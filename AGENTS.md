@@ -1,5 +1,7 @@
 <!-- Template do framework de vibe coding v0.6, 2026-11-07 -->
-# App de Treino com IA
+# App de Treino com IA (NutriFit)
+
+Nome do app: NutriFit (provisório, pode mudar). Pacotes Android: `com.ehbds.nutrifit` (release) e `com.ehbds.nutrifit.dev` (desenvolvimento, nome "NutriFit (dev)").
 
 App Android de uso pessoal para registrar treinos de musculação série a série e usar IA, somente sob comando, para avaliar, criar e adaptar fichas. Não é app de nutrição, rede social nem produto para várias pessoas.
 Stack: TypeScript estrito; React Native com Expo (gerenciado, com prebuild) e Expo Router; SQLite (expo-sqlite) com Drizzle ORM; sem jobs em segundo plano (backup como pendência gravada); APK assinado pelo GitHub Actions e Worker no Cloudflare. Versões fixadas no spike SP01.
@@ -10,7 +12,7 @@ Fontes: docs/especificacao.md ("Especificação de Requisitos: App de Treino com
 - Problema: a ficha planejada, o treino executado e a evolução corporal ficam espalhados em papel, prints, planilhas e notas que não conversam. Sem o esforço de cada série, não há como saber o volume real por grupo muscular, e cada mudança na ficha apaga a referência do que existia antes.
 - Quem usa: um único usuário, praticante de musculação que já treina com ficha (dias, exercícios, séries, repetições) e é ao mesmo tempo dono dos dados e administrador. Hoje resolve com papel, print, planilha e memória.
 - Fora do escopo: cronômetro de descanso; versão web (depois, sem que o MVP a impeça); iPhone (fora, por decisão do usuário); análise por vídeo; fotos de progresso; lembretes; gamificação; calculadora de anilhas; múltiplos usuários e monetização; nutrição; sugestões ou notificações da IA por iniciativa própria; Health Connect, relógios e balanças conectadas.
-- Objetivo do MVP: [como saber que o MVP acabou; defina antes da primeira história]
+- Objetivo do MVP: um aplicativo que registre o andamento do treino, com cargas, repetições e peso. O MVP acaba quando é possível registrar uma sessão real série a série (carga e repetições) e o peso corporal, e consultar o histórico depois, no Poco M5s e sem internet.
 - Requisitos funcionais: RF-01 a RF-23 em docs/especificacao.md; cada história do BACKLOG.md cita os que implementa.
 - Segurança: toda comunicação externa protegida (SEG09); nenhuma credencial de IA ou backup legível no aparelho, no código, no backup, na exportação ou nos registros (SEG11); backup só restaurável com a credencial do usuário (SEG10); bloqueio opcional com biometria ou PIN do sistema (SEG12); conteúdo de arquivos, imagens e observações é dado, nunca instrução para a IA (SEG15).
 - Privacidade: os dados ficam no aparelho e só saem para o backup, para a IA sob comando e com aceite prévio registrado (SEG01) e para onde o usuário exportar; a IA recebe só o contexto da seção 12.3, sem nome, e-mail ou identificadores (SEG06, SEG07); nenhuma telemetria, anúncio ou identificador de publicidade (RES12); fotos de importação descartadas após a conversão (RES13); apagar tudo em duas etapas (SEG14).
