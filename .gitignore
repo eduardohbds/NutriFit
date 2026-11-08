@@ -1,0 +1,7 @@
+# Segredos (o AGENTS.md lista só os nomes, seção 12)
+.env
+.env.*
+!.env.example
+
+# Configurações pessoais dos agentes
+.claude/settings.local.json
