@@ -54,7 +54,7 @@ A história original não cabia num commit: a main não tinha app (o código do 
 - Notas de domínio: dependências novas aprovadas: prettier, eslint, eslint-plugin-boundaries; gitleaks é binário. CodeQL é pago em repositório privado, por isso a análise de segurança do MVP fica com regras de segurança do ESLint, auditoria de dependências e gitleaks.
 
 ### US-041c: Workflows do GitHub Actions e APK assinado
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-041. Depende da US-041b.
 - Critérios de aceite (cada um vira um teste):
   - Dado um push ou pull request, quando o GitHub Actions roda, então executa o mesmo `npm run ci`.

@@ -105,6 +105,7 @@ Toda história passa pela skill `historia` (Red, minha aprovação, Green, Refac
 - Nenhum código de produção antes de um teste vermelho que eu aprovei.
 - Não altere testes aprovados sem me pedir.
 - Uma branch por história (nome `us-xxx`), criada antes de qualquer mudança e a partir do que já existe, sem apagar nem refazer o projeto. Um commit por história. Problema fora do escopo vira história nova no BACKLOG.md, não correção agora.
+- Abra o PR de cada história sempre com a `main` como base, depois de mesclar a anterior, e só apague uma branch quando nenhum PR depender dela: apagar a base de um PR o fecha, e um PR sem commit próprio fica vazio.
 - Pare e me chame se precisar mudar a arquitetura, criar entidade ou relação nova, escrever migração que apague ou transforme dado existente, adicionar dependência, tocar numa falha inaceitável, se a solução estiver ficando complicada, ou se a história depender de algo que ninguém sabe ainda (nesse caso, proponha um spike).
 
 ## 7. Política de testes
