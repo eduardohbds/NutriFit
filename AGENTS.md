@@ -154,10 +154,16 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 
 ## 10. Obstáculos conhecidos
 <!-- Cresce durante o projeto. Formato: regra → por quê (o que quebrou e quando) -->
+- Compilar o APK só no GitHub Actions → o ambiente do agente não tem Java nem Android SDK (SP01, 2026-11-10)
+- O token do GitHub do agente precisa do escopo `workflow` → sem ele o push de `.github/workflows/` é recusado (SP01)
+- `app/AGENTS.md` veio do template do Expo (`npx expo install`, consultar a documentação da versão); manter e fundir o útil aqui na US-001; ignorar a recomendação de EAS → o build é no GitHub Actions (SP01)
+- Migrações do Drizzle no Expo exigem `babel-plugin-inline-import` e a extensão `sql` no `metro.config.js` → sem os dois o app não lê os `.sql` (SP01)
+- Login Google exige cliente OAuth Android com o pacote e o SHA-1 do keystore de release; `DEVELOPER_ERROR` indica pacote ou SHA-1 diferentes (SP01)
 
 ## 11. Notas de domínio
 Spike = experimento descartável para responder uma pergunta: branch spike/[tema], sem testes, nunca entra na main. A resposta fica aqui; o código é descartado, e a implementação volta como história, com TDD.
 <!-- Preenchida no C0 e a cada spike. Formato: pergunta → resposta → como descobrimos (pesquisa ou spike) -->
+- Quais versões ficam fixadas? → Expo SDK 58 (expo 58.0.23), React Native 0.88.1, React 19.3.0, TypeScript 6.0.3, expo-sqlite 58.0.15, expo-secure-store 58.0.2, expo-dev-client 58.0.18, @react-native-google-signin/google-signin 17.0.0, drizzle-orm 0.45.4, drizzle-kit 0.31.11, babel-plugin-inline-import 3.0.0 (justificativa: ler migrações `.sql`); pacote `com.ehbds.nutrifit`; atualizar só entre versões e com o N6 completo (RT06) → SP01, APK de release instalado, gravação no SQLite e login Google funcionando
 - Quando uma série é válida? → série de trabalho por repetições com RIR até o limiar (padrão 3, configurável); aquecimento, tempo, cardio e séries sem RIR ficam fora → especificação, RB12 e seção 13.2
 - Como contar séries por grupo? → fracionado (padrão): direto 1, indireto 0,5; total: 1 e 1; direto: 1 e 0; unilateral conta uma vez; semana de segunda a domingo → pesquisa (meta-regressão de Pelland e colegas), seção 13.3
 - Como estimar o 1RM? → Brzycki: carga × 36 ÷ (37 − n), com n = repetições + RIR, só para n de 1 a 10; RIR 5 gera limite inferior "≥" → pesquisa (Mayhew e colegas, 1995), seção 13.4

@@ -19,7 +19,7 @@ Cada história é executada pela skill historia e fecha em um commit. Mensagens 
 Objetivo: o app guarda fichas, sessões e medidas em um modelo versionado, que migra sem perda entre versões do app, preserva o histórico imutável e registra falhas sem expor dados pessoais.
 
 ### SP01: Esqueleto Expo, SQLite, Drizzle e login Google em APK de release
-- Status: a fazer
+- Status: aceita (2026-11-10). APK de release assinado pelo GitHub Actions instalado no aparelho; gravação no SQLite e login Google funcionaram. Não verificado no spike: sobrevivência da série a fechamento forçado (fica para a US-001, RNF08) e conferência explícita do `journal_mode` na tela. Código na branch spike/esqueleto, que não entra na main.
 - Tipo: spike (código descartável em branch própria), antes da US-001
 - Pergunta: o esqueleto React Native com Expo, TypeScript, SQLite via Drizzle e login Google funciona num APK de release assinado no Poco M5s com MIUI 14?
 - Critério de saída: APK de release instalado no Poco M5s, uma migração aplicada na abertura, login Google concluído e versões de Expo, Drizzle e módulos nativos fixadas.
