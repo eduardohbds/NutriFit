@@ -26,19 +26,45 @@ Objetivo: o app guarda fichas, sessões e medidas em um modelo versionado, que m
 - Saída esperada: versões fixadas e problemas encontrados registrados nas notas de domínio do AGENTS.md; a implementação volta pela US-001 com TDD.
 - Riscos tratados: RT06 (atualização do Expo quebrar módulos nativos).
 
-### US-041: Pipeline de CI e build do APK assinado
+### US-041: Pipeline de CI e build do APK assinado (quebrada em US-041a, US-041b e US-041c)
+A história original não cabia num commit: a main não tinha app (o código do SP01 não entra nela) e o pipeline exige esqueleto, ferramentas de qualidade e dois workflows. Os seis critérios originais estão distribuídos abaixo. Contexto comum: o AGENTS.md exige CI completo verde antes de todo commit e define "deploy" como tag de versão do APK; sem esse pipeline, nenhuma outra história consegue cumprir o checklist (AGENTS.md, seções 4, 7 e 9).
+
+### US-041a: Esqueleto do projeto com testes rodando
+- Status: aceita
+- Contexto: a main não tem app; as demais histórias precisam de um projeto Expo com as versões fixadas no SP01 e de um runner de testes.
+- Critérios de aceite (cada um vira um teste):
+  - Dado o projeto recém-clonado, quando `npm ci` e `npm test` rodam em app/, então os testes passam sem interação nem rede.
+  - Dado o app/package.json, quando inspecionado, então as versões de Expo, React Native, expo-sqlite, Drizzle e Google Sign-In são exatamente as fixadas no AGENTS.md, seção 11.
+  - Dado o app.config, quando lido, então o pacote Android é `com.ehbds.nutrifit` (ou `.dev` com APP_VARIANT=dev) e o nome é "NutriFit" (ou "NutriFit (dev)").
+  - Dado o repositório, quando inspecionado, então existem as pastas de camadas de app/src (dominio, aplicacao, adaptadores, interface, composicao) e as rotas ficam em app/app/.
+- Fora do escopo: Prettier, ESLint, boundaries, gitleaks, workflows, banco, login Google.
+- Falha inaceitável envolvida: nenhuma.
+- Notas de domínio: dependências novas aprovadas: jest, jest-expo, @testing-library/react-native.
+
+### US-041b: `npm run ci` local com camadas e segredos
 - Status: a fazer
-- Contexto: o AGENTS.md exige CI completo verde antes de todo commit e define "deploy" como tag de versão do APK; sem esse pipeline, nenhuma outra história consegue cumprir o checklist (AGENTS.md, seções 4, 7 e 9).
+- Contexto: ver US-041. Depende da US-041a.
 - Critérios de aceite (cada um vira um teste):
   - Dado o repositório, quando `npm run ci` roda, então executa formatação, lint, checagem de tipos, regra de camadas, testes, `npm audit` sem vulnerabilidade alta e gitleaks, e falha se qualquer etapa falhar.
   - Dado um arquivo em app/src/dominio que importa React, Expo, Drizzle ou um adaptador, quando o CI roda, então o eslint-plugin-boundaries reprova o commit (RT03).
   - Dado um segredo de teste falso commitado, quando o CI roda, então o gitleaks reprova.
+  - Dado o código do app, quando inspecionado, então nenhuma variável EXPO_PUBLIC_ contém segredo.
+- Fora do escopo: workflows do GitHub; publicação na Play Store.
+- Falha inaceitável envolvida: FI-6 (dado de saúde ou credencial saindo sem o usuário saber).
+- Notas de domínio: dependências novas aprovadas: prettier, eslint, eslint-plugin-boundaries; gitleaks é binário. CodeQL é pago em repositório privado, por isso a análise de segurança do MVP fica com regras de segurança do ESLint, auditoria de dependências e gitleaks.
+
+### US-041c: Workflows do GitHub Actions e APK assinado
+- Status: a fazer
+- Contexto: ver US-041. Depende da US-041b.
+- Critérios de aceite (cada um vira um teste):
   - Dado um push ou pull request, quando o GitHub Actions roda, então executa o mesmo `npm run ci`.
   - Dada uma tag de versão, quando o GitHub Actions roda, então gera o APK de release assinado com a chave dos segredos ANDROID_KEYSTORE_* como artefato, sem imprimir nenhum segredo no log.
-  - Dado o código do app, quando inspecionado, então nenhuma variável EXPO_PUBLIC_ contém segredo.
 - Fora do escopo: publicação na Play Store; deploy do Worker (US-032).
 - Falha inaceitável envolvida: FI-6 (dado de saúde ou credencial saindo sem o usuário saber).
-- Notas de domínio: depende do SP01 (versões fixadas). A chave de assinatura fica guardada em dois lugares para não perder a possibilidade de atualizar o app (RT01). CodeQL é pago em repositório privado, por isso a análise de segurança do MVP fica com regras de segurança do ESLint, auditoria de dependências e gitleaks.
+- Notas de domínio: partir do workflow do SP01 (branch spike/esqueleto); o escopo `workflow` do token é necessário (AGENTS.md, seção 10).
+
+#### Notas da US-041 original
+- Depende do SP01 (versões fixadas). A chave de assinatura fica guardada em dois lugares para não perder a possibilidade de atualizar o app (RT01). CodeQL é pago em repositório privado, por isso a análise de segurança do MVP fica com regras de segurança do ESLint, auditoria de dependências e gitleaks.
 
 ### US-001: Modelo de dados versionado com migração sem perda
 - Status: a fazer

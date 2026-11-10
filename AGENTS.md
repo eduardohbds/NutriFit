@@ -104,7 +104,7 @@ Estilo (ajuste ou apague o que não servir):
 Toda história passa pela skill `historia` (Red, minha aprovação, Green, Refactor, CI, meu aceite, commit). Valem sempre, dentro ou fora dela:
 - Nenhum código de produção antes de um teste vermelho que eu aprovei.
 - Não altere testes aprovados sem me pedir.
-- Um commit por história. Problema fora do escopo vira história nova no BACKLOG.md, não correção agora.
+- Uma branch por história (nome `us-xxx`), criada antes de qualquer mudança e a partir do que já existe, sem apagar nem refazer o projeto. Um commit por história. Problema fora do escopo vira história nova no BACKLOG.md, não correção agora.
 - Pare e me chame se precisar mudar a arquitetura, criar entidade ou relação nova, escrever migração que apague ou transforme dado existente, adicionar dependência, tocar numa falha inaceitável, se a solução estiver ficando complicada, ou se a história depender de algo que ninguém sabe ainda (nesse caso, proponha um spike).
 
 ## 7. Política de testes
@@ -159,6 +159,7 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - `app/AGENTS.md` veio do template do Expo (`npx expo install`, consultar a documentação da versão); manter e fundir o útil aqui na US-001; ignorar a recomendação de EAS → o build é no GitHub Actions (SP01)
 - Migrações do Drizzle no Expo exigem `babel-plugin-inline-import` e a extensão `sql` no `metro.config.js` → sem os dois o app não lê os `.sql` (SP01)
 - Login Google exige cliente OAuth Android com o pacote e o SHA-1 do keystore de release; `DEVELOPER_ERROR` indica pacote ou SHA-1 diferentes (SP01)
+- Fixar `react-dom` na mesma versão do `react` (19.3.0) → o par do Expo Router puxa a 19.3.1 e o `npm install` falha com ERESOLVE (US-041a)
 
 ## 11. Notas de domínio
 Spike = experimento descartável para responder uma pergunta: branch spike/[tema], sem testes, nunca entra na main. A resposta fica aqui; o código é descartado, e a implementação volta como história, com TDD.
