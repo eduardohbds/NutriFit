@@ -42,7 +42,7 @@ A história original não cabia num commit: a main não tinha app (o código do 
 - Notas de domínio: dependências novas aprovadas: jest, jest-expo, @testing-library/react-native.
 
 ### US-041b: `npm run ci` local com camadas e segredos
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-041. Depende da US-041a.
 - Critérios de aceite (cada um vira um teste):
   - Dado o repositório, quando `npm run ci` roda, então executa formatação, lint, checagem de tipos, regra de camadas, testes, `npm audit` sem vulnerabilidade alta e gitleaks, e falha se qualquer etapa falhar.

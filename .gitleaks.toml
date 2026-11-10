@@ -1,0 +1,12 @@
+# Regras padrão do gitleaks, ignorando só o que não é código do projeto.
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''node_modules/''',
+  '''\.ferramentas/''',
+  '''\.git/''',
+  '''android/''',
+  '''package-lock\.json''',
+]

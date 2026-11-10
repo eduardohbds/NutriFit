@@ -160,6 +160,10 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - Migrações do Drizzle no Expo exigem `babel-plugin-inline-import` e a extensão `sql` no `metro.config.js` → sem os dois o app não lê os `.sql` (SP01)
 - Login Google exige cliente OAuth Android com o pacote e o SHA-1 do keystore de release; `DEVELOPER_ERROR` indica pacote ou SHA-1 diferentes (SP01)
 - Fixar `react-dom` na mesma versão do `react` (19.3.0) → o par do Expo Router puxa a 19.3.1 e o `npm install` falha com ERESOLVE (US-041a)
+- `eslint-plugin-boundaries` 7 só resolve imports `.js`: sem `settings["import/resolver"]` com as extensões `.ts`/`.tsx` ele trata todo import como desconhecido e não reprova nada; e só checa bibliotecas externas com `checkAllOrigins: true` em `boundaries/dependencies` (US-041b)
+- O gitleaks é um binário fora do git (`app/.ferramentas/gitleaks`, versão 8.30.1) → a etapa `segredos` do CI falha com mensagem clara se faltar; o workflow da US-041c precisa baixá-lo (US-041b)
+- `npm audit` mostra moderadas na cadeia minimatch do eslint e do typescript-eslint → o corte do CI é "alta", então não bloqueia; reavaliar ao atualizar o eslint (US-041b)
+- `npm run ci`, `npm test` e os demais comandos rodam dentro de `app/` (US-041b)
 
 ## 11. Notas de domínio
 Spike = experimento descartável para responder uma pergunta: branch spike/[tema], sem testes, nunca entra na main. A resposta fica aqui; o código é descartado, e a implementação volta como história, com TDD.
