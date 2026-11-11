@@ -163,7 +163,7 @@ Cada caso de uso é uma classe com um único método público `executar`, chamad
 | ServicoDeIA | Avaliar, gerar ficha, converter importação | Cliente HTTP do Worker | IAFalsa, com respostas copiadas de respostas reais |
 | ArmazenamentoDeBackup | Enviar, listar e baixar cópias | API do Google Drive, pasta do app | BackupEmMemoria |
 | LeitorEGravadorDeArquivos | XLSX, CSV, PDF e imagem | SheetJS, Papa Parse, expo-print | ArquivosEmMemoria |
-| Relogio e RegistroDeFalhas | Data e hora atual; registro local de eventos (RNF36) | Relógio do sistema; tabela no SQLite | RelogioFixo; RegistroDeFalhasEmMemoria |
+| Relogio e RegistroDeFalhas | Data e hora atual; registro local de eventos (RNF36) | Relógio do sistema; arquivo JSON Lines fora do banco (não entra no backup, como pede a seção 17.2 da especificação, e sobrevive à volta do banco à cópia na migração; decisão da US-003) | RelogioFixo; RegistroDeFalhasEmMemoria |
 
 O relógio vira porta porque metade das regras depende de data: semana de segunda a domingo (RB16), últimos 30 dias no limite de carga, rotação A, B, C. Com RelogioFixo, um teste de "hoje é quarta" é determinístico.
 

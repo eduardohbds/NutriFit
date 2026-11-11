@@ -5,7 +5,7 @@ Nome do app: NutriFit (provisório, pode mudar). Pacotes Android: `com.ehbds.nut
 
 App Android de uso pessoal para registrar treinos de musculação série a série e usar IA, somente sob comando, para avaliar, criar e adaptar fichas. Não é app de nutrição, rede social nem produto para várias pessoas.
 Stack: TypeScript estrito; React Native com Expo (gerenciado, com prebuild) e Expo Router; SQLite (expo-sqlite) com Drizzle ORM; sem jobs em segundo plano (backup como pendência gravada); APK assinado pelo GitHub Actions e Worker no Cloudflare. Versões fixadas no spike SP01.
-Guia único para qualquer agente de código (Claude Code, Codex, Gemini CLI). As histórias ficam no BACKLOG.md. Aqui fica o que muda pouco; mantenha este arquivo abaixo de 200 linhas e sem instruções de uma ferramenta específica (essas ficam no CLAUDE.md ou na configuração da ferramenta).
+Guia único para qualquer agente de código (Claude Code, Codex, Gemini CLI). As histórias ficam no BACKLOG.md. Aqui fica o que muda pouco; mantenha este arquivo abaixo de 300 linhas e sem instruções de uma ferramenta específica (essas ficam no CLAUDE.md ou na configuração da ferramenta).
 Fontes: docs/especificacao.md ("Especificação de Requisitos: App de Treino com IA", 2026-10-29) e docs/arquitetura.md ("Arquitetura: App de Treino com IA", 2026-11-04). Seção com número decimal (12.3, 13.8) é da especificação; seção de número inteiro é deste arquivo, salvo quando o texto diz "da especificação" ou "da arquitetura". Os códigos RF, RB, RNF, SEG, RES, SL e CC são da especificação; SP e RT, da arquitetura.
 
 ## 1. Produto
@@ -169,6 +169,8 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - `npm audit` mostra moderadas na cadeia minimatch do eslint e do typescript-eslint → o corte do CI é "alta", então não bloqueia; reavaliar ao atualizar o eslint (US-041b)
 - `npm run ci`, `npm test` e os demais comandos rodam dentro de `app/` (US-041b)
 - O drizzle-kit falha com ENOENT se `drizzle/meta/_journal.json` não existir ou não for gerado por ele → apague a pasta e gere de novo; `drizzle/` é gerado, fora do lint e da formatação (US-001b)
+- Testing Library 14: `render`, `renderRouter` e `fireEvent` são assíncronos → sem `await`, o teste falha com "`render` function has not been called" (US-003)
+- O React redesenha uma tela que lançou erro antes de acionar o limite de erro → o dublê de tela instável precisa falhar até o teste liberar, não só na primeira vez (US-003)
 - O `uuid` 14 só publica ESM → precisa entrar no `transformIgnorePatterns` do `jest.config.js`, senão o Jest falha com "Must use import to load ES Module" (US-001a)
 
 ## 11. Notas de domínio
