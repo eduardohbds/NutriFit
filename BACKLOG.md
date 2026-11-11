@@ -92,7 +92,7 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 - Notas de domínio: a lista de entidades e do que é único ou obrigatório é aprovada pelo usuário antes do Red (AGENTS.md, seção 6). Vínculos: série executada → exercício da sessão → sessão; série planejada → item → rotina → versão da ficha (seção 18.6). Dependência nova aprovada: `better-sqlite3` (só desenvolvimento), para rodar o SQLite real no Jest. Lista de tabelas aprovada em 2026-11-10: as 16 entidades da seção 18.2 (sem registro de falha) mais etapa de drop-set, com listas em tabelas filhas (sinônimos, grupos do exercício); versão atual da ficha é a de maior número, sem coluna; série e medição removidas ganham `removida_em`; meta semanal em centésimos inteiros; os 16 grupos entram na migração. O diagrama ER é gerado do snapshot do drizzle-kit, sem dependência nova. O critério da suíte de contrato da porta de repositório passou para a US-002.
 
 ### US-003: Registro local de falhas sem dados pessoais
-- Status: a fazer
+- Status: aceita
 - Contexto: como só o autor testa o app (RK11), o registro local é o que permite diagnosticar erros reais sem vazar dados de saúde (RNF36, SEG13). Antecipada para antes da US-001c.
 - Critérios de aceite (cada um vira um teste):
   - Dado um erro inesperado, quando ele ocorre, então o app mostra mensagem simples com opção de tentar de novo e cria um registro de falha (CE62).

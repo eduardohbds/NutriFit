@@ -21,7 +21,7 @@ module.exports = [
   {
     // Scripts do Node (CommonJS) usam require.
     // Os testes usam require com jest.isolateModules para recarregar o módulo a cada caso.
-    files: ['**/*.js', 'testes/**/*.ts'],
+    files: ['**/*.js', 'testes/**/*.{ts,tsx}'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   ...camadas,
