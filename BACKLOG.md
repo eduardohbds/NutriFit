@@ -80,17 +80,16 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 - Notas de domínio: carga em gramas inteiros e circunferências em milímetros inteiros; lb e arredondamento só na exibição (1 kg = 2,20462 lb, seção 13.7). Datas em UTC; o fuso do aparelho só entra na exibição e no cálculo da semana (RB16). Dependência nova aprovada: `uuid` (geração do UUID v7), atrás de uma interface do projeto.
 
 ### US-001b: Esquema inicial e primeira migração
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-001. Depende da US-001a.
 - Critérios de aceite (cada um vira um teste):
   - Dado um banco vazio, quando o app abre, então a migração inicial do drizzle-kit cria todas as tabelas do modelo, e o diagrama ER em docs/modelo-de-dados.md é gerado do esquema.
   - Dados os vínculos obrigatórios da seção 18.6, quando se tenta gravar série executada sem exercício da sessão, exercício da sessão sem sessão, ou série planejada sem item, rotina ou versão da ficha, então o banco recusa.
   - Dada uma sessão sem ficha e sem versão, quando gravada, então é aceita (treino livre, SL18).
   - Dada uma etapa de drop-set, quando gravada, então pertence a uma série executada (arquitetura 7.2).
-  - Dada a porta de repositório, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
-- Fora do escopo: migração de versão anterior (US-001c), durabilidade da gravação (US-001d), regras de só inserção (US-002).
+- Fora do escopo: migração de versão anterior e aplicação da migração na abertura do app (US-001c); configuração da conexão, com WAL, sincronização completa e chaves estrangeiras (US-001d); portas de repositório e só inserção (US-002); tabela do registro de falhas (US-003).
 - Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: a lista de entidades e do que é único ou obrigatório é aprovada pelo usuário antes do Red (AGENTS.md, seção 6). Vínculos: série executada → exercício da sessão → sessão; série planejada → item → rotina → versão da ficha (seção 18.6). Dependência nova aprovada: `better-sqlite3` (só desenvolvimento), para rodar o adaptador SQLite real no Jest.
+- Notas de domínio: a lista de entidades e do que é único ou obrigatório é aprovada pelo usuário antes do Red (AGENTS.md, seção 6). Vínculos: série executada → exercício da sessão → sessão; série planejada → item → rotina → versão da ficha (seção 18.6). Dependência nova aprovada: `better-sqlite3` (só desenvolvimento), para rodar o SQLite real no Jest. Lista de tabelas aprovada em 2026-11-10: as 16 entidades da seção 18.2 (sem registro de falha) mais etapa de drop-set, com listas em tabelas filhas (sinônimos, grupos do exercício); versão atual da ficha é a de maior número, sem coluna; série e medição removidas ganham `removida_em`; meta semanal em centésimos inteiros; os 16 grupos entram na migração. O diagrama ER é gerado do snapshot do drizzle-kit, sem dependência nova. O critério da suíte de contrato da porta de repositório passou para a US-002.
 
 ### US-003: Registro local de falhas sem dados pessoais
 - Status: a fazer
@@ -135,6 +134,7 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
   - Dada uma ficha com sessões ou um exercício com histórico, quando o usuário tenta excluir, então só a opção de arquivar está disponível (seção 18.6).
   - Dada uma ação da IA registrada, quando ela é desfeita, então o único campo que muda é a marca de desfeita.
   - Dado que valores derivados (classificação, contagens, recordes, 1RM, composição) são pedidos, quando uma série é corrigida, então os valores exibidos refletem a correção sem que nenhum valor derivado tenha sido gravado (seção 18.6).
+  - Dada a porta de repositório, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite (vindo da US-001b).
 - Fora do escopo: telas de versões e de desfazer (US-010).
 - Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
 - Notas de domínio: tabelas de versão, rotina, item e série planejada só recebem inserção, e o repositório não expõe atualização nem exclusão; a exclusão física só existe em ApagarTudo. Importação, ação da IA e restauração passam pela porta UnidadeDeTrabalho, numa transação única (RNF09). Valores calculados nunca são gravados, sempre recalculados: classificação da série, séries válidas por grupo e semana, recordes, carga máxima, 1RM, RCE, percentual de gordura, massas, duração da sessão e proporção de ações da IA desfeitas.

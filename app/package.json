@@ -6,13 +6,16 @@
   "scripts": {
     "test": "jest --ci",
     "android": "expo run:android",
-    "ci": "node scripts/ci.js"
+    "ci": "node scripts/ci.js",
+    "modelo-de-dados": "node scripts/gerar-modelo-de-dados.js"
   },
   "devDependencies": {
     "@testing-library/react-native": "^14.1.0",
+    "@types/better-sqlite3": "9.6.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
     "babel-plugin-inline-import": "3.0.0",
+    "better-sqlite3": "13.0.3",
     "drizzle-kit": "0.31.11",
     "eslint": "10.14.0",
     "eslint-plugin-boundaries": "7.4.2",

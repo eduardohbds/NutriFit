@@ -5,7 +5,17 @@ const camadas = require('./eslint.camadas.js');
 
 module.exports = [
   {
-    ignores: ['node_modules/', 'android/', 'ios/', 'dist/', '.expo/', '.ferramentas/', 'coverage/'],
+    // drizzle/ é gerado pelo drizzle-kit (SQL, snapshots e migrations.js).
+    ignores: [
+      'node_modules/',
+      'android/',
+      'ios/',
+      'dist/',
+      '.expo/',
+      '.ferramentas/',
+      'coverage/',
+      'drizzle/',
+    ],
   },
   ...tseslint.configs.recommended,
   {
