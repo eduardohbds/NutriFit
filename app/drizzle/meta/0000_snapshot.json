@@ -1,0 +1,1471 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "b672abd1-10c5-47be-9683-6e0e28220202",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "acao_ia": {
+      "name": "acao_ia",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "comando": {
+          "name": "comando",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "criada_em": {
+          "name": "criada_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "resultado": {
+          "name": "resultado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "versao_criada_id": {
+          "name": "versao_criada_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "resumo": {
+          "name": "resumo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "desfeita": {
+          "name": "desfeita",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "acao_ia_versao_criada_id_versao_ficha_id_fk": {
+          "name": "acao_ia_versao_criada_id_versao_ficha_id_fk",
+          "tableFrom": "acao_ia",
+          "tableTo": "versao_ficha",
+          "columnsFrom": [
+            "versao_criada_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "copia_backup": {
+      "name": "copia_backup",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "criada_em": {
+          "name": "criada_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "resultado": {
+          "name": "resultado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "conteudo": {
+          "name": "conteudo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "etapa_drop_set": {
+      "name": "etapa_drop_set",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "serie_executada_id": {
+          "name": "serie_executada_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "posicao": {
+          "name": "posicao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "carga_gramas": {
+          "name": "carga_gramas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "repeticoes": {
+          "name": "repeticoes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "etapa_drop_set_posicao": {
+          "name": "etapa_drop_set_posicao",
+          "columns": [
+            "serie_executada_id",
+            "posicao"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "etapa_drop_set_serie_executada_id_serie_executada_id_fk": {
+          "name": "etapa_drop_set_serie_executada_id_serie_executada_id_fk",
+          "tableFrom": "etapa_drop_set",
+          "tableTo": "serie_executada",
+          "columnsFrom": [
+            "serie_executada_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "etapa_drop_set_carga": {
+          "name": "etapa_drop_set_carga",
+          "value": "\"etapa_drop_set\".\"carga_gramas\" IS NULL OR \"etapa_drop_set\".\"carga_gramas\" >= 0"
+        },
+        "etapa_drop_set_repeticoes": {
+          "name": "etapa_drop_set_repeticoes",
+          "value": "\"etapa_drop_set\".\"repeticoes\" IS NULL OR \"etapa_drop_set\".\"repeticoes\" >= 0"
+        }
+      }
+    },
+    "exercicio": {
+      "name": "exercicio",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "situacao": {
+          "name": "situacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "origem": {
+          "name": "origem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "unilateral": {
+          "name": "unilateral",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "equipamento": {
+          "name": "equipamento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "exercicio_grupo": {
+      "name": "exercicio_grupo",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exercicio_id": {
+          "name": "exercicio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "grupo_id": {
+          "name": "grupo_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "papel": {
+          "name": "papel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "exercicio_grupo_unico": {
+          "name": "exercicio_grupo_unico",
+          "columns": [
+            "exercicio_id",
+            "grupo_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "exercicio_grupo_exercicio_id_exercicio_id_fk": {
+          "name": "exercicio_grupo_exercicio_id_exercicio_id_fk",
+          "tableFrom": "exercicio_grupo",
+          "tableTo": "exercicio",
+          "columnsFrom": [
+            "exercicio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "exercicio_grupo_grupo_id_grupo_muscular_id_fk": {
+          "name": "exercicio_grupo_grupo_id_grupo_muscular_id_fk",
+          "tableFrom": "exercicio_grupo",
+          "tableTo": "grupo_muscular",
+          "columnsFrom": [
+            "grupo_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "exercicio_grupo_papel": {
+          "name": "exercicio_grupo_papel",
+          "value": "\"exercicio_grupo\".\"papel\" IN ('direto', 'indireto')"
+        }
+      }
+    },
+    "exercicio_sessao": {
+      "name": "exercicio_sessao",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sessao_id": {
+          "name": "sessao_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exercicio_id": {
+          "name": "exercicio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "item_origem_id": {
+          "name": "item_origem_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "posicao": {
+          "name": "posicao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "observacoes": {
+          "name": "observacoes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "exercicio_sessao_sessao_id_sessao_id_fk": {
+          "name": "exercicio_sessao_sessao_id_sessao_id_fk",
+          "tableFrom": "exercicio_sessao",
+          "tableTo": "sessao",
+          "columnsFrom": [
+            "sessao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "exercicio_sessao_exercicio_id_exercicio_id_fk": {
+          "name": "exercicio_sessao_exercicio_id_exercicio_id_fk",
+          "tableFrom": "exercicio_sessao",
+          "tableTo": "exercicio",
+          "columnsFrom": [
+            "exercicio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "exercicio_sessao_item_origem_id_item_id_fk": {
+          "name": "exercicio_sessao_item_origem_id_item_id_fk",
+          "tableFrom": "exercicio_sessao",
+          "tableTo": "item",
+          "columnsFrom": [
+            "item_origem_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "exercicio_sinonimo": {
+      "name": "exercicio_sinonimo",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exercicio_id": {
+          "name": "exercicio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "texto": {
+          "name": "texto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "exercicio_sinonimo_unico": {
+          "name": "exercicio_sinonimo_unico",
+          "columns": [
+            "exercicio_id",
+            "texto"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "exercicio_sinonimo_exercicio_id_exercicio_id_fk": {
+          "name": "exercicio_sinonimo_exercicio_id_exercicio_id_fk",
+          "tableFrom": "exercicio_sinonimo",
+          "tableTo": "exercicio",
+          "columnsFrom": [
+            "exercicio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "ficha": {
+      "name": "ficha",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "situacao": {
+          "name": "situacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "origem": {
+          "name": "origem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "criada_em": {
+          "name": "criada_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ficha_uma_ativa": {
+          "name": "ficha_uma_ativa",
+          "columns": [
+            "situacao"
+          ],
+          "isUnique": true,
+          "where": "situacao = 'ativa'"
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "grupo_muscular": {
+      "name": "grupo_muscular",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "grupo_muscular_nome_unique": {
+          "name": "grupo_muscular_nome_unique",
+          "columns": [
+            "nome"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "item": {
+      "name": "item",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rotina_id": {
+          "name": "rotina_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exercicio_id": {
+          "name": "exercicio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "posicao": {
+          "name": "posicao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "grupo_sequencia": {
+          "name": "grupo_sequencia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "unilateral": {
+          "name": "unilateral",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "travado": {
+          "name": "travado",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "observacoes": {
+          "name": "observacoes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "item_posicao": {
+          "name": "item_posicao",
+          "columns": [
+            "rotina_id",
+            "posicao"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "item_rotina_id_rotina_id_fk": {
+          "name": "item_rotina_id_rotina_id_fk",
+          "tableFrom": "item",
+          "tableTo": "rotina",
+          "columnsFrom": [
+            "rotina_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "item_exercicio_id_exercicio_id_fk": {
+          "name": "item_exercicio_id_exercicio_id_fk",
+          "tableFrom": "item",
+          "tableTo": "exercicio",
+          "columnsFrom": [
+            "exercicio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "medicao_corporal": {
+      "name": "medicao_corporal",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "data": {
+          "name": "data",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "peso_gramas": {
+          "name": "peso_gramas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cintura_mm": {
+          "name": "cintura_mm",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "pescoco_mm": {
+          "name": "pescoco_mm",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "quadril_mm": {
+          "name": "quadril_mm",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "removida_em": {
+          "name": "removida_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "medicao_corporal_alguma_medida": {
+          "name": "medicao_corporal_alguma_medida",
+          "value": "COALESCE(\"medicao_corporal\".\"peso_gramas\", \"medicao_corporal\".\"cintura_mm\", \"medicao_corporal\".\"pescoco_mm\", \"medicao_corporal\".\"quadril_mm\") IS NOT NULL"
+        },
+        "medicao_corporal_peso": {
+          "name": "medicao_corporal_peso",
+          "value": "\"medicao_corporal\".\"peso_gramas\" IS NULL OR \"medicao_corporal\".\"peso_gramas\" >= 0"
+        },
+        "medicao_corporal_cintura": {
+          "name": "medicao_corporal_cintura",
+          "value": "\"medicao_corporal\".\"cintura_mm\" IS NULL OR \"medicao_corporal\".\"cintura_mm\" >= 0"
+        },
+        "medicao_corporal_pescoco": {
+          "name": "medicao_corporal_pescoco",
+          "value": "\"medicao_corporal\".\"pescoco_mm\" IS NULL OR \"medicao_corporal\".\"pescoco_mm\" >= 0"
+        },
+        "medicao_corporal_quadril": {
+          "name": "medicao_corporal_quadril",
+          "value": "\"medicao_corporal\".\"quadril_mm\" IS NULL OR \"medicao_corporal\".\"quadril_mm\" >= 0"
+        }
+      }
+    },
+    "meta_semanal": {
+      "name": "meta_semanal",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "grupo_id": {
+          "name": "grupo_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "valor_centesimos": {
+          "name": "valor_centesimos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "meta_semanal_grupo_id_unique": {
+          "name": "meta_semanal_grupo_id_unique",
+          "columns": [
+            "grupo_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "meta_semanal_grupo_id_grupo_muscular_id_fk": {
+          "name": "meta_semanal_grupo_id_grupo_muscular_id_fk",
+          "tableFrom": "meta_semanal",
+          "tableTo": "grupo_muscular",
+          "columnsFrom": [
+            "grupo_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "meta_semanal_valor": {
+          "name": "meta_semanal_valor",
+          "value": "\"meta_semanal\".\"valor_centesimos\" >= 0"
+        }
+      }
+    },
+    "perfil": {
+      "name": "perfil",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "unico": {
+          "name": "unico",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "objetivo": {
+          "name": "objetivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "objetivo_outro": {
+          "name": "objetivo_outro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nivel": {
+          "name": "nivel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "limitacoes": {
+          "name": "limitacoes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "equipamentos": {
+          "name": "equipamentos",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "sexo": {
+          "name": "sexo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "altura_mm": {
+          "name": "altura_mm",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "unidade_carga": {
+          "name": "unidade_carga",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "limiar_rir": {
+          "name": "limiar_rir",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metodo_contagem": {
+          "name": "metodo_contagem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metodo_composicao": {
+          "name": "metodo_composicao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bloqueio_ativo": {
+          "name": "bloqueio_ativo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bloqueio_espera_segundos": {
+          "name": "bloqueio_espera_segundos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "perfil_unico_unique": {
+          "name": "perfil_unico_unique",
+          "columns": [
+            "unico"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "perfil_unico": {
+          "name": "perfil_unico",
+          "value": "\"perfil\".\"unico\" = 1"
+        },
+        "perfil_altura": {
+          "name": "perfil_altura",
+          "value": "\"perfil\".\"altura_mm\" IS NULL OR \"perfil\".\"altura_mm\" >= 0"
+        }
+      }
+    },
+    "rotina": {
+      "name": "rotina",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "versao_id": {
+          "name": "versao_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dia_semana": {
+          "name": "dia_semana",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "posicao": {
+          "name": "posicao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "rotina_posicao": {
+          "name": "rotina_posicao",
+          "columns": [
+            "versao_id",
+            "posicao"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "rotina_versao_id_versao_ficha_id_fk": {
+          "name": "rotina_versao_id_versao_ficha_id_fk",
+          "tableFrom": "rotina",
+          "tableTo": "versao_ficha",
+          "columnsFrom": [
+            "versao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "rotina_dia": {
+          "name": "rotina_dia",
+          "value": "\"rotina\".\"dia_semana\" IS NULL OR \"rotina\".\"dia_semana\" BETWEEN 1 AND 7"
+        }
+      }
+    },
+    "serie_executada": {
+      "name": "serie_executada",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exercicio_sessao_id": {
+          "name": "exercicio_sessao_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "posicao": {
+          "name": "posicao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "carga_gramas": {
+          "name": "carga_gramas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "repeticoes": {
+          "name": "repeticoes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "repeticoes_outro_lado": {
+          "name": "repeticoes_outro_lado",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "segundos": {
+          "name": "segundos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "segundos_outro_lado": {
+          "name": "segundos_outro_lado",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "rir": {
+          "name": "rir",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tecnica": {
+          "name": "tecnica",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "concluida_em": {
+          "name": "concluida_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "removida_em": {
+          "name": "removida_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "serie_executada_exercicio_sessao_id_exercicio_sessao_id_fk": {
+          "name": "serie_executada_exercicio_sessao_id_exercicio_sessao_id_fk",
+          "tableFrom": "serie_executada",
+          "tableTo": "exercicio_sessao",
+          "columnsFrom": [
+            "exercicio_sessao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "serie_executada_carga": {
+          "name": "serie_executada_carga",
+          "value": "\"serie_executada\".\"carga_gramas\" IS NULL OR \"serie_executada\".\"carga_gramas\" >= 0"
+        },
+        "serie_executada_repeticoes": {
+          "name": "serie_executada_repeticoes",
+          "value": "\"serie_executada\".\"repeticoes\" IS NULL OR \"serie_executada\".\"repeticoes\" >= 0"
+        },
+        "serie_executada_repeticoes_outro_lado": {
+          "name": "serie_executada_repeticoes_outro_lado",
+          "value": "\"serie_executada\".\"repeticoes_outro_lado\" IS NULL OR \"serie_executada\".\"repeticoes_outro_lado\" >= 0"
+        },
+        "serie_executada_segundos": {
+          "name": "serie_executada_segundos",
+          "value": "\"serie_executada\".\"segundos\" IS NULL OR \"serie_executada\".\"segundos\" >= 0"
+        },
+        "serie_executada_segundos_outro_lado": {
+          "name": "serie_executada_segundos_outro_lado",
+          "value": "\"serie_executada\".\"segundos_outro_lado\" IS NULL OR \"serie_executada\".\"segundos_outro_lado\" >= 0"
+        },
+        "serie_executada_rir": {
+          "name": "serie_executada_rir",
+          "value": "\"serie_executada\".\"rir\" IS NULL OR \"serie_executada\".\"rir\" BETWEEN 0 AND 5"
+        }
+      }
+    },
+    "serie_planejada": {
+      "name": "serie_planejada",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "posicao": {
+          "name": "posicao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "meta_tipo": {
+          "name": "meta_tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "meta_minimo": {
+          "name": "meta_minimo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "meta_maximo": {
+          "name": "meta_maximo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "meta_segundos": {
+          "name": "meta_segundos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "carga_gramas": {
+          "name": "carga_gramas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tecnica": {
+          "name": "tecnica",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "descanso_segundos": {
+          "name": "descanso_segundos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "serie_planejada_posicao": {
+          "name": "serie_planejada_posicao",
+          "columns": [
+            "item_id",
+            "posicao"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "serie_planejada_item_id_item_id_fk": {
+          "name": "serie_planejada_item_id_item_id_fk",
+          "tableFrom": "serie_planejada",
+          "tableTo": "item",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "serie_planejada_carga": {
+          "name": "serie_planejada_carga",
+          "value": "\"serie_planejada\".\"carga_gramas\" IS NULL OR \"serie_planejada\".\"carga_gramas\" >= 0"
+        },
+        "serie_planejada_descanso": {
+          "name": "serie_planejada_descanso",
+          "value": "\"serie_planejada\".\"descanso_segundos\" IS NULL OR \"serie_planejada\".\"descanso_segundos\" >= 0"
+        }
+      }
+    },
+    "sessao": {
+      "name": "sessao",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "inicio": {
+          "name": "inicio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fim": {
+          "name": "fim",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ficha_id": {
+          "name": "ficha_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "versao_id": {
+          "name": "versao_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "rotina_id": {
+          "name": "rotina_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "situacao": {
+          "name": "situacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "observacao": {
+          "name": "observacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sessao_ficha_id_ficha_id_fk": {
+          "name": "sessao_ficha_id_ficha_id_fk",
+          "tableFrom": "sessao",
+          "tableTo": "ficha",
+          "columnsFrom": [
+            "ficha_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sessao_versao_id_versao_ficha_id_fk": {
+          "name": "sessao_versao_id_versao_ficha_id_fk",
+          "tableFrom": "sessao",
+          "tableTo": "versao_ficha",
+          "columnsFrom": [
+            "versao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sessao_rotina_id_rotina_id_fk": {
+          "name": "sessao_rotina_id_rotina_id_fk",
+          "tableFrom": "sessao",
+          "tableTo": "rotina",
+          "columnsFrom": [
+            "rotina_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "sessao_versao_com_ficha": {
+          "name": "sessao_versao_com_ficha",
+          "value": "\"sessao\".\"versao_id\" IS NULL OR \"sessao\".\"ficha_id\" IS NOT NULL"
+        }
+      }
+    },
+    "versao_ficha": {
+      "name": "versao_ficha",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ficha_id": {
+          "name": "ficha_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "autor": {
+          "name": "autor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "criada_em": {
+          "name": "criada_em",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "resumo": {
+          "name": "resumo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "versao_ficha_numero": {
+          "name": "versao_ficha_numero",
+          "columns": [
+            "ficha_id",
+            "numero"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "versao_ficha_ficha_id_ficha_id_fk": {
+          "name": "versao_ficha_ficha_id_ficha_id_fk",
+          "tableFrom": "versao_ficha",
+          "tableTo": "ficha",
+          "columnsFrom": [
+            "ficha_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

@@ -63,7 +63,8 @@ compartilhado/contrato-ia/       # esquemas Zod usados pelo app e pelo Worker
 Modelo de dados (diagrama ER em docs/modelo-de-dados.md, gerado do esquema; vínculos da seção 18.6 da especificação):
 - Ficha → Versão da ficha → Rotina → Item → Série planejada; versões só recebem inserção
 - Sessão → Exercício da sessão → Série executada → Etapa de drop-set; sessão aceita ficha e versão vazias (treino livre)
-- Demais entidades e o que é único ou obrigatório: completar na US-001, a partir do esquema
+- Exercício (sinônimos, grupos diretos e indiretos) e Grupo muscular (16 fixos, na migração) → Meta semanal (uma por grupo); Perfil (linha única); Medição corporal (ao menos uma medida); Ação da IA; Cópia de backup
+- Só uma ficha ativa; versão atual = maior número, sem coluna; série e medição removidas ganham `removida_em`; esquema em app/src/adaptadores/sqlite/esquema.ts
 
 ## 4. Comandos
 ```bash
@@ -71,6 +72,8 @@ npm ci                            # instalar e preparar
 npm run android                   # rodar local: build de depuração no celular (não usar Expo Go)
 npm test                          # suíte inteira, sem interação nem rede
 npx jest caminho/arquivo.test.ts  # um arquivo de teste
+npx drizzle-kit generate --name x # nova migração a partir do esquema (nunca editar uma aplicada)
+npm run modelo-de-dados           # regenerar docs/modelo-de-dados.md depois de migrar
 npm run ci                        # CI completo: formatação, lint, tipos, camadas, testes, npm audit, gitleaks
 npm run build:apk                 # deploy do app: APK de release assinado
 npm run deploy:worker             # deploy do Worker
@@ -165,6 +168,7 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - O gitleaks é um binário fora do git (`app/.ferramentas/gitleaks`, versão 8.30.1) → a etapa `segredos` do CI falha com mensagem clara se faltar; o workflow da US-041c precisa baixá-lo (US-041b)
 - `npm audit` mostra moderadas na cadeia minimatch do eslint e do typescript-eslint → o corte do CI é "alta", então não bloqueia; reavaliar ao atualizar o eslint (US-041b)
 - `npm run ci`, `npm test` e os demais comandos rodam dentro de `app/` (US-041b)
+- O drizzle-kit falha com ENOENT se `drizzle/meta/_journal.json` não existir ou não for gerado por ele → apague a pasta e gere de novo; `drizzle/` é gerado, fora do lint e da formatação (US-001b)
 - O `uuid` 14 só publica ESM → precisa entrar no `transformIgnorePatterns` do `jest.config.js`, senão o Jest falha com "Must use import to load ES Module" (US-001a)
 
 ## 11. Notas de domínio
