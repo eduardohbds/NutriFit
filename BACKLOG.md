@@ -66,20 +66,65 @@ A história original não cabia num commit: a main não tinha app (o código do 
 #### Notas da US-041 original
 - Depende do SP01 (versões fixadas). A chave de assinatura fica guardada em dois lugares para não perder a possibilidade de atualizar o app (RT01). CodeQL é pago em repositório privado, por isso a análise de segurança do MVP fica com regras de segurança do ESLint, auditoria de dependências e gitleaks.
 
-### US-001: Modelo de dados versionado com migração sem perda
+### US-001: Modelo de dados versionado com migração sem perda (quebrada em US-001a, US-001b, US-001c e US-001d)
+A história original não cabia num commit: junta objetos de valor, o esquema inteiro, a migração com volta à cópia e a durabilidade da gravação. Os sete critérios originais estão distribuídos abaixo; a US-003 foi antecipada para antes da US-001c, porque a migração segura precisa registrar a falha. Contexto comum: tudo o que vem depois grava dados neste modelo, e uma atualização que perde dados destrói a confiança no histórico, que é o núcleo do produto (RNF13, RNF32).
+
+### US-001a: Objetos de valor de carga, identificador e data
+- Status: aceita
+- Contexto: ver US-001. Primeira história com código de domínio; define o exemplo de objeto de valor do AGENTS.md, seção 5.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma carga de 22,5 kg, quando ela é convertida para libras e de volta várias vezes, então o valor gravado continua exatamente 22 500 g e nenhum recorde aparece ou some (arquitetura 7.1).
+  - Dados registros criados no aparelho, quando são gravados, então recebem identificador UUID v7 e datas em ISO 8601 UTC.
+- Fora do escopo: banco, esquema, telas.
+- Falha inaceitável envolvida: FI-2 (número errado).
+- Notas de domínio: carga em gramas inteiros e circunferências em milímetros inteiros; lb e arredondamento só na exibição (1 kg = 2,20462 lb, seção 13.7). Datas em UTC; o fuso do aparelho só entra na exibição e no cálculo da semana (RB16). Dependência nova aprovada: `uuid` (geração do UUID v7), atrás de uma interface do projeto.
+
+### US-001b: Esquema inicial e primeira migração
 - Status: a fazer
-- Contexto: tudo o que vem depois grava dados neste modelo, e uma atualização que perde dados destrói a confiança no histórico, que é o núcleo do produto (RNF13, RNF32).
+- Contexto: ver US-001. Depende da US-001a.
+- Critérios de aceite (cada um vira um teste):
+  - Dado um banco vazio, quando o app abre, então a migração inicial do drizzle-kit cria todas as tabelas do modelo, e o diagrama ER em docs/modelo-de-dados.md é gerado do esquema.
+  - Dados os vínculos obrigatórios da seção 18.6, quando se tenta gravar série executada sem exercício da sessão, exercício da sessão sem sessão, ou série planejada sem item, rotina ou versão da ficha, então o banco recusa.
+  - Dada uma sessão sem ficha e sem versão, quando gravada, então é aceita (treino livre, SL18).
+  - Dada uma etapa de drop-set, quando gravada, então pertence a uma série executada (arquitetura 7.2).
+  - Dada a porta de repositório, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: migração de versão anterior (US-001c), durabilidade da gravação (US-001d), regras de só inserção (US-002).
+- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
+- Notas de domínio: a lista de entidades e do que é único ou obrigatório é aprovada pelo usuário antes do Red (AGENTS.md, seção 6). Vínculos: série executada → exercício da sessão → sessão; série planejada → item → rotina → versão da ficha (seção 18.6). Dependência nova aprovada: `better-sqlite3` (só desenvolvimento), para rodar o adaptador SQLite real no Jest.
+
+### US-003: Registro local de falhas sem dados pessoais
+- Status: a fazer
+- Contexto: como só o autor testa o app (RK11), o registro local é o que permite diagnosticar erros reais sem vazar dados de saúde (RNF36, SEG13). Antecipada para antes da US-001c.
+- Critérios de aceite (cada um vira um teste):
+  - Dado um erro inesperado, quando ele ocorre, então o app mostra mensagem simples com opção de tentar de novo e cria um registro de falha (CE62).
+  - Dados os testes de falha provocada, quando os registros são inspecionados, então não contêm credenciais, texto de comandos à IA, valores de medidas nem conteúdo de fichas e sessões (SEG13).
+  - Dada uma falha de importação, backup, restauração ou IA, quando registrada, então o evento é um JSON com os campos quando, nivel, onde, codigo, campo, esperado e versaoApp, e nunca o valor recebido.
+  - Dado o app, quando inspecionado, então nenhum registro de falha é enviado a terceiros (RES12).
+  - Dado um erro inesperado, quando o app se recupera, então os dados já gravados estão preservados (CE62).
+- Fora do escopo: envio de registros para fora do aparelho.
+- Falha inaceitável envolvida: FI-6 (dado de saúde ou credencial saindo sem o usuário saber).
+- Notas de domínio: o registro serve para diagnóstico do próprio usuário, que é o único dono dos dados (RB41).
+
+### US-001c: Migração sem perda, com cópia e volta
+- Status: a fazer
+- Contexto: ver US-001. Depende da US-001b e da US-003.
 - Critérios de aceite (cada um vira um teste):
   - Dado um aparelho com dados gravados pela versão anterior do modelo, quando o app atualizado abre, então todas as fichas, versões, sessões, séries e medidas continuam presentes com os mesmos valores (CE63).
   - Dado que a migração falha no meio, quando o app abre, então os dados anteriores ficam intactos e o usuário é informado (CE63).
+  - Dada uma migração, quando ela começa, então o app copia o arquivo do banco para uma pasta interna e só apaga a cópia depois que os totais de séries e sessões batem; se algo falhar, volta à cópia e registra a falha (arquitetura 7.3).
+- Fora do escopo: backup externo (E-07).
+- Falha inaceitável envolvida: FI-1 (perder série concluída); FI-4 (apagar ou alterar versão, sessão ou histórico).
+- Notas de domínio: uma migração SQL por mudança, e cada migração ganha um teste que parte de um banco da versão anterior com dados de exemplo. Como ainda só existe a migração inicial, o Red define como simular a "versão seguinte" sem criar migração de produção.
+
+### US-001d: Gravação durável da série
+- Status: a fazer
+- Contexto: ver US-001. Depende da US-001b.
+- Critérios de aceite (cada um vira um teste):
   - Dado que o app grava uma série, quando o processo é encerrado logo após a confirmação, então a série está presente na reabertura (RNF08).
   - Dado que falta espaço no aparelho ao gravar, quando o usuário confirma, então nada é gravado pela metade, o que foi digitado permanece na tela e é possível tentar de novo (CE61).
-  - Dada uma migração, quando ela começa, então o app copia o arquivo do banco para uma pasta interna e só apaga a cópia depois que os totais de séries e sessões batem; se algo falhar, volta à cópia e registra a falha (arquitetura 7.3).
-  - Dada uma carga de 22,5 kg, quando ela é convertida para libras e de volta várias vezes, então o valor gravado continua exatamente 22 500 g e nenhum recorde aparece ou some (arquitetura 7.1).
-  - Dados registros criados no aparelho, quando são gravados, então recebem identificador UUID v7 e datas em ISO 8601 UTC.
-- Fora do escopo: backup externo (E-07), telas de uso.
-- Falha inaceitável envolvida: FI-1 (perder série concluída); FI-2 (número errado); FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: SQLite com Drizzle, em modo WAL com sincronização completa; cada série concluída é gravada numa transação própria antes de qualquer chamada de rede. Carga é guardada em gramas inteiros e circunferências em milímetros inteiros; conversão só na exibição. Datas ficam em UTC no banco e o fuso do aparelho só entra na exibição e no cálculo da semana (segunda a domingo, RB16). Esquema versionado pelo drizzle-kit, uma migração SQL por mudança, e cada migração ganha um teste que parte de um banco da versão anterior com dados de exemplo. Vínculos obrigatórios: série executada pertence a um exercício da sessão, que pertence a uma sessão; série planejada pertence a um item, que pertence a uma rotina, que pertence a uma versão da ficha (seção 18.6). Dois ajustes ao modelo vindos da arquitetura (7.2): Etapa de drop-set como filha de Série executada, e Sessão aceitando ficha e versão vazias (treino livre).
+- Fora do escopo: telas de registro (US-013).
+- Falha inaceitável envolvida: FI-1 (perder série concluída).
+- Notas de domínio: SQLite em modo WAL com sincronização completa; cada série concluída é gravada numa transação própria antes de qualquer chamada de rede. No Jest se cobrem a configuração do banco, a transação e o disco cheio simulado; o fechamento forçado real é verificado no Poco M5s (N6), pendência herdada do SP01.
 
 ### US-002: Regras de integridade e histórico que não muda
 - Status: a fazer
@@ -93,19 +138,6 @@ A história original não cabia num commit: a main não tinha app (o código do 
 - Fora do escopo: telas de versões e de desfazer (US-010).
 - Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
 - Notas de domínio: tabelas de versão, rotina, item e série planejada só recebem inserção, e o repositório não expõe atualização nem exclusão; a exclusão física só existe em ApagarTudo. Importação, ação da IA e restauração passam pela porta UnidadeDeTrabalho, numa transação única (RNF09). Valores calculados nunca são gravados, sempre recalculados: classificação da série, séries válidas por grupo e semana, recordes, carga máxima, 1RM, RCE, percentual de gordura, massas, duração da sessão e proporção de ações da IA desfeitas.
-
-### US-003: Registro local de falhas sem dados pessoais
-- Status: a fazer
-- Contexto: como só o autor testa o app (RK11), o registro local é o que permite diagnosticar erros reais sem vazar dados de saúde (RNF36, SEG13).
-- Critérios de aceite (cada um vira um teste):
-  - Dado um erro inesperado, quando ele ocorre, então o app mostra mensagem simples com opção de tentar de novo e cria um registro de falha (CE62).
-  - Dados os testes de falha provocada, quando os registros são inspecionados, então não contêm credenciais, texto de comandos à IA, valores de medidas nem conteúdo de fichas e sessões (SEG13).
-  - Dada uma falha de importação, backup, restauração ou IA, quando registrada, então o evento é um JSON com os campos quando, nivel, onde, codigo, campo, esperado e versaoApp, e nunca o valor recebido.
-  - Dado o app, quando inspecionado, então nenhum registro de falha é enviado a terceiros (RES12).
-  - Dado um erro inesperado, quando o app se recupera, então os dados já gravados estão preservados (CE62).
-- Fora do escopo: envio de registros para fora do aparelho.
-- Falha inaceitável envolvida: FI-6 (dado de saúde ou credencial saindo sem o usuário saber).
-- Notas de domínio: o registro serve para diagnóstico do próprio usuário, que é o único dono dos dados (RB41).
 
 ## Épico E-02: Catálogo de exercícios (BL04 · P1)
 Objetivo: o usuário tem um catálogo com os grupos musculares de cada exercício, para que fichas, importação e contagem de séries válidas funcionem sem duplicar exercícios.

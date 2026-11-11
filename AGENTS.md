@@ -165,6 +165,7 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - O gitleaks é um binário fora do git (`app/.ferramentas/gitleaks`, versão 8.30.1) → a etapa `segredos` do CI falha com mensagem clara se faltar; o workflow da US-041c precisa baixá-lo (US-041b)
 - `npm audit` mostra moderadas na cadeia minimatch do eslint e do typescript-eslint → o corte do CI é "alta", então não bloqueia; reavaliar ao atualizar o eslint (US-041b)
 - `npm run ci`, `npm test` e os demais comandos rodam dentro de `app/` (US-041b)
+- O `uuid` 14 só publica ESM → precisa entrar no `transformIgnorePatterns` do `jest.config.js`, senão o Jest falha com "Must use import to load ES Module" (US-001a)
 
 ## 11. Notas de domínio
 Spike = experimento descartável para responder uma pergunta: branch spike/[tema], sem testes, nunca entra na main. A resposta fica aqui; o código é descartado, e a implementação volta como história, com TDD.
