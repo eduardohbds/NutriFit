@@ -173,6 +173,8 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - Testing Library 14: `render`, `renderRouter` e `fireEvent` são assíncronos → sem `await`, o teste falha com "`render` function has not been called" (US-003)
 - O React redesenha uma tela que lançou erro antes de acionar o limite de erro → o dublê de tela instável precisa falhar até o teste liberar, não só na primeira vez (US-003)
 - O `uuid` 14 só publica ESM → precisa entrar no `transformIgnorePatterns` do `jest.config.js`, senão o Jest falha com "Must use import to load ES Module" (US-001a)
+- Teste que renderiza o `app/_layout` carrega a composição e, com ela, o `expo-sqlite` e `drizzle/migrations.js` → o Jest não carrega `.sql` nem acha `expo-asset`; mocke `expo-sqlite` e `../../drizzle/migrations` como no limite-de-erro.test.tsx (US-001d)
+- `expo-asset` não está no `package.json`; se o app no aparelho reclamar dele ao abrir o `expo-sqlite`, vira pedido de dependência nova (US-001d)
 
 ## 11. Notas de domínio
 Spike = experimento descartável para responder uma pergunta: branch spike/[tema], sem testes, nunca entra na main. A resposta fica aqui; o código é descartado, e a implementação volta como história, com TDD.
@@ -188,6 +190,7 @@ Spike = experimento descartável para responder uma pergunta: branch spike/[tema
 - Treino livre existe? → sim, sessão sem ficha nem versão → decisão do usuário (SL18)
 - Composição corporal → relação cintura-estatura é o método principal padrão → confirmado (SL11)
 - Conversões → 1 kg = 2,20462 lb; 1 pol = 2,54 cm (só na fórmula da Marinha) → seção 13.7
+- Como abrir o banco no app? → abrir e fechar a conexão (recupera e esvazia o `-wal`), migrar pela MigrarBanco com o arquivo fechado, abrir de novo com WAL, sincronização completa (`synchronous = 2`) e chaves estrangeiras; as telas só aparecem depois, e migração revertida ou não feita vira aviso (CE63) → US-001d, arquitetura 7.3
 
 ## 12. Variáveis de ambiente
 - `EXPO_PUBLIC_WORKER_URL` → endereço do Worker de IA (público, vai no APK)

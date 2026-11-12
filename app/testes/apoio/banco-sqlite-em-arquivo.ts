@@ -5,6 +5,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
+import type { ConexaoDoBanco } from '../../src/aplicacao/portas/conexao-do-banco';
 import type { CopiaDoBanco } from '../../src/aplicacao/portas/copia-do-banco';
 import type { EsquemaDoBanco, TotaisDoBanco } from '../../src/aplicacao/portas/esquema-do-banco';
 
@@ -111,5 +112,29 @@ export function despejarTabelas(caminho: string, colunasIgnoradas: string[] = []
     );
   } finally {
     banco.close();
+  }
+}
+
+// Conexão real (better-sqlite3) em arquivo, para o contrato da porta ConexaoDoBanco.
+export class ConexaoDoBancoSqlite implements ConexaoDoBanco {
+  private banco: Database.Database | null = null;
+  constructor(private readonly caminho: string) {}
+
+  async abrir() {
+    this.banco = new Database(this.caminho);
+  }
+  async fechar() {
+    this.banco?.close();
+    this.banco = null;
+  }
+  async definirPragma(nome: string, valor: string | number) {
+    this.aberto().pragma(`${nome} = ${valor}`);
+  }
+  async lerPragma(nome: string) {
+    return this.aberto().pragma(nome, { simple: true }) as string | number;
+  }
+  private aberto() {
+    if (!this.banco) throw new Error('conexão fechada');
+    return this.banco;
   }
 }
