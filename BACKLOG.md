@@ -66,7 +66,7 @@ A história original não cabia num commit: a main não tinha app (o código do 
 #### Notas da US-041 original
 - Depende do SP01 (versões fixadas). A chave de assinatura fica guardada em dois lugares para não perder a possibilidade de atualizar o app (RT01). CodeQL é pago em repositório privado, por isso a análise de segurança do MVP fica com regras de segurança do ESLint, auditoria de dependências e gitleaks.
 
-### US-001: Modelo de dados versionado com migração sem perda (quebrada em US-001a, US-001b, US-001c e US-001d)
+### US-001: Modelo de dados versionado com migração sem perda (quebrada em US-001a a US-001e)
 A história original não cabia num commit: junta objetos de valor, o esquema inteiro, a migração com volta à cópia e a durabilidade da gravação. Os sete critérios originais estão distribuídos abaixo; a US-003 foi antecipada para antes da US-001c, porque a migração segura precisa registrar a falha. Contexto comum: tudo o que vem depois grava dados neste modelo, e uma atualização que perde dados destrói a confiança no histórico, que é o núcleo do produto (RNF13, RNF32).
 
 ### US-001a: Objetos de valor de carga, identificador e data
@@ -87,7 +87,7 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
   - Dados os vínculos obrigatórios da seção 18.6, quando se tenta gravar série executada sem exercício da sessão, exercício da sessão sem sessão, ou série planejada sem item, rotina ou versão da ficha, então o banco recusa.
   - Dada uma sessão sem ficha e sem versão, quando gravada, então é aceita (treino livre, SL18).
   - Dada uma etapa de drop-set, quando gravada, então pertence a uma série executada (arquitetura 7.2).
-- Fora do escopo: migração de versão anterior e aplicação da migração na abertura do app (US-001c); configuração da conexão, com WAL, sincronização completa e chaves estrangeiras (US-001d); portas de repositório e só inserção (US-002); tabela do registro de falhas (US-003).
+- Fora do escopo: migração de versão anterior e aplicação da migração na abertura do app (US-001c); configuração da conexão, com WAL, sincronização completa e chaves estrangeiras (US-001d); gravação durável da série (US-001e); portas de repositório e só inserção (US-002); tabela do registro de falhas (US-003).
 - Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
 - Notas de domínio: a lista de entidades e do que é único ou obrigatório é aprovada pelo usuário antes do Red (AGENTS.md, seção 6). Vínculos: série executada → exercício da sessão → sessão; série planejada → item → rotina → versão da ficha (seção 18.6). Dependência nova aprovada: `better-sqlite3` (só desenvolvimento), para rodar o SQLite real no Jest. Lista de tabelas aprovada em 2026-11-10: as 16 entidades da seção 18.2 (sem registro de falha) mais etapa de drop-set, com listas em tabelas filhas (sinônimos, grupos do exercício); versão atual da ficha é a de maior número, sem coluna; série e medição removidas ganham `removida_em`; meta semanal em centésimos inteiros; os 16 grupos entram na migração. O diagrama ER é gerado do snapshot do drizzle-kit, sem dependência nova. O critério da suíte de contrato da porta de repositório passou para a US-002.
 
@@ -115,15 +115,26 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 - Falha inaceitável envolvida: FI-1 (perder série concluída); FI-4 (apagar ou alterar versão, sessão ou histórico).
 - Notas de domínio: uma migração SQL por mudança, e cada migração ganha um teste que parte de um banco da versão anterior com dados de exemplo. Como ainda só existe a migração inicial, o Red define como simular a "versão seguinte" sem criar migração de produção.
 
-### US-001d: Gravação durável da série
+### US-001d: Conexão durável e migração ao abrir o app
+- Status: aceita
+- Contexto: ver US-001. Depende da US-001b e da US-001c. Liga o que as histórias anteriores deixaram solto: o banco real do aparelho, configurado para não perder dados, e a migração segura rodando quando o app abre.
+- Critérios de aceite (cada um vira um teste):
+  - Dado o banco aberto pelo app, quando a conexão é configurada, então usa o modo WAL, sincronização completa e chaves estrangeiras ligadas (RNF08).
+  - Dado um aparelho com o banco da versão anterior, quando o app abre, então a migração roda pela MigrarBanco antes de qualquer tela usar o banco, e o resultado vira aviso ao usuário quando for revertido ou não migrado (CE63).
+  - Dado o arquivo do banco, quando a cópia da migração é feita, então a conexão está fechada e sem escrita pendente no arquivo -wal (obstáculo registrado na US-001c).
+- Fora do escopo: gravar séries (US-001e); telas de registro (US-013).
+- Falha inaceitável envolvida: FI-1 (perder série concluída).
+- Notas de domínio: o EsquemaDoBanco de produção usa o expo-sqlite e só roda no aparelho; no Jest se cobrem a configuração (por uma porta mínima de conexão, com falso e contrato contra o better-sqlite3) e a ordem abrir, migrar, usar. O arquivo aberto de verdade, a cópia e a volta no aparelho são verificados no Poco M5s (N6). Verificar no N6 também se o uuid 14 gera o UUID v7 no Hermes (sem crypto global); se não gerar, a correção é história nova com expo-crypto, que precisa de aprovação.
+
+### US-001e: Gravação durável da série
 - Status: a fazer
-- Contexto: ver US-001. Depende da US-001b.
+- Contexto: ver US-001. Depende da US-001d e da US-002 (porta de repositório, só inserção).
 - Critérios de aceite (cada um vira um teste):
   - Dado que o app grava uma série, quando o processo é encerrado logo após a confirmação, então a série está presente na reabertura (RNF08).
   - Dado que falta espaço no aparelho ao gravar, quando o usuário confirma, então nada é gravado pela metade, o que foi digitado permanece na tela e é possível tentar de novo (CE61).
 - Fora do escopo: telas de registro (US-013).
 - Falha inaceitável envolvida: FI-1 (perder série concluída).
-- Notas de domínio: SQLite em modo WAL com sincronização completa; cada série concluída é gravada numa transação própria antes de qualquer chamada de rede. No Jest se cobrem a configuração do banco, a transação e o disco cheio simulado; o fechamento forçado real é verificado no Poco M5s (N6), pendência herdada do SP01.
+- Notas de domínio: cada série concluída é gravada numa transação própria antes de qualquer chamada de rede. No Jest se cobrem a transação em arquivo SQLite real (fechar e reabrir o arquivo) e o disco cheio simulado; o fechamento forçado real é verificado no Poco M5s (N6), pendência herdada do SP01.
 
 ### US-002: Regras de integridade e histórico que não muda
 - Status: a fazer
