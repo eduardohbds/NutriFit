@@ -168,6 +168,7 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - O gitleaks é um binário fora do git (`app/.ferramentas/gitleaks`, versão 8.30.1) → a etapa `segredos` do CI falha com mensagem clara se faltar; o workflow da US-041c precisa baixá-lo (US-041b)
 - `npm audit` mostra moderadas na cadeia minimatch do eslint e do typescript-eslint → o corte do CI é "alta", então não bloqueia; reavaliar ao atualizar o eslint (US-041b)
 - `npm run ci`, `npm test` e os demais comandos rodam dentro de `app/` (US-041b)
+- Migração: `MigrarBanco` copia o banco para `copias-de-migracao/` antes de migrar e só a apaga com os totais de séries e sessões iguais; a cópia exige o arquivo do `expo-sqlite` fechado (e sem `-wal` pendente), o que a US-001d garante ao ligar a conexão (US-001c)
 - O drizzle-kit falha com ENOENT se `drizzle/meta/_journal.json` não existir ou não for gerado por ele → apague a pasta e gere de novo; `drizzle/` é gerado, fora do lint e da formatação (US-001b)
 - Testing Library 14: `render`, `renderRouter` e `fireEvent` são assíncronos → sem `await`, o teste falha com "`render` function has not been called" (US-003)
 - O React redesenha uma tela que lançou erro antes de acionar o limite de erro → o dublê de tela instável precisa falhar até o teste liberar, não só na primeira vez (US-003)

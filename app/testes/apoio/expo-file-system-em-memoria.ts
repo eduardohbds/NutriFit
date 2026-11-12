@@ -20,6 +20,19 @@ export class File {
     arquivosEmMemoria.set(this.uri, '');
   }
 
+  get parentDirectory() {
+    return { create: () => undefined };
+  }
+
+  copy(destino: { uri: string }) {
+    if (!this.exists) throw new Error(`arquivo inexistente: ${this.uri}`);
+    arquivosEmMemoria.set(destino.uri, arquivosEmMemoria.get(this.uri) ?? '');
+  }
+
+  delete() {
+    arquivosEmMemoria.delete(this.uri);
+  }
+
   async text() {
     if (!this.exists) throw new Error(`arquivo inexistente: ${this.uri}`);
     return arquivosEmMemoria.get(this.uri) ?? '';

@@ -105,7 +105,7 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 - Notas de domínio: o registro serve para diagnóstico do próprio usuário, que é o único dono dos dados (RB41).
 
 ### US-001c: Migração sem perda, com cópia e volta
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-001. Depende da US-001b e da US-003.
 - Critérios de aceite (cada um vira um teste):
   - Dado um aparelho com dados gravados pela versão anterior do modelo, quando o app atualizado abre, então todas as fichas, versões, sessões, séries e medidas continuam presentes com os mesmos valores (CE63).
@@ -692,3 +692,12 @@ Objetivo: dados de saúde e treino ficam protegidos se o celular for perdido ou 
 
 ## Achados da política de testes
 <!-- Falhas fora do escopo entram aqui como histórias; se forem estruturais, viram épico -->
+
+### US-043: Teste de tela estoura 5 s sob carga no CI completo
+- Status: a fazer
+- Contexto: achado da US-001c. No `npm run ci`, com a suíte inteira rodando em paralelo no sandbox, `testes/interface/limite-de-erro.test.tsx` estourou os 5 s do Jest (`Exceeded timeout of 5000 ms`); isolado, passou em 16 s no total.
+- Critérios de aceite (cada um vira um teste):
+  - Dado o `npm run ci` rodando a suíte inteira, quando os testes de interface renderizam rotas, então nenhum estoura o tempo por lentidão do primeiro render.
+- Fora do escopo: mudar o que os testes de interface verificam.
+- Falha inaceitável envolvida: nenhuma.
+- Notas de domínio: cogitar `testTimeout` maior só para a pasta de interface ou limitar os workers; decidir no Red.
