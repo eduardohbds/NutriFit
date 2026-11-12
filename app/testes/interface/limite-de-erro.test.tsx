@@ -7,6 +7,19 @@ import { abrirBancoMigrado, criarFichaComSerie, criarSessaoComSerie } from '../a
 import { arquivosEmMemoria } from '../apoio/expo-file-system-em-memoria';
 
 jest.mock('expo-file-system', () => require('../apoio/expo-file-system-em-memoria'));
+// As migrações .sql só são lidas pelo Metro (babel-plugin-inline-import); o Jest não carrega .sql.
+jest.mock('../../drizzle/migrations', () => ({
+  __esModule: true,
+  default: { journal: { entries: [] }, migrations: {} },
+}));
+// Módulo de plataforma: o SQLite nativo só existe no aparelho. O banco falso abre e migra na hora.
+jest.mock('expo-sqlite', () => ({
+  openDatabaseAsync: async () => ({
+    execAsync: async () => undefined,
+    getFirstAsync: async () => null,
+    closeAsync: async () => undefined,
+  }),
+}));
 
 const ARQUIVO = 'file:///documentos/registro-de-falhas.jsonl';
 
