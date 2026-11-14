@@ -192,6 +192,7 @@ Spike = experimento descartável para responder uma pergunta: branch spike/[tema
 - Composição corporal → relação cintura-estatura é o método principal padrão → confirmado (SL11)
 - Conversões → 1 kg = 2,20462 lb; 1 pol = 2,54 cm (só na fórmula da Marinha) → seção 13.7
 - Como abrir o banco no app? → abrir e fechar a conexão (recupera e esvazia o `-wal`), migrar pela MigrarBanco com o arquivo fechado, abrir de novo com WAL, sincronização completa (`synchronous = 2`) e chaves estrangeiras; as telas só aparecem depois, e migração revertida ou não feita vira aviso (CE63) → US-001d, arquitetura 7.3
+- Como nasce o número de uma versão da ficha? → o repositório o dá (maior número + 1) dentro da mesma transação que grava a versão; quem chama não informa número, e a porta não tem atualização nem exclusão → US-002a, RB02
 
 ## 12. Variáveis de ambiente
 - `EXPO_PUBLIC_WORKER_URL` → endereço do Worker de IA (público, vai no APK)

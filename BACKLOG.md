@@ -139,7 +139,7 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 
 ### US-001e: Gravação durável da série
 - Status: a fazer
-- Contexto: ver US-001. Depende da US-001d e da US-002 (porta de repositório, só inserção).
+- Contexto: ver US-001. Depende da US-001d e da US-002b (porta de sessões, só inserção).
 - Critérios de aceite (cada um vira um teste):
   - Dado que o app grava uma série, quando o processo é encerrado logo após a confirmação, então a série está presente na reabertura (RNF08).
   - Dado que falta espaço no aparelho ao gravar, quando o usuário confirma, então nada é gravado pela metade, o que foi digitado permanece na tela e é possível tentar de novo (CE61).
@@ -147,19 +147,50 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 - Falha inaceitável envolvida: FI-1 (perder série concluída).
 - Notas de domínio: cada série concluída é gravada numa transação própria antes de qualquer chamada de rede. No Jest se cobrem a transação em arquivo SQLite real (fechar e reabrir o arquivo) e o disco cheio simulado; o fechamento forçado real é verificado no Poco M5s (N6), pendência herdada do SP01.
 
-### US-002: Regras de integridade e histórico que não muda
-- Status: a fazer
-- Contexto: versões da ficha, sessões presas à versão e ações da IA são a base do desfazer e da comparação antes e depois; se o histórico puder ser reescrito, o produto perde a rastreabilidade prometida (RB02, RB03, RB04).
+### US-002: Regras de integridade e histórico que não muda (quebrada em US-002a a US-002d)
+A história original não cabia num commit: cada critério pede uma porta de repositório própria (fichas, sessões, catálogo, ações da IA), com falso em memória, adaptador SQLite e suíte de contrato, além de tipos de domínio que ainda não existem. Os seis critérios originais estão distribuídos abaixo; o da suíte de contrato vale para cada porta, em cada história. Contexto comum: versões da ficha, sessões presas à versão e ações da IA são a base do desfazer e da comparação antes e depois; se o histórico puder ser reescrito, o produto perde a rastreabilidade prometida (RB02, RB03, RB04).
+- Notas de domínio comuns: tabelas de versão, rotina, item e série planejada só recebem inserção, e o repositório não expõe atualização nem exclusão; a exclusão física só existe em ApagarTudo. Importação, ação da IA e restauração passam pela porta UnidadeDeTrabalho, numa transação única (RNF09); ela entra na primeira história que precisar de alteração composta, não aqui. Valores calculados nunca são gravados, sempre recalculados: classificação da série, séries válidas por grupo e semana, recordes, carga máxima, 1RM, RCE, percentual de gordura, massas, duração da sessão e proporção de ações da IA desfeitas.
+
+### US-002a: Fichas e versões que só recebem inserção
+- Status: aceita
+- Contexto: ver US-002. Primeira porta de repositório do projeto; define o exemplo de porta, falso e suíte de contrato do AGENTS.md, seção 5.
 - Critérios de aceite (cada um vira um teste):
   - Dada uma ficha com versões, quando qualquer alteração é salva, então uma nova versão é criada e nenhuma versão anterior é alterada ou apagada (RB02).
-  - Dada uma sessão registrada com a versão 2 da ficha, quando a ficha passa para a versão 3, então a sessão continua apontando para a versão 2 (RB04).
-  - Dada uma ficha com sessões ou um exercício com histórico, quando o usuário tenta excluir, então só a opção de arquivar está disponível (seção 18.6).
-  - Dada uma ação da IA registrada, quando ela é desfeita, então o único campo que muda é a marca de desfeita.
-  - Dado que valores derivados (classificação, contagens, recordes, 1RM, composição) são pedidos, quando uma série é corrigida, então os valores exibidos refletem a correção sem que nenhum valor derivado tenha sido gravado (seção 18.6).
-  - Dada a porta de repositório, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite (vindo da US-001b).
-- Fora do escopo: telas de versões e de desfazer (US-010).
+  - Dada a porta RepositorioDeFichas, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: telas e edição completa da ficha (US-007 e US-008); consultar versões e desfazer (US-010); arquivar (US-002c); sessões (US-002b).
 - Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: tabelas de versão, rotina, item e série planejada só recebem inserção, e o repositório não expõe atualização nem exclusão; a exclusão física só existe em ApagarTudo. Importação, ação da IA e restauração passam pela porta UnidadeDeTrabalho, numa transação única (RNF09). Valores calculados nunca são gravados, sempre recalculados: classificação da série, séries válidas por grupo e semana, recordes, carga máxima, 1RM, RCE, percentual de gordura, massas, duração da sessão e proporção de ações da IA desfeitas.
+- Notas de domínio: o repositório não expõe atualização nem exclusão de versão, rotina, item nem série planejada. Os tipos de domínio ficam no mínimo para guardar uma versão com seu conteúdo; as regras de meta, RIR e técnica ficam para US-007 e US-008. A lista de tipos e portas é aprovada pelo usuário antes do Red.
+
+### US-002b: Sessões presas à versão e séries corrigidas sem valor derivado gravado
+- Status: a fazer
+- Contexto: ver US-002. Depende da US-002a. Entrega a porta de sessões e a inserção de série que a US-001e usa.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma sessão registrada com a versão 2 da ficha, quando a ficha passa para a versão 3, então a sessão continua apontando para a versão 2 (RB04).
+  - Dado que valores derivados (classificação, contagens, recordes, 1RM, composição) são pedidos, quando uma série é corrigida, então os valores exibidos refletem a correção sem que nenhum valor derivado tenha sido gravado (seção 18.6).
+  - Dada a porta RepositorioDeSessoes, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: gravação durável e transação por série (US-001e); telas de registro (US-013); o cálculo dos valores derivados (US-019, US-020, US-025).
+- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico); FI-1 (perder série concluída).
+- Notas de domínio: série corrigida ou removida ganha `removida_em`, sem exclusão física. O critério dos valores derivados se verifica no esquema (nenhuma coluna de valor derivado) e na porta (nenhum método grava valor derivado).
+
+### US-002c: Arquivar em vez de excluir
+- Status: a fazer
+- Contexto: ver US-002. Depende da US-002a e da US-002b.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma ficha com sessões ou um exercício com histórico, quando o usuário tenta excluir, então só a opção de arquivar está disponível (seção 18.6).
+  - Dada a porta RepositorioDoCatalogo, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: telas de arquivar (US-009); catálogo inicial e criação de exercícios (US-004 e US-005); mesclar duplicados (US-006).
+- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
+- Notas de domínio: a porta do catálogo nasce aqui com o mínimo para arquivar e consultar se há histórico; o restante vem nas US-004 a US-006. Ficha ou exercício sem histórico pode ser excluído; com histórico, só arquivado.
+
+### US-002d: Desfazer uma ação da IA muda só a marca
+- Status: a fazer
+- Contexto: ver US-002. Depende da US-002a (a ação aponta para a versão criada).
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma ação da IA registrada, quando ela é desfeita, então o único campo que muda é a marca de desfeita.
+  - Dada a porta RepositorioDeAcoesDaIA, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: criar a versão de desfazer e a marca na tela (US-010 e US-037); chamar a IA (E-09).
+- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
+- Notas de domínio: a coluna `desfeita` é a única alteração permitida depois de registrada (FL04). A porta é nova e não estava na tabela de portas da arquitetura (seção 5); a arquitetura precisa listá-la.
 
 ## Épico E-02: Catálogo de exercícios (BL04 · P1)
 Objetivo: o usuário tem um catálogo com os grupos musculares de cada exercício, para que fichas, importação e contagem de séries válidas funcionem sem duplicar exercícios.
