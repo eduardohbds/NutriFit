@@ -174,6 +174,7 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - O React redesenha uma tela que lançou erro antes de acionar o limite de erro → o dublê de tela instável precisa falhar até o teste liberar, não só na primeira vez (US-003)
 - O `uuid` 14 só publica ESM → precisa entrar no `transformIgnorePatterns` do `jest.config.js`, senão o Jest falha com "Must use import to load ES Module" (US-001a)
 - `npm run ci` não detecta a falta do `metro.config.js` e do `babel.config.js`: o Jest não empacota com o Metro, e só o `apk` do GitHub Actions quebrava com `Unable to resolve "./0000_esquema-inicial.sql"`; o teste `testes/empacotamento` roda `expo export:embed` e cobre isso. `babel-preset-expo` é dependência direta por causa do `babel.config.js` próprio (US-001f)
+- Série corrigida divide a `posicao` com a antiga (a antiga fica com `removida_em`) → a leitura ordena por `posicao` e `rowid` para manter a ordem de registro; trocar por outro desempate quebra a ordem das séries corrigidas (US-002b)
 - Teste que renderiza o `app/_layout` carrega a composição e, com ela, o `expo-sqlite` e `drizzle/migrations.js` → o Jest não carrega `.sql` nem acha `expo-asset`; mocke `expo-sqlite` e `../../drizzle/migrations` como no limite-de-erro.test.tsx (US-001d)
 - `expo-asset` não está no `package.json`; se o app no aparelho reclamar dele ao abrir o `expo-sqlite`, vira pedido de dependência nova (US-001d)
 
@@ -193,6 +194,7 @@ Spike = experimento descartável para responder uma pergunta: branch spike/[tema
 - Conversões → 1 kg = 2,20462 lb; 1 pol = 2,54 cm (só na fórmula da Marinha) → seção 13.7
 - Como abrir o banco no app? → abrir e fechar a conexão (recupera e esvazia o `-wal`), migrar pela MigrarBanco com o arquivo fechado, abrir de novo com WAL, sincronização completa (`synchronous = 2`) e chaves estrangeiras; as telas só aparecem depois, e migração revertida ou não feita vira aviso (CE63) → US-001d, arquitetura 7.3
 - Como nasce o número de uma versão da ficha? → o repositório o dá (maior número + 1) dentro da mesma transação que grava a versão; quem chama não informa número, e a porta não tem atualização nem exclusão → US-002a, RB02
+- Como se corrige uma série executada? → a linha original não é reescrita: ganha só `removida_em` e a corrigida entra como linha nova na mesma posição, numa transação; a leitura devolve as séries removidas com a marca, e quem calcula usa só as ativas (RF02, seção 18.6) → US-002b
 
 ## 12. Variáveis de ambiente
 - `EXPO_PUBLIC_WORKER_URL` → endereço do Worker de IA (público, vai no APK)

@@ -162,7 +162,7 @@ A história original não cabia num commit: cada critério pede uma porta de rep
 - Notas de domínio: o repositório não expõe atualização nem exclusão de versão, rotina, item nem série planejada. Os tipos de domínio ficam no mínimo para guardar uma versão com seu conteúdo; as regras de meta, RIR e técnica ficam para US-007 e US-008. A lista de tipos e portas é aprovada pelo usuário antes do Red.
 
 ### US-002b: Sessões presas à versão e séries corrigidas sem valor derivado gravado
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-002. Depende da US-002a. Entrega a porta de sessões e a inserção de série que a US-001e usa.
 - Critérios de aceite (cada um vira um teste):
   - Dada uma sessão registrada com a versão 2 da ficha, quando a ficha passa para a versão 3, então a sessão continua apontando para a versão 2 (RB04).
