@@ -126,6 +126,17 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 - Falha inaceitável envolvida: FI-1 (perder série concluída).
 - Notas de domínio: o EsquemaDoBanco de produção usa o expo-sqlite e só roda no aparelho; no Jest se cobrem a configuração (por uma porta mínima de conexão, com falso e contrato contra o better-sqlite3) e a ordem abrir, migrar, usar. O arquivo aberto de verdade, a cópia e a volta no aparelho são verificados no Poco M5s (N6). Verificar no N6 também se o uuid 14 gera o UUID v7 no Hermes (sem crypto global); se não gerar, a correção é história nova com expo-crypto, que precisa de aprovação.
 
+### US-001f: O app empacota as migrações no APK
+- Status: aceita
+- Contexto: achado da US-001d. O workflow `apk` da tag `v0.0.2` falhou em `createBundleReleaseJsAndAssets` com `Unable to resolve "./0000_esquema-inicial.sql" from "drizzle/migrations.js"`. A US-001c entrou na main sem `metro.config.js` e sem `babel.config.js`, que o SP01 já tinha registrado como obrigatórios (AGENTS.md, seção 10). O `npm run ci` passou porque o Jest não empacota com o Metro; desde a US-001c nenhum APK com migrações foi gerado. Depende da US-001d.
+- Critérios de aceite (cada um vira um teste):
+  - Dada a configuração do Metro do app, quando ela é carregada, então `.sql` está entre as extensões de código-fonte resolvidas.
+  - Dada a configuração do Babel do app, quando um arquivo `.sql` é importado, então o plugin `inline-import` o transforma em texto dentro do pacote.
+  - Dado `drizzle/migrations.js`, quando o Metro o empacota para Android, então todos os `.sql` importados resolvem, sem erro de módulo não encontrado.
+- Fora do escopo: criar a tag e rodar o workflow (depois do merge: tag `v0.0.3` e conferência do `apk`, feitas pelo usuário); verificar no aparelho a abertura do banco e o uuid v7 no Hermes (N6, notas da US-001d); item US-043 (teste de interface lento no CI).
+- Falha inaceitável envolvida: nenhuma, mas bloqueia o N6 de FI-1 e FI-4, que só se verifica com APK instalado.
+- Notas de domínio: os dois arquivos são os do spike (branch spike/esqueleto): `metro.config.js` com `getDefaultConfig` e `sourceExts.push('sql')`; `babel.config.js` com `babel-preset-expo` e `['inline-import', { extensions: ['.sql'] }]`. Com `babel.config.js` próprio, o `babel-preset-expo` precisa ser dependência direta no `package.json` (obstáculo da US-001c); hoje só existe como transitivo do `expo`, então adicioná-lo é dependência nova e precisa da aprovação do usuário antes do Red. O Red decide como testar o empacotamento sem o Gradle (por exemplo, `Metro.runBuild` ou `expo export` só do ponto de entrada). Registrar o obstáculo na seção 10 ao fechar.
+
 ### US-001e: Gravação durável da série
 - Status: a fazer
 - Contexto: ver US-001. Depende da US-001d e da US-002 (porta de repositório, só inserção).
