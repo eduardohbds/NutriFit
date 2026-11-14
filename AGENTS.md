@@ -173,6 +173,7 @@ Neste projeto, "deploy" é uma tag de versão do APK ou a publicação do Worker
 - Testing Library 14: `render`, `renderRouter` e `fireEvent` são assíncronos → sem `await`, o teste falha com "`render` function has not been called" (US-003)
 - O React redesenha uma tela que lançou erro antes de acionar o limite de erro → o dublê de tela instável precisa falhar até o teste liberar, não só na primeira vez (US-003)
 - O `uuid` 14 só publica ESM → precisa entrar no `transformIgnorePatterns` do `jest.config.js`, senão o Jest falha com "Must use import to load ES Module" (US-001a)
+- `npm run ci` não detecta a falta do `metro.config.js` e do `babel.config.js`: o Jest não empacota com o Metro, e só o `apk` do GitHub Actions quebrava com `Unable to resolve "./0000_esquema-inicial.sql"`; o teste `testes/empacotamento` roda `expo export:embed` e cobre isso. `babel-preset-expo` é dependência direta por causa do `babel.config.js` próprio (US-001f)
 - Teste que renderiza o `app/_layout` carrega a composição e, com ela, o `expo-sqlite` e `drizzle/migrations.js` → o Jest não carrega `.sql` nem acha `expo-asset`; mocke `expo-sqlite` e `../../drizzle/migrations` como no limite-de-erro.test.tsx (US-001d)
 - `expo-asset` não está no `package.json`; se o app no aparelho reclamar dele ao abrir o `expo-sqlite`, vira pedido de dependência nova (US-001d)
 
