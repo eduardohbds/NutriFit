@@ -138,7 +138,7 @@ A história original não cabia num commit: junta objetos de valor, o esquema in
 - Notas de domínio: os dois arquivos são os do spike (branch spike/esqueleto): `metro.config.js` com `getDefaultConfig` e `sourceExts.push('sql')`; `babel.config.js` com `babel-preset-expo` e `['inline-import', { extensions: ['.sql'] }]`. Com `babel.config.js` próprio, o `babel-preset-expo` precisa ser dependência direta no `package.json` (obstáculo da US-001c); hoje só existe como transitivo do `expo`, então adicioná-lo é dependência nova e precisa da aprovação do usuário antes do Red. O Red decide como testar o empacotamento sem o Gradle (por exemplo, `Metro.runBuild` ou `expo export` só do ponto de entrada). Registrar o obstáculo na seção 10 ao fechar.
 
 ### US-001e: Gravação durável da série
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-001. Depende da US-001d e da US-002b (porta de sessões, só inserção).
 - Critérios de aceite (cada um vira um teste):
   - Dado que o app grava uma série, quando o processo é encerrado logo após a confirmação, então a série está presente na reabertura (RNF08).

@@ -15,9 +15,9 @@ export class FabricaDeSessoes {
   }
 
   sessao(vinculo: {
-    fichaId: Identificador;
-    versaoId: Identificador;
-    rotinaId: Identificador;
+    fichaId: Identificador | null;
+    versaoId: Identificador | null;
+    rotinaId: Identificador | null;
   }): NovaSessao {
     return {
       id: this.id(),
