@@ -16,3 +16,9 @@ export interface ExercicioDoCatalogo {
   gruposDiretos: string[];
   gruposIndiretos: string[];
 }
+
+// Os dois papéis de um exercício na contagem de séries (seção 13.3), pelo nome do grupo.
+export interface GruposDoExercicio {
+  diretos: string[];
+  indiretos: string[];
+}

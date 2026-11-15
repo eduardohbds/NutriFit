@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
+import type { GeradorDeIdentificador } from '../../aplicacao/portas/gerador-de-identificador';
 import type {
   OpcaoDeRemocao,
   RepositorioDoCatalogo,
@@ -8,6 +9,7 @@ import type {
 } from '../../aplicacao/portas/repositorio-do-catalogo';
 import type {
   ExercicioDoCatalogo,
+  GruposDoExercicio,
   OrigemDoExercicio,
   SituacaoDoExercicio,
 } from '../../dominio/exercicio';
@@ -22,12 +24,16 @@ import {
   grupoMuscular,
   item,
 } from './esquema';
+import { GeradorUuidV7 } from '../sistema/gerador-uuid-v7';
 
 type BancoDrizzle = BaseSQLiteDatabase<'sync', unknown>;
 type Consultor = Pick<BancoDrizzle, 'select'>;
 
 export class RepositorioDoCatalogoSqlite implements RepositorioDoCatalogo {
-  constructor(private readonly banco: BancoDrizzle) {}
+  constructor(
+    private readonly banco: BancoDrizzle,
+    private readonly gerador: GeradorDeIdentificador = new GeradorUuidV7(),
+  ) {}
 
   async listarExercicios(): Promise<ExercicioDoCatalogo[]> {
     const gruposPorExercicio = agrupar(
@@ -62,6 +68,23 @@ export class RepositorioDoCatalogoSqlite implements RepositorioDoCatalogo {
         gruposDiretos: nomesDoPapel(gruposPorExercicio.get(linha.id), 'direto'),
         gruposIndiretos: nomesDoPapel(gruposPorExercicio.get(linha.id), 'indireto'),
       }));
+  }
+
+  async gravarGrupos(id: Identificador, grupos: GruposDoExercicio): Promise<void> {
+    this.banco.transaction((tx) => {
+      exigirExercicio(tx, id);
+      const novos = [
+        ...grupos.diretos.map((nome) => ({ nome, papel: 'direto' as const })),
+        ...grupos.indiretos.map((nome) => ({ nome, papel: 'indireto' as const })),
+      ].map(({ nome, papel }) => ({
+        id: this.gerador.gerar().valor,
+        exercicioId: id.valor,
+        grupoId: idDoGrupo(tx, nome),
+        papel,
+      }));
+      tx.delete(exercicioGrupo).where(eq(exercicioGrupo.exercicioId, id.valor)).run();
+      if (novos.length > 0) tx.insert(exercicioGrupo).values(novos).run();
+    });
   }
 
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {
@@ -160,4 +183,15 @@ function agrupar(linhas: LinhaDoExercicio[]): Map<string, LinhaDoExercicio[]> {
 
 function nomesDoPapel(linhas: LinhaDoExercicio[] | undefined, papel: string): string[] {
   return (linhas ?? []).filter((l) => l.papel === papel).map((l) => l.nome);
+}
+
+// A transação desfaz tudo se um nome não está na lista fixa (a tabela é a dos 16 grupos da 0001).
+function idDoGrupo(banco: Consultor, nome: string): string {
+  const linha = banco
+    .select({ id: grupoMuscular.id })
+    .from(grupoMuscular)
+    .where(eq(grupoMuscular.nome, nome))
+    .get();
+  if (!linha) throw new ErroDeValidacao('grupo', 'um dos 16 grupos da lista fixa', nome);
+  return linha.id;
 }

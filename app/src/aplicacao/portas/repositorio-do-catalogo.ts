@@ -1,4 +1,8 @@
-import type { ExercicioDoCatalogo, SituacaoDoExercicio } from '../../dominio/exercicio';
+import type {
+  ExercicioDoCatalogo,
+  GruposDoExercicio,
+  SituacaoDoExercicio,
+} from '../../dominio/exercicio';
 import type { Identificador } from '../../dominio/identificador';
 
 export type { SituacaoDoExercicio };
@@ -12,6 +16,10 @@ export interface RepositorioDoCatalogo {
   // Todos os exercícios, arquivados inclusive, sem ordem garantida. Quem exibe ordena.
   listarExercicios(): Promise<ExercicioDoCatalogo[]>;
   // Nula se o exercício não existe.
+  // Troca os grupos do exercício por inteiro, numa transação: ou grava os dois papéis, ou nada.
+  // Os nomes vêm da lista fixa de 16 grupos; nome fora dela ou exercício que não existe falha com
+  // ErroDeValidacao, sem alterar nada. Não toca em série, sessão nem versão (FI-4).
+  gravarGrupos(exercicioId: Identificador, grupos: GruposDoExercicio): Promise<void>;
   situacaoDoExercicio(exercicioId: Identificador): Promise<SituacaoDoExercicio | null>;
   // Com histórico (item de qualquer versão de ficha ou exercício de qualquer sessão): só arquivar.
   opcoesDeRemocaoDoExercicio(exercicioId: Identificador): Promise<OpcaoDeRemocao[]>;

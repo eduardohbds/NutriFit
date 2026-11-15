@@ -4,7 +4,8 @@ import type {
   SituacaoDaFichaNoCatalogo,
   SituacaoDoExercicio,
 } from '../../src/aplicacao/portas/repositorio-do-catalogo';
-import type { ExercicioDoCatalogo } from '../../src/dominio/exercicio';
+import type { ExercicioDoCatalogo, GruposDoExercicio } from '../../src/dominio/exercicio';
+import { GRUPOS_MUSCULARES } from '../../src/dominio/grupo-muscular';
 import { ErroDeValidacao } from '../../src/dominio/erro-de-validacao';
 import type { Identificador } from '../../src/dominio/identificador';
 
@@ -53,6 +54,16 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
 
   async listarExercicios(): Promise<ExercicioDoCatalogo[]> {
     return [...this.catalogo.values()].map(copiarExercicio);
+  }
+
+  async gravarGrupos(id: Identificador, grupos: GruposDoExercicio): Promise<void> {
+    const guardado = this.catalogo.get(id.valor);
+    if (!guardado) throw new ErroDeValidacao('exercicio', 'exercício existente', id.valor);
+    for (const nome of [...grupos.diretos, ...grupos.indiretos])
+      if (!GRUPOS_MUSCULARES.includes(nome))
+        throw new ErroDeValidacao('grupo', 'um dos 16 grupos da lista fixa', nome);
+    guardado.gruposDiretos = [...grupos.diretos];
+    guardado.gruposIndiretos = [...grupos.indiretos];
   }
 
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {

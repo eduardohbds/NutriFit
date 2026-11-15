@@ -221,7 +221,7 @@ A história original não cabia num commit: ela pede dados iniciais (migração 
 - Notas de domínio: migração nova, só com inserções (sem apagar nem transformar dado existente), origem `inicial`, identificadores UUID v7 fixos no arquivo, como na migração 0001. Corrida ou Esteira são dois exercícios sem grupos (cardio, fora da contagem); Elevação Frontal e Elevação Frontal com Halteres são dois exercícios.
 
 ### US-004b: Editar os grupos de um exercício
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-004. Depende da US-004a.
 - Critérios de aceite (cada um vira um teste):
   - Dado um exercício, quando o usuário edita os grupos, então só pode escolher entre os 16 grupos fixos da seção 18.3 (VE20).
