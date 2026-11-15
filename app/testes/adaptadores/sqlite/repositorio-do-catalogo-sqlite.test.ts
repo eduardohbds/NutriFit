@@ -56,12 +56,16 @@ describe('RepositorioDoCatalogoSqlite: arquivar não apaga histórico (RB02, RB0
     });
     inserir(banco, 'exercicio_sinonimo', { exercicio_id: exercicio, texto: 'Reverse Wrist Curl' });
     const repositorio = new RepositorioDoCatalogoSqlite(drizzle(banco));
+    // O banco migrado já traz o catálogo inicial (US-004a): conta-se a diferença, não o total.
+    const antes = ['exercicio', 'exercicio_grupo', 'exercicio_sinonimo'].map((t) =>
+      contar(banco, t),
+    );
 
     await repositorio.excluirExercicio(Identificador.de(exercicio));
 
-    expect(contar(banco, 'exercicio')).toBe(0);
-    expect(contar(banco, 'exercicio_grupo')).toBe(0);
-    expect(contar(banco, 'exercicio_sinonimo')).toBe(0);
+    expect(
+      ['exercicio', 'exercicio_grupo', 'exercicio_sinonimo'].map((t) => contar(banco, t)),
+    ).toEqual(antes.map((n) => n - 1));
     expect(contar(banco, 'grupo_muscular')).toBeGreaterThan(0);
   });
 });

@@ -15,6 +15,13 @@
       "when": 1794358958188,
       "tag": "0001_grupos-musculares",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794768952751,
+      "tag": "0002_catalogo-inicial",
+      "breakpoints": true
     }
   ]
 }

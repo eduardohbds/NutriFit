@@ -4,6 +4,8 @@ import type {
   SituacaoDaFichaNoCatalogo,
   SituacaoDoExercicio,
 } from '../../src/aplicacao/portas/repositorio-do-catalogo';
+import type { ExercicioDoCatalogo, GruposDoExercicio } from '../../src/dominio/exercicio';
+import { GRUPOS_MUSCULARES } from '../../src/dominio/grupo-muscular';
 import { ErroDeValidacao } from '../../src/dominio/erro-de-validacao';
 import type { Identificador } from '../../src/dominio/identificador';
 
@@ -13,8 +15,19 @@ interface ExercicioGuardado {
   emSessao: boolean;
 }
 
+// Cópia na entrada e na saída: quem recebe um exercício não altera o que está guardado.
+function copiarExercicio(e: ExercicioDoCatalogo): ExercicioDoCatalogo {
+  return {
+    ...e,
+    sinonimos: [...e.sinonimos],
+    gruposDiretos: [...e.gruposDiretos],
+    gruposIndiretos: [...e.gruposIndiretos],
+  };
+}
+
 export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
   private readonly exercicios = new Map<string, ExercicioGuardado>();
+  private readonly catalogo = new Map<string, ExercicioDoCatalogo>();
   private readonly fichas = new Map<string, SituacaoDaFichaNoCatalogo>();
 
   // Apoio dos testes: o falso não tem como saber de fichas e sessões que vivem em outras portas.
@@ -29,6 +42,28 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
   semearFicha(id: Identificador, comSessao: boolean): void {
     this.fichas.set(id.valor, 'ativa');
     if (comSessao) this.fichasComSessao.add(id.valor);
+  }
+
+  // Apoio dos testes: exercícios do catálogo com grupos e sinônimos, sem uso em ficha ou sessão.
+  semearCatalogo(exercicios: ExercicioDoCatalogo[]): void {
+    for (const e of exercicios) {
+      this.catalogo.set(e.id.valor, copiarExercicio(e));
+      this.exercicios.set(e.id.valor, { situacao: e.situacao, emFicha: false, emSessao: false });
+    }
+  }
+
+  async listarExercicios(): Promise<ExercicioDoCatalogo[]> {
+    return [...this.catalogo.values()].map(copiarExercicio);
+  }
+
+  async gravarGrupos(id: Identificador, grupos: GruposDoExercicio): Promise<void> {
+    const guardado = this.catalogo.get(id.valor);
+    if (!guardado) throw new ErroDeValidacao('exercicio', 'exercício existente', id.valor);
+    for (const nome of [...grupos.diretos, ...grupos.indiretos])
+      if (!GRUPOS_MUSCULARES.includes(nome))
+        throw new ErroDeValidacao('grupo', 'um dos 16 grupos da lista fixa', nome);
+    guardado.gruposDiretos = [...grupos.diretos];
+    guardado.gruposIndiretos = [...grupos.indiretos];
   }
 
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {
