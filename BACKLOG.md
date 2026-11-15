@@ -785,7 +785,7 @@ Objetivo: dados de saúde e treino ficam protegidos se o celular for perdido ou 
 <!-- Falhas fora do escopo entram aqui como histórias; se forem estruturais, viram épico -->
 
 ### US-043: Teste de tela estoura 5 s sob carga no CI completo
-- Status: a fazer
+- Status: aceita
 - Contexto: achado da US-001c. No `npm run ci`, com a suíte inteira rodando em paralelo no sandbox, `testes/interface/limite-de-erro.test.tsx` estourou os 5 s do Jest (`Exceeded timeout of 5000 ms`); isolado, passou em 16 s no total.
 - Critérios de aceite (cada um vira um teste):
   - Dado o `npm run ci` rodando a suíte inteira, quando os testes de interface renderizam rotas, então nenhum estoura o tempo por lentidão do primeiro render.
