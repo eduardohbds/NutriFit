@@ -197,6 +197,7 @@ Spike = experimento descartável para responder uma pergunta: branch spike/[tema
 - Como nasce o número de uma versão da ficha? → o repositório o dá (maior número + 1) dentro da mesma transação que grava a versão; quem chama não informa número, e a porta não tem atualização nem exclusão → US-002a, RB02
 - Como se corrige uma série executada? → a linha original não é reescrita: ganha só `removida_em` e a corrigida entra como linha nova na mesma posição, numa transação; a leitura devolve as séries removidas com a marca, e quem calcula usa só as ativas (RF02, seção 18.6) → US-002b
 - O que acontece quando falta espaço ao gravar uma série? → a transação desfaz tudo, o `RegistrarSerie` devolve `{gravada:false, motivo:'sem_espaco'}` e registra `SEM_ESPACO`, sem lançar erro e sem consumir a entrada; a tela reenvia a mesma série depois (CE61, RNF08) → US-001e
+- Onde baixar o APK de uma versão? → na Release do GitHub com o nome da tag (`github.com/<repo>/releases/tag/vX.Y.Z`), pública por decisão do usuário (2026-11-14): o APK leva só valores `EXPO_PUBLIC_` e nenhum segredo; se algo arriscado entrar no APK, a decisão volta ao usuário. O artefato `nutrifit-apk` da execução continua existindo, mas em .zip e com login → US-044
 
 ## 12. Variáveis de ambiente
 - `EXPO_PUBLIC_WORKER_URL` → endereço do Worker de IA (público, vai no APK)

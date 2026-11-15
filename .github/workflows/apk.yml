@@ -65,3 +65,27 @@ jobs:
         with:
           name: nutrifit-apk
           path: app/android/app/build/outputs/apk/release/*.apk
+
+  # Publica o APK numa Release pública com o nome da tag (US-044). A escrita no repositório fica
+  # só aqui; o job apk acima só lê. Sem segredo do keystore: este job só recebe o APK já assinado.
+  release:
+    needs: apk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: nutrifit-apk
+          path: apk
+      - name: Criar a Release (se não existir) e anexar o APK
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          if ! gh release view "$TAG" --repo "$REPO" > /dev/null 2>&1; then
+            gh release create "$TAG" --repo "$REPO" --verify-tag --title "$TAG" \
+              --notes "APK de release assinado da versão $TAG."
+          fi
+          gh release upload "$TAG" apk/*.apk --repo "$REPO" --clobber
