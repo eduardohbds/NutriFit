@@ -66,6 +66,17 @@ A história original não cabia num commit: a main não tinha app (o código do 
 #### Notas da US-041 original
 - Depende do SP01 (versões fixadas). A chave de assinatura fica guardada em dois lugares para não perder a possibilidade de atualizar o app (RT01). CodeQL é pago em repositório privado, por isso a análise de segurança do MVP fica com regras de segurança do ESLint, auditoria de dependências e gitleaks.
 
+### US-044: Publicar o APK assinado numa Release do GitHub
+- Status: aceita
+- Contexto: achado da US-001f. O workflow `apk` só envia o APK como artefato da execução (`nutrifit-apk`, cerca de 39 MB, guardado por 90 dias): o download exige login e chega num .zip, o que atrapalha instalar pelo app do GitHub no Poco M5s. Depende da US-041c.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma tag de versão, quando o workflow `apk` termina com sucesso, então existe uma Release com o nome da tag e o APK assinado anexado, com link direto de download.
+  - Dada uma execução repetida da mesma tag, quando o workflow roda de novo, então atualiza o anexo da Release, sem falhar nem duplicar.
+  - Dado o workflow, quando ele publica a Release, então a permissão de escrita fica só no job que publica, e nenhum segredo `ANDROID_KEYSTORE_*` é impresso no log.
+- Fora do escopo: publicação na Play Store; atualização automática do app; notas de versão geradas; trocar a chave de assinatura.
+- Falha inaceitável envolvida: FI-6 (dado de saúde ou credencial saindo sem o usuário saber).
+- Notas de domínio: o repositório é público, então uma Release comum deixa o APK baixável por qualquer pessoa. O APK leva só valores `EXPO_PUBLIC_` (URL do Worker e id do cliente OAuth, públicos por desenho) e nenhum segredo, e o usuário decidiu (2026-11-14) que a Release seja pública. Se a história passar a envolver segredo ou algo mais arriscado, o usuário decide de novo. Usar o `gh release` do próprio runner, sem action de terceiros (sem dependência nova); `permissions: contents: write` só no job de publicação (hoje o workflow tem `contents: read`). O teste lê o YAML (`testes/workflows`); a publicação de verdade se confere na tag seguinte.
+
 ### US-001: Modelo de dados versionado com migração sem perda (quebrada em US-001a a US-001e)
 A história original não cabia num commit: junta objetos de valor, o esquema inteiro, a migração com volta à cópia e a durabilidade da gravação. Os sete critérios originais estão distribuídos abaixo; a US-003 foi antecipada para antes da US-001c, porque a migração segura precisa registrar a falha. Contexto comum: tudo o que vem depois grava dados neste modelo, e uma atualização que perde dados destrói a confiança no histórico, que é o núcleo do produto (RNF13, RNF32).
 
