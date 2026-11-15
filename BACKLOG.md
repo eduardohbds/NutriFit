@@ -184,14 +184,14 @@ A história original não cabia num commit: cada critério pede uma porta de rep
 - Notas de domínio: série corrigida ou removida ganha `removida_em`, sem exclusão física. O critério dos valores derivados se verifica no esquema (nenhuma coluna de valor derivado) e na porta (nenhum método grava valor derivado).
 
 ### US-002c: Arquivar em vez de excluir
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-002. Depende da US-002a e da US-002b.
 - Critérios de aceite (cada um vira um teste):
   - Dada uma ficha com sessões ou um exercício com histórico, quando o usuário tenta excluir, então só a opção de arquivar está disponível (seção 18.6).
   - Dada a porta RepositorioDoCatalogo, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
 - Fora do escopo: telas de arquivar (US-009); catálogo inicial e criação de exercícios (US-004 e US-005); mesclar duplicados (US-006).
 - Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: a porta do catálogo nasce aqui com o mínimo para arquivar e consultar se há histórico; o restante vem nas US-004 a US-006. Ficha ou exercício sem histórico pode ser excluído; com histórico, só arquivado.
+- Notas de domínio: a porta do catálogo nasce aqui com o mínimo para arquivar e consultar se há histórico; o restante vem nas US-004 a US-006. Exercício sem histórico pode ser excluído; com histórico, só arquivado. Conta como histórico ser item de qualquer versão de ficha ou constar em qualquer sessão. Ficha nunca é excluída, com ou sem sessões, só arquivada: excluir apagaria versões, que só recebem inserção (decisão do usuário, 2026-11-15).
 
 ### US-002d: Desfazer uma ação da IA muda só a marca
 - Status: a fazer
