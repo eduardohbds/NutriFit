@@ -3,6 +3,7 @@ import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 import type { RepositorioDeSessoes } from '../../aplicacao/portas/repositorio-de-sessoes';
 import { Carga } from '../../dominio/carga';
+import { ErroDeEspacoInsuficiente } from '../../dominio/erro-de-espaco-insuficiente';
 import { ErroDeValidacao } from '../../dominio/erro-de-validacao';
 import { Identificador } from '../../dominio/identificador';
 import { InstanteUtc } from '../../dominio/instante-utc';
@@ -64,6 +65,14 @@ export class RepositorioDeSessoesSqlite implements RepositorioDeSessoes {
   }
 
   async registrarSerie(exercicioDaSessaoId: Identificador, serie: SerieExecutada): Promise<void> {
+    try {
+      this.gravarSerie(exercicioDaSessaoId, serie);
+    } catch (erro) {
+      throw ehFaltaDeEspaco(erro) ? new ErroDeEspacoInsuficiente() : erro;
+    }
+  }
+
+  private gravarSerie(exercicioDaSessaoId: Identificador, serie: SerieExecutada): void {
     this.banco.transaction((tx) => {
       const [existente] = tx
         .select()
@@ -152,6 +161,14 @@ function montarSessao(linha: typeof sessao.$inferSelect, exercicios: ExercicioDa
     observacao: linha.observacao,
     exercicios,
   };
+}
+
+// better-sqlite3 traz o código SQLITE_FULL; o expo-sqlite, no aparelho, só a mensagem (N6).
+const SEM_ESPACO = /SQLITE_FULL|database or disk is full/i;
+
+function ehFaltaDeEspaco(erro: unknown): boolean {
+  const { code, message } = (erro ?? {}) as { code?: unknown; message?: unknown };
+  return SEM_ESPACO.test(String(code ?? '')) || SEM_ESPACO.test(String(message ?? ''));
 }
 
 function identificadorOuNulo(valor: string | null): Identificador | null {
