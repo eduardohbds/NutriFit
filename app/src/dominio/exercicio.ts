@@ -1,0 +1,18 @@
+import type { Identificador } from './identificador';
+
+export type SituacaoDoExercicio = 'ativo' | 'arquivado';
+export type OrigemDoExercicio = 'inicial' | 'usuario';
+
+// Exercício do catálogo com os grupos pelo nome da lista fixa de 16 (seção 18.3). Os grupos são
+// lidos na hora do cálculo (seção 18.6): nenhum valor derivado fica aqui.
+export interface ExercicioDoCatalogo {
+  id: Identificador;
+  nome: string;
+  situacao: SituacaoDoExercicio;
+  origem: OrigemDoExercicio;
+  unilateral: boolean;
+  equipamento: string | null;
+  sinonimos: string[];
+  gruposDiretos: string[];
+  gruposIndiretos: string[];
+}

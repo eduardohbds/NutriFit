@@ -206,16 +206,43 @@ A história original não cabia num commit: cada critério pede uma porta de rep
 ## Épico E-02: Catálogo de exercícios (BL04 · P1)
 Objetivo: o usuário tem um catálogo com os grupos musculares de cada exercício, para que fichas, importação e contagem de séries válidas funcionem sem duplicar exercícios.
 
-### US-004: Catálogo inicial com grupos musculares
+### US-004: Catálogo inicial com grupos musculares (quebrada em US-004a a US-004c)
+A história original não cabia num commit: ela pede dados iniciais (migração com 30 exercícios e seus grupos), uma regra de edição dos grupos com caso de uso próprio e a primeira tela de verdade do app, cada uma com testes de natureza diferente. Os três critérios originais ficam distribuídos abaixo. Contexto comum: a contagem por grupo depende de cada exercício ter grupos diretos e indiretos corretos (RB14, RF08). Notas de domínio comuns: os 16 grupos são Peitoral, Costas, Trapézio, Ombro anterior, Ombro lateral, Ombro posterior, Bíceps, Tríceps, Antebraço, Abdômen, Lombar, Quadríceps, Posterior de coxa, Glúteos, Adutores e Panturrilha (já na migração 0001). Exemplo de referência: supino reto tem peitoral direto e tríceps e ombro anterior indiretos; remada curvada tem costas direto e bíceps indireto.
+
+### US-004a: Catálogo inicial gravado na migração e lido pela porta
+- Status: aceita
+- Contexto: ver US-004. Primeira parte: os dados e a leitura. Depende da US-002c (porta `RepositorioDoCatalogo`).
+- Critérios de aceite (cada um vira um teste):
+  - Dado um banco recém-migrado, quando o catálogo é lido pela porta, então os exercícios da seção 18.4 existem com os grupos diretos e indiretos da tabela (ex.: supino reto, remada curvada) (SL04, RF08).
+  - Dado o catálogo inicial, quando os 30 itens da ficha de referência (DT01) são procurados pelo nome, então todos existem ou têm equivalente; Rosca de Punho Inversa tem o sinônimo Reverse Wrist Curl (SL04, RF08).
+  - Dada a porta `RepositorioDoCatalogo`, quando a suíte de contrato roda com a leitura do catálogo, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: edição dos grupos (US-004b); tela (US-004c); criar exercícios próprios (US-005); mesclar (US-006); procurar por nome parecido ou sinônimo na busca da tela (US-005).
+- Falha inaceitável envolvida: FI-2 (número errado); grupos errados distorcem as contagens.
+- Notas de domínio: migração nova, só com inserções (sem apagar nem transformar dado existente), origem `inicial`, identificadores UUID v7 fixos no arquivo, como na migração 0001. Corrida ou Esteira são dois exercícios sem grupos (cardio, fora da contagem); Elevação Frontal e Elevação Frontal com Halteres são dois exercícios.
+
+### US-004b: Editar os grupos de um exercício
 - Status: a fazer
-- Contexto: a contagem por grupo depende de cada exercício ter grupos diretos e indiretos corretos (RB14, RF08).
+- Contexto: ver US-004. Depende da US-004a.
+- Critérios de aceite (cada um vira um teste):
+  - Dado um exercício, quando o usuário edita os grupos, então só pode escolher entre os 16 grupos fixos da seção 18.3 (VE20).
+  - Dado um exercício, quando o usuário marca o mesmo grupo como direto e indireto, então o salvamento é bloqueado com mensagem que diz o valor recebido e o formato esperado (VE20, seção 13.3).
+  - Dado um exercício com grupos indiretos e nenhum direto, quando o usuário salva, então o salvamento é bloqueado (VE20).
+  - Dado um exercício sem nenhum grupo, quando o usuário salva, então o caso de uso pede confirmação em vez de gravar direto, porque ele fica fora da contagem (VE20).
+  - Dada a porta, quando a suíte de contrato roda com a gravação dos grupos, então passa contra o falso e contra o adaptador SQLite.
+- Fora do escopo: tela (US-004c); recalcular contagens passadas (US-020); criar exercício (US-005).
+- Falha inaceitável envolvida: FI-2 (número errado); FI-4 (editar grupos não pode tocar em série registrada).
+- Notas de domínio: os grupos são lidos na hora do cálculo (seção 18.6), então trocar os grupos não grava nem corrige valor derivado.
+
+### US-004c: Tela do catálogo
+- Status: a fazer
+- Contexto: ver US-004. Primeira tela de verdade do app; depende da US-004a e da US-004b.
 - Critérios de aceite (cada um vira um teste):
   - Dado o primeiro uso, quando o catálogo é aberto, então os exercícios comuns da seção 18.4 aparecem com grupos diretos e indiretos já definidos.
-  - Dado o catálogo inicial, quando os 30 itens da ficha de referência (DT01) são procurados, então todos existem ou têm equivalente (SL04, RF08).
-  - Dado um exercício, quando o usuário edita os grupos, então só pode escolher entre os 16 grupos fixos da seção 18.3 e não consegue marcar um grupo como direto e indireto ao mesmo tempo.
-- Fora do escopo: criar exercícios próprios (US-005), mesclar (US-006).
-- Falha inaceitável envolvida: FI-2 (número errado); grupos errados distorcem as contagens.
-- Notas de domínio: os 16 grupos são Peitoral, Costas, Trapézio, Ombro anterior, Ombro lateral, Ombro posterior, Bíceps, Tríceps, Antebraço, Abdômen, Lombar, Quadríceps, Posterior de coxa, Glúteos, Adutores e Panturrilha. Exemplo de referência: supino reto tem peitoral direto e tríceps e ombro anterior indiretos; remada curvada tem costas direto e bíceps indireto.
+  - Dado um exercício na lista, quando o usuário abre a edição de grupos, então só os 16 grupos fixos são oferecidos e um grupo escolhido como direto não pode ser marcado também como indireto.
+  - Dado um salvamento bloqueado pela regra de grupos, quando a tela mostra o aviso, então o texto diz o valor recebido e o formato esperado, em português do Brasil e vindo do arquivo único de textos.
+- Fora do escopo: criar exercício, sinônimos e busca (US-005); mesclar (US-006); arquivar pela tela (US-009).
+- Falha inaceitável envolvida: FI-2 (número errado).
+- Notas de domínio: a rota do Expo Router fica fina e a tela em `src/interface`. Entra o teste de tela com o `renderRouter` (ver seção 10 do AGENTS.md sobre `await`).
 
 ### US-005: Criar e editar exercícios com sinônimos
 - Status: a fazer
