@@ -234,7 +234,7 @@ A história original não cabia num commit: ela pede dados iniciais (migração 
 - Notas de domínio: os grupos são lidos na hora do cálculo (seção 18.6), então trocar os grupos não grava nem corrige valor derivado.
 
 ### US-004c: Tela do catálogo
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-004. Primeira tela de verdade do app; depende da US-004a e da US-004b.
 - Critérios de aceite (cada um vira um teste):
   - Dado o primeiro uso, quando o catálogo é aberto, então os exercícios comuns da seção 18.4 aparecem com grupos diretos e indiretos já definidos.
