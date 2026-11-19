@@ -10,6 +10,7 @@ import type {
 import type {
   ExercicioDoCatalogo,
   GruposDoExercicio,
+  NovoExercicio,
   OrigemDoExercicio,
   SituacaoDoExercicio,
 } from '../../dominio/exercicio';
@@ -28,6 +29,7 @@ import { GeradorUuidV7 } from '../sistema/gerador-uuid-v7';
 
 type BancoDrizzle = BaseSQLiteDatabase<'sync', unknown>;
 type Consultor = Pick<BancoDrizzle, 'select'>;
+type Gravador = Pick<BancoDrizzle, 'select' | 'insert'>;
 
 export class RepositorioDoCatalogoSqlite implements RepositorioDoCatalogo {
   constructor(
@@ -73,17 +75,38 @@ export class RepositorioDoCatalogoSqlite implements RepositorioDoCatalogo {
   async gravarGrupos(id: Identificador, grupos: GruposDoExercicio): Promise<void> {
     this.banco.transaction((tx) => {
       exigirExercicio(tx, id);
-      const novos = [
-        ...grupos.diretos.map((nome) => ({ nome, papel: 'direto' as const })),
-        ...grupos.indiretos.map((nome) => ({ nome, papel: 'indireto' as const })),
-      ].map(({ nome, papel }) => ({
-        id: this.gerador.gerar().valor,
-        exercicioId: id.valor,
-        grupoId: idDoGrupo(tx, nome),
-        papel,
-      }));
       tx.delete(exercicioGrupo).where(eq(exercicioGrupo.exercicioId, id.valor)).run();
-      if (novos.length > 0) tx.insert(exercicioGrupo).values(novos).run();
+      this.inserirGrupos(tx, id, grupos);
+    });
+  }
+
+  // A transação de quem chama desfaz tudo se um nome não está na lista fixa.
+  private inserirGrupos(tx: Gravador, id: Identificador, grupos: GruposDoExercicio): void {
+    const novos = [
+      ...grupos.diretos.map((nome) => ({ nome, papel: 'direto' as const })),
+      ...grupos.indiretos.map((nome) => ({ nome, papel: 'indireto' as const })),
+    ].map(({ nome, papel }) => ({
+      id: this.gerador.gerar().valor,
+      exercicioId: id.valor,
+      grupoId: idDoGrupo(tx, nome),
+      papel,
+    }));
+    if (novos.length > 0) tx.insert(exercicioGrupo).values(novos).run();
+  }
+
+  async criarExercicio(novo: NovoExercicio): Promise<void> {
+    this.banco.transaction((tx) => {
+      tx.insert(exercicio)
+        .values({
+          id: novo.id.valor,
+          nome: novo.nome,
+          situacao: 'ativo',
+          origem: 'usuario',
+          unilateral: novo.unilateral,
+          equipamento: novo.equipamento,
+        })
+        .run();
+      this.inserirGrupos(tx, novo.id, novo.grupos);
     });
   }
 

@@ -22,3 +22,13 @@ export interface GruposDoExercicio {
   diretos: string[];
   indiretos: string[];
 }
+
+// Exercício criado pelo usuário (US-005a): entra ativo, com origem `usuario` e sem sinônimos
+// (sinônimos são da US-005b).
+export interface NovoExercicio {
+  id: Identificador;
+  nome: string;
+  unilateral: boolean;
+  equipamento: string | null;
+  grupos: GruposDoExercicio;
+}

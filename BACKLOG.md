@@ -244,18 +244,41 @@ A história original não cabia num commit: ela pede dados iniciais (migração 
 - Falha inaceitável envolvida: FI-2 (número errado).
 - Notas de domínio: a rota do Expo Router fica fina e a tela em `src/interface`. Entra o teste de tela com o `renderRouter` (ver seção 10 do AGENTS.md sobre `await`).
 
-### US-005: Criar e editar exercícios com sinônimos
-- Status: a fazer
-- Contexto: fichas reais usam nomes variados, e sinônimos evitam duplicação na importação (RB35, RF08).
+### US-005: Criar e editar exercícios com sinônimos (quebrada em US-005a a US-005c)
+A história original não cabia num commit: ela mistura criar exercício, sinônimos com busca e aviso de nome parecido, cada um com regra e porta próprias. Contexto comum: fichas reais usam nomes variados, e sinônimos evitam duplicação na importação (RB35, RF08). Campos do exercício: nome, grupos diretos e indiretos, unilateral (sim ou não), equipamento necessário opcional e sinônimos. Dois critérios originais não viram história nova: "só o arquivamento é oferecido para exercício com histórico" já foi entregue e testado na US-002c (`opcoesDeRemocaoDoExercicio`), e "contagens das semanas passadas recalculadas ao alterar grupos" é garantido pela US-004b (os grupos são lidos na hora do cálculo, seção 18.6) e testado na US-020 (critério de troca de método), onde a contagem passa a existir.
+
+### US-005a: Criar exercício com grupos
+- Status: aceita
+- Contexto: ver US-005. Depende da US-004b (validação dos grupos).
 - Critérios de aceite (cada um vira um teste):
-  - Dado o catálogo, quando o usuário cria um exercício com grupo direto costas e indireto bíceps, então ele fica disponível na ficha.
+  - Dado o catálogo, quando o usuário cria um exercício com grupo direto costas e indireto bíceps, então ele fica disponível na ficha (ativo, origem `usuario`, listado pelo catálogo).
+  - Dado um nome vazio ou grupo inválido, quando o usuário cria, então nada é gravado e o erro diz o valor recebido e o formato esperado.
+  - Dada a porta RepositorioDoCatalogo, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: sinônimos (US-005b); aviso de nome parecido (US-005c); tela de criação.
+- Falha inaceitável envolvida: FI-2 (grupos errados distorcem a contagem).
+- Notas de domínio: reaproveita `validarGruposDoExercicio`; exercício sem grupo pede confirmação, como na US-004b.
+
+### US-005b: Sinônimos e busca por nome ou sinônimo
+- Status: a fazer
+- Contexto: ver US-005. Depende da US-005a.
+- Critérios de aceite (cada um vira um teste):
   - Dado o exercício "Rosca de Punho Inversa", quando o usuário cadastra "Reverse Wrist Curl" como sinônimo, então a busca por qualquer dos dois nomes encontra o mesmo exercício.
-  - Dado um nome igual ou parecido com um existente, quando o usuário cria o exercício, então o app avisa e sugere associar ao existente.
-  - Dado um exercício com histórico, quando o usuário tenta excluí-lo, então só o arquivamento é oferecido.
-  - Dado um exercício com histórico, quando seus grupos são alterados, então as contagens das semanas passadas são recalculadas sem alterar séries registradas.
-- Fora do escopo: mesclar duplicados (US-006).
-- Falha inaceitável envolvida: FI-2 (número errado); FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: campos do exercício: nome, grupos diretos e indiretos, unilateral (sim ou não), equipamento necessário opcional e sinônimos.
+  - Dada a busca, quando o texto difere só em maiúsculas, acentos ou espaços nas pontas, então encontra o mesmo exercício.
+  - Dado um sinônimo já cadastrado no mesmo exercício, quando cadastrado de novo, então nada muda.
+- Fora do escopo: aviso de nome parecido (US-005c); mesclar (US-006).
+- Falha inaceitável envolvida: nenhuma.
+- Notas de domínio: tabela `exercicio_sinonimo` já existe, com unicidade por exercício e texto; sem migração.
+
+### US-005c: Avisar nome igual ou parecido ao criar
+- Status: a fazer
+- Contexto: ver US-005 (RB35). Depende da US-005b (a comparação usa nome e sinônimos).
+- Critérios de aceite (cada um vira um teste):
+  - Dado um nome igual ou parecido com um existente (nome ou sinônimo), quando o usuário cria o exercício, então o caso de uso devolve o aviso com o exercício existente e sugere associar a ele, sem gravar.
+  - Dado que o usuário confirma que quer criar mesmo assim, quando cria, então o exercício é gravado.
+  - Dado um nome sem semelhança, quando cria, então grava direto, sem aviso.
+- Fora do escopo: tela do aviso; importação (US-029).
+- Falha inaceitável envolvida: nenhuma.
+- Notas de domínio: "parecido" = igual depois de ignorar maiúsculas, acentos e espaços nas pontas; a regra exata de semelhança (distância de edição) fica para o Red propor e eu aprovar.
 
 ### US-006: Mesclar exercícios duplicados
 - Status: a fazer
