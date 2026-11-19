@@ -157,6 +157,7 @@ Cada caso de uso é uma classe com um único método público `executar`, chamad
 | --- | --- | --- | --- |
 | RepositorioDeFichas | Ler e gravar fichas e versões | SQLite via Drizzle | RepositorioDeFichasEmMemoria |
 | RepositorioDeSessoes | Ler e gravar sessões e séries | SQLite via Drizzle | RepositorioDeSessoesEmMemoria |
+| RepositorioDeAcoesDaIA | Registrar ações da IA e marcar como desfeita (só a marca muda) | SQLite via Drizzle | RepositorioDeAcoesDaIAEmMemoria |
 | RepositorioDoCatalogo | Exercícios, grupos e sinônimos | SQLite via Drizzle | RepositorioDoCatalogoEmMemoria |
 | RepositorioDoCorpo | Medições e perfil | SQLite via Drizzle | RepositorioDoCorpoEmMemoria |
 | UnidadeDeTrabalho | Executar várias gravações numa única transação (RNF09) | Transação do SQLite | UnidadeDeTrabalhoEmMemoria |

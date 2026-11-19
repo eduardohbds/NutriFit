@@ -194,7 +194,7 @@ A história original não cabia num commit: cada critério pede uma porta de rep
 - Notas de domínio: a porta do catálogo nasce aqui com o mínimo para arquivar e consultar se há histórico; o restante vem nas US-004 a US-006. Exercício sem histórico pode ser excluído; com histórico, só arquivado. Conta como histórico ser item de qualquer versão de ficha ou constar em qualquer sessão. Ficha nunca é excluída, com ou sem sessões, só arquivada: excluir apagaria versões, que só recebem inserção (decisão do usuário, 2026-11-15).
 
 ### US-002d: Desfazer uma ação da IA muda só a marca
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-002. Depende da US-002a (a ação aponta para a versão criada).
 - Critérios de aceite (cada um vira um teste):
   - Dada uma ação da IA registrada, quando ela é desfeita, então o único campo que muda é a marca de desfeita.
