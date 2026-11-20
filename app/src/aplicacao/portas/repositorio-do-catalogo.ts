@@ -1,6 +1,7 @@
 import type {
   ExercicioDoCatalogo,
   GruposDoExercicio,
+  NovoExercicio,
   SituacaoDoExercicio,
 } from '../../dominio/exercicio';
 import type { Identificador } from '../../dominio/identificador';
@@ -20,6 +21,9 @@ export interface RepositorioDoCatalogo {
   // Os nomes vêm da lista fixa de 16 grupos; nome fora dela ou exercício que não existe falha com
   // ErroDeValidacao, sem alterar nada. Não toca em série, sessão nem versão (FI-4).
   gravarGrupos(exercicioId: Identificador, grupos: GruposDoExercicio): Promise<void>;
+  // Grava o exercício (ativo, origem `usuario`) e seus grupos numa transação: ou entra por inteiro,
+  // ou nada. Nome de grupo fora da lista fixa falha com ErroDeValidacao, sem gravar nada.
+  criarExercicio(exercicio: NovoExercicio): Promise<void>;
   situacaoDoExercicio(exercicioId: Identificador): Promise<SituacaoDoExercicio | null>;
   // Com histórico (item de qualquer versão de ficha ou exercício de qualquer sessão): só arquivar.
   opcoesDeRemocaoDoExercicio(exercicioId: Identificador): Promise<OpcaoDeRemocao[]>;

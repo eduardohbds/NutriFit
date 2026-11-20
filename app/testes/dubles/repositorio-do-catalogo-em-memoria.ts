@@ -4,7 +4,11 @@ import type {
   SituacaoDaFichaNoCatalogo,
   SituacaoDoExercicio,
 } from '../../src/aplicacao/portas/repositorio-do-catalogo';
-import type { ExercicioDoCatalogo, GruposDoExercicio } from '../../src/dominio/exercicio';
+import type {
+  ExercicioDoCatalogo,
+  GruposDoExercicio,
+  NovoExercicio,
+} from '../../src/dominio/exercicio';
 import { GRUPOS_MUSCULARES } from '../../src/dominio/grupo-muscular';
 import { ErroDeValidacao } from '../../src/dominio/erro-de-validacao';
 import type { Identificador } from '../../src/dominio/identificador';
@@ -64,6 +68,25 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
         throw new ErroDeValidacao('grupo', 'um dos 16 grupos da lista fixa', nome);
     guardado.gruposDiretos = [...grupos.diretos];
     guardado.gruposIndiretos = [...grupos.indiretos];
+  }
+
+  async criarExercicio(novo: NovoExercicio): Promise<void> {
+    for (const nome of [...novo.grupos.diretos, ...novo.grupos.indiretos])
+      if (!GRUPOS_MUSCULARES.includes(nome))
+        throw new ErroDeValidacao('grupo', 'um dos 16 grupos da lista fixa', nome);
+    this.semearCatalogo([
+      {
+        id: novo.id,
+        nome: novo.nome,
+        situacao: 'ativo',
+        origem: 'usuario',
+        unilateral: novo.unilateral,
+        equipamento: novo.equipamento,
+        sinonimos: [],
+        gruposDiretos: [...novo.grupos.diretos],
+        gruposIndiretos: [...novo.grupos.indiretos],
+      },
+    ]);
   }
 
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {
