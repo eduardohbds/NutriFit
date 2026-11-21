@@ -1,4 +1,6 @@
 import { Carga } from '../../dominio/carga';
+import { lerCargaEmQuilos } from '../../dominio/carga-planejada';
+import { lerDescanso } from '../../dominio/descanso-de-serie';
 import { ErroDeValidacao } from '../../dominio/erro-de-validacao';
 import type {
   Ficha,
@@ -8,8 +10,10 @@ import type {
   SeriePlanejada,
   VersaoDaFicha,
 } from '../../dominio/ficha';
+import { exigirGruposEmSequencia } from '../../dominio/grupo-em-sequencia';
 import { exigirTipoUnicoDeRotina } from '../../dominio/identificacao-de-rotina';
 import type { Identificador } from '../../dominio/identificador';
+import { listaPorSerie } from '../../dominio/lista-por-serie';
 import { MetaDeSerie } from '../../dominio/meta-de-serie';
 import { lerTecnica } from '../../dominio/tecnica-de-serie';
 import type { GeradorDeIdentificador } from '../portas/gerador-de-identificador';
@@ -24,13 +28,25 @@ export interface SeriePedida {
   descansoSegundos: number | null;
 }
 
+// Séries por texto, como na planilha (seção 11.3): um valor vale para todas as séries, e a lista
+// separada por barra traz exatamente um valor por série.
+export interface ListasDoItem {
+  quantidade: number;
+  meta: string;
+  carga: string | null;
+  tecnica: string | null;
+  descanso: string | null;
+}
+
+// Informe `series` (uma por série) ou `listas` (texto por campo), nunca os dois.
 export interface ItemPedido {
   ordem: number;
   exercicioId: Identificador;
   grupo: string | null;
   unilateral: boolean;
   observacoes: string | null;
-  series: SeriePedida[];
+  series?: SeriePedida[];
+  listas?: ListasDoItem;
 }
 
 export interface RotinaPedida {
@@ -71,6 +87,28 @@ function naLinha<T>(rotina: string, ordem: number, ler: () => T): T {
     if (!(erro instanceof ErroDeValidacao)) throw erro;
     throw erroNaLinha(rotina, ordem, erro.campo, erro.esperado, erro.recebido);
   }
+}
+
+// Valor ausente ou vazio vale para todas as séries como "não informado".
+function valoresPorSerie(campo: string, texto: string | null, quantidade: number) {
+  if (texto === null || texto.trim() === '') return Array<string | null>(quantidade).fill(null);
+  return listaPorSerie(campo, texto, quantidade);
+}
+
+// Expande o texto de cada campo em uma série pedida por posição (RB06, seção 11.3).
+function seriesPorListas(listas: ListasDoItem): SeriePedida[] {
+  const n = listas.quantidade;
+  if (!Number.isInteger(n) || n < 1) throw new ErroDeValidacao('séries', 'ao menos 1 série', n);
+  const metas = listaPorSerie('meta', listas.meta, n);
+  const cargas = valoresPorSerie('carga', listas.carga, n);
+  const tecnicas = valoresPorSerie('técnica', listas.tecnica, n);
+  const descansos = valoresPorSerie('descanso', listas.descanso, n);
+  return metas.map((meta, i) => ({
+    meta,
+    cargaEmQuilos: lerCargaEmQuilos(cargas[i]),
+    tecnica: tecnicas[i],
+    descansoSegundos: lerDescanso(descansos[i]),
+  }));
 }
 
 export class SalvarFicha {
@@ -118,6 +156,10 @@ export class SalvarFicha {
   }
 
   private montarRotina(rotina: RotinaPedida, existentes: Set<string>): Rotina {
+    exigirGruposEmSequencia(
+      rotina.nome,
+      rotina.itens.map((i) => ({ ordem: i.ordem, grupo: i.grupo })),
+    );
     const ordenados = [...rotina.itens].sort((a, b) => a.ordem - b.ordem);
     const itens = ordenados.map((item, i) => {
       if (i > 0 && item.ordem === ordenados[i - 1].ordem)
@@ -132,8 +174,8 @@ export class SalvarFicha {
       const id = item.exercicioId.valor;
       throw erroNaLinha(rotina, item.ordem, 'exercício', 'exercício do catálogo', id);
     }
-    if (item.series.length === 0)
-      throw erroNaLinha(rotina, item.ordem, 'séries', 'ao menos 1 série', 0);
+    const series = this.seriesDoItem(rotina, item);
+    if (series.length === 0) throw erroNaLinha(rotina, item.ordem, 'séries', 'ao menos 1 série', 0);
     return {
       id: this.gerador.gerar(),
       exercicioId: item.exercicioId,
@@ -141,8 +183,17 @@ export class SalvarFicha {
       unilateral: item.unilateral,
       travado: false,
       observacoes: item.observacoes,
-      series: item.series.map((s) => naLinha(rotina, item.ordem, () => this.montarSerie(s))),
+      series: series.map((s) => naLinha(rotina, item.ordem, () => this.montarSerie(s))),
     };
+  }
+
+  private seriesDoItem(rotina: string, item: ItemPedido): SeriePedida[] {
+    if (item.series && item.listas) {
+      throw erroNaLinha(rotina, item.ordem, 'séries', 'series ou listas, não os dois', 'ambos');
+    }
+    const { listas } = item;
+    if (listas) return naLinha(rotina, item.ordem, () => seriesPorListas(listas));
+    return item.series ?? [];
   }
 
   private montarSerie(serie: SeriePedida): SeriePlanejada {

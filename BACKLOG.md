@@ -338,7 +338,7 @@ A história original não cabia num commit: ela mistura as regras de uma ficha v
 - Notas de domínio: a ficha entra como dado de teste em testes/casos-de-referencia/ficha-de-referencia.ts, para a importação e a exportação reaproveitarem (TE04, TE05, TE10).
 
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência
-- Status: a fazer
+- Status: aceita
 - Contexto: o usuário pediu técnica e descanso por série, e bi-set, tri-set e circuito precisam ser representados sem colunas extras (RB06, RB07).
 - Critérios de aceite (cada um vira um teste):
   - Dado um exercício de 4 séries, quando o descanso é "90/90/90/120", então é aceito com 120 segundos na última série.
