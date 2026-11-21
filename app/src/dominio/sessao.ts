@@ -48,3 +48,11 @@ export interface Sessao {
 
 export type NovaSessao = Omit<Sessao, 'exercicios'>;
 export type NovoExercicioDaSessao = Omit<ExercicioDaSessao, 'series'>;
+
+// Série ativa lida pelo histórico de um exercício (US-006b): leva a sessão e o exercício a que
+// pertence, porque o histórico combinado de uma mesclagem mistura exercícios diferentes.
+export interface SerieDoHistorico {
+  sessaoId: Identificador;
+  exercicioId: Identificador;
+  serie: SerieExecutada;
+}
