@@ -328,8 +328,8 @@ A história original não cabia num commit: ela mistura as regras de uma ficha v
 - Notas de domínio: meta aceita repetições (10), faixa (8-12), falha ou tempo (60s, 30min). Carga vazia significa peso corporal ou carga a definir. Técnicas aceitas: aquecimento, drop-set, rest-pause, repetições parciais, negativa, isometria, cluster ou "-". O registro das etapas do drop-set está na US-039 (SL16 resolvida). Sem migração: o modelo e a porta RepositorioDeFichas já existem.
 
 ### US-007b: Recriar a ficha de referência (DT01) manualmente
-- Status: a fazer
-- Contexto: ver US-007. Depende da US-007a e da ficha de referência (DT01), as 30 linhas da ficha anexada, que não está no repositório: o usuário precisa fornecê-la (o CSV ou XLSX da DT01, ou as linhas por escrito).
+- Status: aceita
+- Contexto: ver US-007. Depende da US-007a e da ficha de referência (DT01), as 30 linhas da ficha anexada, entregue em docs/DT01_ficha_v1.csv (e .xlsx e imagem).
 - Critérios de aceite (cada um vira um teste):
   - Dada a ficha de referência, com 5 dias (segunda a sexta) e 6 linhas por dia, quando é recriada pelo caso de uso de salvar, então as 30 linhas ficam registradas na versão 1, com cada exercício do catálogo inicial e as rotinas por dia da semana.
   - Dadas as linhas que a seção 11.8 da especificação trata como ambíguas, quando são recriadas, então cada uma é gravada como o usuário decidiu na ficha fornecida, sem inventar escolha.
