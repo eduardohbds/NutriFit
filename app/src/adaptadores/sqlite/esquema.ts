@@ -69,6 +69,9 @@ export const exercicio = sqliteTable('exercicio', {
   origem: text('origem').notNull(),
   unilateral: booleano('unilateral'),
   equipamento: text('equipamento'),
+  // Mesclagem por vínculo (US-006a): o descartado aponta para o mantido, sem reescrever sessões nem
+  // versões de ficha (RB02, RB03). Vazio enquanto o exercício não foi mesclado em outro.
+  mescladoEmId: text('mesclado_em_id').references((): AnySQLiteColumn => exercicio.id),
 });
 
 export const exercicioSinonimo = sqliteTable(

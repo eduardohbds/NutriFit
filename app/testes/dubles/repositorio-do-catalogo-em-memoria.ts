@@ -11,7 +11,11 @@ import type {
 } from '../../src/dominio/exercicio';
 import { GRUPOS_MUSCULARES } from '../../src/dominio/grupo-muscular';
 import { ErroDeValidacao } from '../../src/dominio/erro-de-validacao';
-import type { Identificador } from '../../src/dominio/identificador';
+import { Identificador } from '../../src/dominio/identificador';
+import {
+  exigirIdentificadoresDiferentes,
+  exigirSemMesclagemPrevia,
+} from '../../src/dominio/mesclagem';
 
 interface ExercicioGuardado {
   situacao: SituacaoDoExercicio;
@@ -33,6 +37,8 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
   private readonly exercicios = new Map<string, ExercicioGuardado>();
   private readonly catalogo = new Map<string, ExercicioDoCatalogo>();
   private readonly fichas = new Map<string, SituacaoDaFichaNoCatalogo>();
+  // Descartado → mantido, como a coluna mesclado_em_id do SQLite.
+  private readonly vinculos = new Map<string, string>();
 
   // Apoio dos testes: o falso não tem como saber de fichas e sessões que vivem em outras portas.
   semearExercicio(id: Identificador, uso: { emFicha: boolean; emSessao: boolean }): void {
@@ -95,6 +101,28 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
     if (!guardado.sinonimos.includes(texto)) guardado.sinonimos.push(texto);
   }
 
+  async mesclarExercicios(mantidoId: Identificador, descartadoId: Identificador): Promise<void> {
+    exigirIdentificadoresDiferentes(mantidoId, descartadoId);
+    this.existente(descartadoId);
+    this.existente(mantidoId);
+    exigirSemMesclagemPrevia(
+      { id: mantidoId, jaMesclado: this.vinculos.has(mantidoId.valor) },
+      { id: descartadoId, jaMesclado: this.vinculos.has(descartadoId.valor) },
+    );
+    const nome = this.catalogo.get(descartadoId.valor)?.nome ?? '';
+    this.arquivarNoCatalogo(descartadoId);
+    for (const [absorvido, destino] of this.vinculos)
+      if (destino === descartadoId.valor) this.vinculos.set(absorvido, mantidoId.valor);
+    this.vinculos.set(descartadoId.valor, mantidoId.valor);
+    await this.adicionarSinonimo(mantidoId, nome);
+  }
+
+  async exerciciosEquivalentes(id: Identificador): Promise<Identificador[]> {
+    const raiz = this.vinculos.get(id.valor) ?? id.valor;
+    const mesclados = [...this.vinculos].filter(([, destino]) => destino === raiz);
+    return [Identificador.de(raiz), ...mesclados.map(([absorvido]) => Identificador.de(absorvido))];
+  }
+
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {
     return this.exercicios.get(id.valor)?.situacao ?? null;
   }
@@ -126,6 +154,13 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
   async arquivarFicha(id: Identificador): Promise<void> {
     if (!this.fichas.has(id.valor)) throw new ErroDeValidacao('ficha', 'ficha existente', id.valor);
     this.fichas.set(id.valor, 'arquivada');
+  }
+
+  // A situação mora em dois lugares no falso (o uso e o catálogo lido pela tela); muda nos dois.
+  private arquivarNoCatalogo(id: Identificador): void {
+    this.existente(id).situacao = 'arquivado';
+    const lido = this.catalogo.get(id.valor);
+    if (lido) lido.situacao = 'arquivado';
   }
 
   private existente(id: Identificador): ExercicioGuardado {

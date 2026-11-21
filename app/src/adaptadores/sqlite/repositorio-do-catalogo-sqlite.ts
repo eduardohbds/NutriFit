@@ -16,6 +16,7 @@ import type {
 } from '../../dominio/exercicio';
 import { ErroDeValidacao } from '../../dominio/erro-de-validacao';
 import { Identificador } from '../../dominio/identificador';
+import { exigirIdentificadoresDiferentes, exigirSemMesclagemPrevia } from '../../dominio/mesclagem';
 import {
   exercicio,
   exercicioGrupo,
@@ -121,6 +122,39 @@ export class RepositorioDoCatalogoSqlite implements RepositorioDoCatalogo {
     });
   }
 
+  async mesclarExercicios(mantidoId: Identificador, descartadoId: Identificador): Promise<void> {
+    exigirIdentificadoresDiferentes(mantidoId, descartadoId);
+    this.banco.transaction((tx) => {
+      const nome = nomeDoExercicio(tx, descartadoId);
+      exigirExercicio(tx, mantidoId);
+      exigirSemMesclagemPrevia(
+        { id: mantidoId, jaMesclado: vinculoDe(tx, mantidoId) !== null },
+        { id: descartadoId, jaMesclado: vinculoDe(tx, descartadoId) !== null },
+      );
+      const arquivado = { situacao: 'arquivado', mescladoEmId: mantidoId.valor };
+      tx.update(exercicio).set(arquivado).where(eq(exercicio.id, descartadoId.valor)).run();
+      // Quem já apontava para o descartado passa a apontar direto ao mantido, sem cadeia.
+      const aponta = eq(exercicio.mescladoEmId, descartadoId.valor);
+      tx.update(exercicio).set({ mescladoEmId: mantidoId.valor }).where(aponta).run();
+      const sinonimo = {
+        id: this.gerador.gerar().valor,
+        exercicioId: mantidoId.valor,
+        texto: nome,
+      };
+      tx.insert(exercicioSinonimo).values(sinonimo).onConflictDoNothing().run();
+    });
+  }
+
+  async exerciciosEquivalentes(id: Identificador): Promise<Identificador[]> {
+    const raiz = vinculoDe(this.banco, id) ?? id.valor;
+    const mesclados = this.banco
+      .select({ id: exercicio.id })
+      .from(exercicio)
+      .where(eq(exercicio.mescladoEmId, raiz))
+      .all();
+    return [Identificador.de(raiz), ...mesclados.map((linha) => Identificador.de(linha.id))];
+  }
+
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {
     const linha = this.banco
       .select({ situacao: exercicio.situacao })
@@ -174,6 +208,25 @@ export class RepositorioDoCatalogoSqlite implements RepositorioDoCatalogo {
       throw new ErroDeValidacao('ficha', 'ficha existente', id.valor);
     this.banco.update(ficha).set({ situacao: 'arquivada' }).where(eq(ficha.id, id.valor)).run();
   }
+}
+
+function vinculoDe(banco: Consultor, id: Identificador): string | null {
+  const linha = banco
+    .select({ vinculo: exercicio.mescladoEmId })
+    .from(exercicio)
+    .where(eq(exercicio.id, id.valor))
+    .get();
+  return linha?.vinculo ?? null;
+}
+
+function nomeDoExercicio(banco: Consultor, id: Identificador): string {
+  const linha = banco
+    .select({ nome: exercicio.nome })
+    .from(exercicio)
+    .where(eq(exercicio.id, id.valor))
+    .get();
+  if (!linha) throw new ErroDeValidacao('exercicio', 'exercício existente', id.valor);
+  return linha.nome;
 }
 
 function exigirExercicio(banco: Consultor, id: Identificador): void {

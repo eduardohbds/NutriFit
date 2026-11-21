@@ -280,15 +280,34 @@ A história original não cabia num commit: ela mistura criar exercício, sinôn
 - Falha inaceitável envolvida: nenhuma.
 - Notas de domínio: "parecido" = igual depois de ignorar maiúsculas, acentos e espaços nas pontas; a regra exata de semelhança (distância de edição) fica para o Red propor e eu aprovar.
 
-### US-006: Mesclar exercícios duplicados
-- Status: a fazer
-- Contexto: duplicatas criadas por engano dividem o histórico e escondem recordes (RF08).
+### US-006: Mesclar exercícios duplicados (quebrada em US-006a e US-006b)
+A história original não cabia num commit: mesclar exige uma migração, uma porta nova no catálogo e uma leitura nova de histórico em outra porta, cada uma com falso e suíte de contrato. Contexto comum: duplicatas criadas por engano dividem o histórico e escondem recordes (RF08). Decisão do usuário: a mesclagem é por vínculo, sem reescrever histórico. O exercício descartado fica arquivado e aponta para o mantido; `exercicio_sessao.exercicio_id` e `item.exercicio_id` não mudam, porque sessões e versões de ficha não podem ser alteradas (RB02, RB03, FI-4). A leitura trata os dois como um só pelo vínculo. O critério original "recordes exibidos são os do histórico combinado" depende do cálculo de recordes, que ainda não existe: a US-006b entrega o histórico combinado de que os recordes vão ler, e o teste dos recordes entra na história que os calcular.
+
+### US-006a: Mesclar por vínculo, sem reescrever histórico
+- Status: aceita
+- Contexto: ver US-006. Depende da US-005b (sinônimos).
 - Critérios de aceite (cada um vira um teste):
-  - Dados dois exercícios duplicados com sessões em ambos, quando o usuário os mescla, então todo o histórico passa para o exercício mantido e a contagem total de séries não muda.
-  - Dados recordes nos dois exercícios, quando são mesclados, então os recordes exibidos são os do histórico combinado.
-- Fora do escopo: mesclagem automática sem ação do usuário.
-- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: o nome do exercício descartado deve virar sinônimo do mantido, para não reaparecer como novo na próxima importação.
+  - Dados dois exercícios duplicados, quando o usuário mescla o descartado no mantido, então o descartado fica arquivado e vinculado ao mantido, e nenhuma linha de sessão, de item de versão ou de série é alterada.
+  - Dada a mesclagem, quando termina, então o nome do descartado é sinônimo do mantido e a busca o acha pelo nome antigo (sem duplicar se já era sinônimo).
+  - Dado um pedido inválido (o mesmo exercício nos dois lados, exercício inexistente, descartado já mesclado ou mantido que já foi mesclado em outro), quando o usuário mescla, então nada é gravado e o erro diz o valor recebido e o formato esperado.
+  - Dado um descartado que já havia recebido mesclagens, quando é mesclado, então os que apontavam para ele passam a apontar para o mantido, sem cadeia de vínculos.
+  - Dada a migração nova, quando roda em banco vazio e em banco com sessões e fichas, então a coluna de vínculo existe, vazia, e nenhum dado existente muda.
+  - Dada a porta RepositorioDoCatalogo, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: ler o histórico combinado e recordes (US-006b); tela de mesclagem; desfazer uma mesclagem; mesclagem automática sem ação do usuário.
+- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico): só a tabela `exercicio` é escrita.
+- Notas de domínio: migração aditiva, uma coluna `mesclado_em_id` anulável em `exercicio`, com chave estrangeira para `exercicio.id`; não transforma dado existente. O vínculo e o arquivamento entram numa transação só. Não mexer em `ExercicioDoCatalogo`, para não alterar testes aprovados: a leitura dos vínculos entra por um método próprio da porta, `exerciciosEquivalentes(id)`.
+
+### US-006b: Histórico combinado do exercício mesclado
+- Status: a fazer
+- Contexto: ver US-006. Depende da US-006a.
+- Critérios de aceite (cada um vira um teste):
+  - Dados dois exercícios duplicados com sessões em ambos, quando mesclados, então o histórico lido pelo mantido (ou pelo descartado) traz as séries dos dois e a contagem total é a soma das contagens de antes.
+  - Dadas séries corrigidas ou removidas (`removida_em`), quando o histórico é lido, então só as ativas entram na contagem.
+  - Dado um exercício nunca mesclado, quando o histórico é lido, então traz só as séries dele, como antes.
+  - Dada a nova leitura de séries por exercício, quando a suíte de contrato roda, então passa contra o falso em memória e contra o adaptador SQLite.
+- Fora do escopo: cálculo e exibição de recordes (história própria, FI-2); tela.
+- Falha inaceitável envolvida: FI-4 (só leitura).
+- Notas de domínio: o caso de uso combina as duas portas, `exerciciosEquivalentes` do catálogo e uma leitura de séries por vários exercícios nas sessões, para os dois repositórios não precisarem se conhecer. A história que calcular recordes lê por este caso de uso e leva o teste "recordes dos dois exercícios mesclados".
 
 ## Épico E-03: Fichas, versões e travas (BL05 · P1)
 Objetivo: o usuário monta e edita fichas com todos os detalhes por série, consulta e restaura versões e protege exercícios contra alteração da IA.

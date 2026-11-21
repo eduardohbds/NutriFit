@@ -1,0 +1,1 @@
+ALTER TABLE `exercicio` ADD `mesclado_em_id` text REFERENCES exercicio(id);
