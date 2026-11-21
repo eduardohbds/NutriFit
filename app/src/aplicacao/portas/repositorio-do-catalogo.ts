@@ -27,6 +27,14 @@ export interface RepositorioDoCatalogo {
   // Acrescenta o texto como sinônimo do exercício. Texto igual (exato) já cadastrado nele não muda nada
   // nem falha; exercício que não existe falha com ErroDeValidacao, sem gravar. Não toca em histórico.
   adicionarSinonimo(exercicioId: Identificador, texto: string): Promise<void>;
+  // Mescla por vínculo (US-006a), numa transação: arquiva o descartado, aponta ele (e quem já apontava
+  // para ele) para o mantido e guarda o nome dele como sinônimo do mantido. Nada de sessão, versão ou
+  // série é tocado (FI-4, RB02, RB03). Falha com ErroDeValidacao, sem gravar, se os dois forem o mesmo,
+  // se algum não existir, se o descartado já foi mesclado ou se o mantido já foi mesclado em outro.
+  mesclarExercicios(mantidoId: Identificador, descartadoId: Identificador): Promise<void>;
+  // O mantido primeiro e depois todos os mesclados nele, qualquer que seja o id dado; só [id] se o
+  // exercício nunca participou de uma mesclagem.
+  exerciciosEquivalentes(exercicioId: Identificador): Promise<Identificador[]>;
   situacaoDoExercicio(exercicioId: Identificador): Promise<SituacaoDoExercicio | null>;
   // Com histórico (item de qualquer versão de ficha ou exercício de qualquer sessão): só arquivar.
   opcoesDeRemocaoDoExercicio(exercicioId: Identificador): Promise<OpcaoDeRemocao[]>;

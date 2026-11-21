@@ -38,6 +38,7 @@ erDiagram
     text origem
     integer unilateral
     text equipamento "opcional"
+    text mesclado_em_id FK "opcional"
   }
   exercicio_grupo {
     text id PK
@@ -165,6 +166,7 @@ erDiagram
   }
   versao_ficha |o--o{ acao_ia : "versao_criada_id"
   serie_executada ||--o{ etapa_drop_set : "serie_executada_id"
+  exercicio |o--o{ exercicio : "mesclado_em_id"
   exercicio ||--o{ exercicio_grupo : "exercicio_id"
   grupo_muscular ||--o{ exercicio_grupo : "grupo_id"
   sessao ||--o{ exercicio_sessao : "sessao_id"
