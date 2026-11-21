@@ -89,6 +89,12 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
     ]);
   }
 
+  async adicionarSinonimo(id: Identificador, texto: string): Promise<void> {
+    const guardado = this.catalogo.get(id.valor);
+    if (!guardado) throw new ErroDeValidacao('exercicio', 'exercício existente', id.valor);
+    if (!guardado.sinonimos.includes(texto)) guardado.sinonimos.push(texto);
+  }
+
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {
     return this.exercicios.get(id.valor)?.situacao ?? null;
   }

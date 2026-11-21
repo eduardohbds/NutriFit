@@ -110,6 +110,17 @@ export class RepositorioDoCatalogoSqlite implements RepositorioDoCatalogo {
     });
   }
 
+  async adicionarSinonimo(id: Identificador, texto: string): Promise<void> {
+    this.banco.transaction((tx) => {
+      exigirExercicio(tx, id);
+      // A unicidade por exercício e texto do esquema faz a repetição exata não mudar nada.
+      tx.insert(exercicioSinonimo)
+        .values({ id: this.gerador.gerar().valor, exercicioId: id.valor, texto })
+        .onConflictDoNothing()
+        .run();
+    });
+  }
+
   async situacaoDoExercicio(id: Identificador): Promise<SituacaoDoExercicio | null> {
     const linha = this.banco
       .select({ situacao: exercicio.situacao })

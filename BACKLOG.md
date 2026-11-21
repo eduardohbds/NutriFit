@@ -259,7 +259,7 @@ A história original não cabia num commit: ela mistura criar exercício, sinôn
 - Notas de domínio: reaproveita `validarGruposDoExercicio`; exercício sem grupo pede confirmação, como na US-004b.
 
 ### US-005b: Sinônimos e busca por nome ou sinônimo
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-005. Depende da US-005a.
 - Critérios de aceite (cada um vira um teste):
   - Dado o exercício "Rosca de Punho Inversa", quando o usuário cadastra "Reverse Wrist Curl" como sinônimo, então a busca por qualquer dos dois nomes encontra o mesmo exercício.
