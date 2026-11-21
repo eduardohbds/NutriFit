@@ -6,6 +6,7 @@ import type {
   ExercicioDaSessao,
   NovaSessao,
   NovoExercicioDaSessao,
+  SerieDoHistorico,
   SerieExecutada,
   Sessao,
 } from '../../src/dominio/sessao';
@@ -17,6 +18,21 @@ function copiar(sessao: Sessao): Sessao {
     ...sessao,
     exercicios: sessao.exercicios.map((e) => ({ ...e, series: e.series.map((s) => ({ ...s })) })),
   };
+}
+
+function porInicio(a: Sessao, b: Sessao): number {
+  if (a.inicio.iso === b.inicio.iso) return 0;
+  return a.inicio.iso < b.inicio.iso ? -1 : 1;
+}
+
+// Só as séries ativas dos exercícios pedidos, cada uma com a sessão e o exercício de origem.
+function seriesDaSessao(sessao: Sessao, pedidos: Set<string>): SerieDoHistorico[] {
+  const doPedido = sessao.exercicios.filter((e) => pedidos.has(e.exercicioId.valor));
+  return doPedido.flatMap((e) =>
+    e.series
+      .filter((s) => !s.removidaEm)
+      .map((s) => ({ sessaoId: sessao.id, exercicioId: e.exercicioId, serie: { ...s } })),
+  );
 }
 
 export class RepositorioDeSessoesEmMemoria implements RepositorioDeSessoes {
@@ -54,6 +70,13 @@ export class RepositorioDeSessoesEmMemoria implements RepositorioDeSessoes {
       return;
     }
     throw new ErroDeValidacao('série', 'série ativa existente', serieId.valor);
+  }
+
+  async seriesDosExercicios(exercicioIds: Identificador[]): Promise<SerieDoHistorico[]> {
+    const pedidos = new Set(exercicioIds.map((id) => id.valor));
+    // O sort é estável: sessões com o mesmo início ficam na ordem em que foram iniciadas.
+    const cronologicas = [...this.sessoes.values()].sort(porInicio);
+    return cronologicas.flatMap((sessao) => seriesDaSessao(sessao, pedidos));
   }
 
   async buscarSessao(id: Identificador): Promise<Sessao | null> {

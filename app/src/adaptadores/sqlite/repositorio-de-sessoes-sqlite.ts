@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull, max, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, max, sql } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 import type { RepositorioDeSessoes } from '../../aplicacao/portas/repositorio-de-sessoes';
@@ -11,6 +11,7 @@ import type {
   ExercicioDaSessao,
   NovaSessao,
   NovoExercicioDaSessao,
+  SerieDoHistorico,
   SerieExecutada,
   Sessao,
 } from '../../dominio/sessao';
@@ -114,6 +115,34 @@ export class RepositorioDeSessoesSqlite implements RepositorioDeSessoes {
         .run();
       inserirSerie(tx, Identificador.de(antiga.exercicioSessaoId), antiga.posicao, corrigida);
     });
+  }
+
+  async seriesDosExercicios(exercicioIds: Identificador[]): Promise<SerieDoHistorico[]> {
+    if (exercicioIds.length === 0) return [];
+    const ids = exercicioIds.map((id) => id.valor);
+    // Série corrigida divide a posição com a antiga; o rowid da própria tabela mantém a ordem.
+    const linhas = this.banco
+      .select({
+        sessaoId: sessao.id,
+        exercicioId: exercicioSessao.exercicioId,
+        serie: serieExecutada,
+      })
+      .from(serieExecutada)
+      .innerJoin(exercicioSessao, eq(serieExecutada.exercicioSessaoId, exercicioSessao.id))
+      .innerJoin(sessao, eq(exercicioSessao.sessaoId, sessao.id))
+      .where(and(inArray(exercicioSessao.exercicioId, ids), isNull(serieExecutada.removidaEm)))
+      .orderBy(
+        asc(sessao.inicio),
+        asc(exercicioSessao.posicao),
+        asc(serieExecutada.posicao),
+        sql`${serieExecutada}.rowid`,
+      )
+      .all();
+    return linhas.map((linha) => ({
+      sessaoId: Identificador.de(linha.sessaoId),
+      exercicioId: Identificador.de(linha.exercicioId),
+      serie: lerSerie(linha.serie),
+    }));
   }
 
   async buscarSessao(id: Identificador): Promise<Sessao | null> {

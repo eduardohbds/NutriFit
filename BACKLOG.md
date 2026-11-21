@@ -298,7 +298,7 @@ A história original não cabia num commit: mesclar exige uma migração, uma po
 - Notas de domínio: migração aditiva, uma coluna `mesclado_em_id` anulável em `exercicio`, com chave estrangeira para `exercicio.id`; não transforma dado existente. O vínculo e o arquivamento entram numa transação só. Não mexer em `ExercicioDoCatalogo`, para não alterar testes aprovados: a leitura dos vínculos entra por um método próprio da porta, `exerciciosEquivalentes(id)`.
 
 ### US-006b: Histórico combinado do exercício mesclado
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-006. Depende da US-006a.
 - Critérios de aceite (cada um vira um teste):
   - Dados dois exercícios duplicados com sessões em ambos, quando mesclados, então o histórico lido pelo mantido (ou pelo descartado) traz as séries dos dois e a contagem total é a soma das contagens de antes.
