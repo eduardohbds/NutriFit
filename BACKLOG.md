@@ -270,7 +270,7 @@ A história original não cabia num commit: ela mistura criar exercício, sinôn
 - Notas de domínio: tabela `exercicio_sinonimo` já existe, com unicidade por exercício e texto; sem migração.
 
 ### US-005c: Avisar nome igual ou parecido ao criar
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-005 (RB35). Depende da US-005b (a comparação usa nome e sinônimos).
 - Critérios de aceite (cada um vira um teste):
   - Dado um nome igual ou parecido com um existente (nome ou sinônimo), quando o usuário cria o exercício, então o caso de uso devolve o aviso com o exercício existente e sugere associar a ele, sem gravar.
