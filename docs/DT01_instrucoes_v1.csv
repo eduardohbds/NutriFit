@@ -1,0 +1,23 @@
+﻿Campo;Valor
+Formato;Formato canônico da ficha, seção 11 do documento de requisitos
+Versão do formato;1
+Unidade de carga;kg
+Dado de referência;DT01, ficha de referência (seção 23.3)
+Origem;Transcrição da imagem FICHA DE TREINO anexada ao documento
+Conteúdo;1 ficha, 5 rotinas (Segunda a Sexta), 6 exercícios por rotina, 30 linhas
+Usado em;TE04, TE05, TE06 e TE10 (seção 23.5)
+O que a importação deve perguntar;Escolha entre Corrida e Esteira, e confirmação de Elevação Frontal e Elevação Frontal com Halteres (seção 11.8). Reverse Wrist Curl é reconhecido pelo sinônimo, sem pergunta
+
+Coluna;Obrigatória;Valores aceitos
+Rotina;Sim;Nome ou rótulo do treino. Quando vazia, assume o valor de Dia
+Dia;Em fichas por dia da semana;Segunda a Domingo
+Ordem;Sim;Inteiro maior ou igual a 1, sem repetição na mesma rotina
+Grupo;Não;Letra de A a Z. Exercícios consecutivos com a mesma letra formam bi-set, tri-set ou circuito
+Exercício;Sim;Nome ou sinônimo de um exercício do catálogo
+Séries;Sim;Inteiro maior ou igual a 1, incluindo aquecimento
+Meta;Sim;Repetições (10), faixa (8-12), falha ou tempo (60s, 30min). Aceita lista por série
+Carga;Não;Número maior ou igual a 0. Vazia significa peso corporal ou carga a definir
+Técnica;Não;Aquecimento, drop-set, rest-pause, repetições parciais, negativa, isometria, cluster ou -
+Descanso;Não;Segundos (90) ou minutos e segundos (1:30). Aceita lista por série
+Unilateral;Não;Sim ou Não (vazio equivale a Não)
+Observações;Não;Texto livre

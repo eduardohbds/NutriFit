@@ -1,0 +1,31 @@
+﻿Rotina;Dia;Ordem;Grupo;Exercício;Séries;Meta;Carga;Técnica;Descanso;Unilateral;Observações
+Segunda;Segunda;1;;Supino Reto;4;10;;;;Não;
+Segunda;Segunda;2;;Supino Inclinado com Halteres;3;12;;;;Não;
+Segunda;Segunda;3;;Cross Over;3;15;;;;Não;
+Segunda;Segunda;4;;Paralelas;3;12;;;;Não;
+Segunda;Segunda;5;;Tríceps Pulley;4;12;;;;Não;
+Segunda;Segunda;6;;Tríceps Testa com Barra;3;12;;;;Não;
+Terça;Terça;1;;Barra Fixa;4;falha;;;;Não;
+Terça;Terça;2;;Remada Curvada;3;12;;;;Não;
+Terça;Terça;3;;Pulldown;3;12;;;;Não;
+Terça;Terça;4;;Remada na Máquina;3;12;;;;Não;
+Terça;Terça;5;;Rosca Direta;4;falha;;;;Não;
+Terça;Terça;6;;Rosca Alternada;3;12;;;;Sim;3 x 12 por braço na ficha original
+Quarta;Quarta;1;;Desenvolvimento com Barra;4;10;;;;Não;
+Quarta;Quarta;2;;Elevação Lateral;3;15;;;;Não;
+Quarta;Quarta;3;;Elevação Frontal;3;15;;;;Não;Nome parecido com Elevação Frontal com Halteres: a importação pede confirmação
+Quarta;Quarta;4;;Encolhimento com Halteres;4;falha;;;;Não;
+Quarta;Quarta;5;;Rosca de Punho;3;12;;;;Não;
+Quarta;Quarta;6;;Reverse Wrist Curl;3;12;;;;Não;Sinônimo de Rosca de Punho Inversa no catálogo
+Quinta;Quinta;1;;Agachamento Livre;4;10;;;;Não;
+Quinta;Quinta;2;;Leg Press;3;12;;;;Não;
+Quinta;Quinta;3;;Cadeira Extensora;4;15;;;;Não;
+Quinta;Quinta;4;;Cadeira Flexora;3;15;;;;Não;
+Quinta;Quinta;5;;Panturrilha em Pé;4;15;;;;Não;
+Quinta;Quinta;6;;Lunges (Passadas);3;12;;;;Sim;3 x 12 por perna na ficha original
+Sexta;Sexta;1;;Corrida ou Esteira;1;30min;;;;Não;Cardio. A importação pede para escolher entre Corrida e Esteira
+Sexta;Sexta;2;;Prancha;3;60s;;;;Não;
+Sexta;Sexta;3;;Abdominais Crunch;3;15;;;;Não;
+Sexta;Sexta;4;;Flexões de Braço;3;12;;;;Não;
+Sexta;Sexta;5;;Elevação de Pernas;3;15;;;;Não;
+Sexta;Sexta;6;;Elevação Frontal com Halteres;3;12;;;;Não;Nome parecido com Elevação Frontal: a importação pede confirmação
