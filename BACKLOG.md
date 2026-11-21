@@ -337,6 +337,19 @@ A história original não cabia num commit: ela mistura as regras de uma ficha v
 - Falha inaceitável envolvida: nenhuma direta.
 - Notas de domínio: a ficha entra como dado de teste em testes/casos-de-referencia/ficha-de-referencia.ts, para a importação e a exportação reaproveitarem (TE04, TE05, TE10).
 
+### US-007c: Tela de edição da ficha
+- Status: a fazer
+- Contexto: ver US-007. A US-007 original previa a tela de criar e editar a ficha, mas as US-007a, US-007b e US-008 entregaram só os casos de uso e as regras (`SalvarFicha`, listas por série, grupos em sequência). Sem a tela, o usuário não consegue montar nem alterar a ficha no aparelho (RF05, F02). Depende da US-007a, da US-008 e da tela do catálogo (US-004c).
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma ficha existente, quando o usuário abre a edição, então a tela mostra as rotinas e as linhas da versão atual, com exercício, ordem, grupo, séries, meta, carga, técnica, descanso, unilateral e observações.
+  - Dada uma linha, quando o usuário escolhe o exercício, então só os do catálogo são oferecidos, com busca por nome ou sinônimo.
+  - Dados os campos de séries preenchidos como na planilha (valor único ou lista por barra, como 90/90/90/120), quando o usuário salva, então a tela grava uma versão nova pelo `SalvarFicha` e mostra o número dela; o motivo é opcional.
+  - Dado um salvamento bloqueado por uma regra (tipo de rotina, séries, meta, técnica, descanso, grupo), quando a tela mostra o aviso, então o texto diz a rotina e a linha, o valor recebido e o formato esperado, em português do Brasil e vindo do arquivo único de textos, e nada do que foi digitado se perde.
+  - Dada uma ficha nova, quando o usuário a salva, então ela nasce inativa e aparece como versão 1.
+- Fora do escopo: ativar, duplicar e arquivar (US-009); histórico, comparação e restauração de versões (US-010); travar exercícios (US-011); importação e exportação (E-10); execução dos grupos em sequência na tela de treino (E-04).
+- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico): a tela só cria versões novas.
+- Notas de domínio: a rota do Expo Router fica fina e a tela em `src/interface`, com o teste de tela no `renderRouter` (seção 10 do AGENTS.md). A leitura da ficha e da versão atual pode pedir um caso de uso de leitura novo; se pedir porta nova, a história para e chama o usuário. Se não couber num commit, quebrar em listar fichas, editar linhas e salvar.
+
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência
 - Status: aceita
 - Contexto: o usuário pediu técnica e descanso por série, e bi-set, tri-set e circuito precisam ser representados sem colunas extras (RB06, RB07).
