@@ -130,7 +130,7 @@ describe('SalvarFicha: grava a versão (RB02)', () => {
 
     const { fichaId, versao } = await caso.executar({
       nome: 'Peito',
-      rotinas: [rotina('Segunda', 1, [completo, item(2, REMADA)])],
+      rotinas: [rotina('Segunda', 1, [completo, item(2, REMADA, { grupo: 'A' })])],
     });
 
     expect(versao).toMatchObject({ fichaId, numero: 1, autor: 'usuario', motivo: null });
@@ -149,7 +149,7 @@ describe('SalvarFicha: grava a versão (RB02)', () => {
       tecnica: 'aquecimento',
       descansoSegundos: 90,
     });
-    expect(segundo.exercicioId).toEqual(REMADA);
+    expect(segundo).toMatchObject({ exercicioId: REMADA, grupoSequencia: 'A' });
   });
 
   it('grava os exercícios na ordem informada, mesmo chegando fora de ordem', async () => {
