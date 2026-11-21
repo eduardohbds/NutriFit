@@ -312,17 +312,30 @@ A história original não cabia num commit: mesclar exige uma migração, uma po
 ## Épico E-03: Fichas, versões e travas (BL05 · P1)
 Objetivo: o usuário monta e edita fichas com todos os detalhes por série, consulta e restaura versões e protege exercícios contra alteração da IA.
 
-### US-007: Criar e editar ficha com rotinas
-- Status: a fazer
-- Contexto: a ficha é o plano que o registro de treino executa; sem ela o app não tem uso na academia (RF05, RB01).
+### US-007: Criar e editar ficha com rotinas (quebrada em US-007a e US-007b)
+A história original não cabia num commit: ela mistura as regras de uma ficha válida (tipo único de rotina, meta, técnica, séries, linha indicada), o salvamento como versão nova e a recriação da ficha de referência de 30 linhas, que ainda depende de um dado que não está no repositório. Contexto comum: a ficha é o plano que o registro de treino executa; sem ela o app não tem uso na academia (RF05, RB01). Os critérios são de caso de uso, como nas US-005 e US-006; a tela de edição da ficha não faz parte deles.
+
+### US-007a: Validar e salvar ficha como versão nova
+- Status: aceita
+- Contexto: ver US-007. Depende da US-002a (versões que só recebem inserção) e do catálogo (US-004).
 - Critérios de aceite (cada um vira um teste):
-  - Dada uma ficha nova, quando o usuário define rotinas por dia da semana ou por rotação (Treino A, B, C), então todas as rotinas da ficha usam o mesmo tipo e misturar os dois bloqueia o salvamento (RB01).
-  - Dada uma rotina, quando o usuário adiciona exercício do catálogo com ordem, séries, meta, carga, técnica, descanso, unilateral, grupo e observações, então os dados são salvos como uma nova versão com autor usuário, data e motivo opcional (RB02).
-  - Dada a ficha de referência (DT01), quando é recriada manualmente, então as 30 linhas ficam registradas.
-  - Dado um exercício sem séries ou com meta inválida, quando o usuário salva, então o salvamento é bloqueado com a linha indicada.
-- Fora do escopo: listas por série e grupos em sequência (US-008), versões (US-010).
-- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: meta aceita repetições (10), faixa (8-12), falha ou tempo (60s, 30min). Carga vazia significa peso corporal ou carga a definir. Técnicas aceitas: aquecimento, drop-set, rest-pause, repetições parciais, negativa, isometria, cluster ou "-". O registro das etapas do drop-set está na US-039 (SL16 resolvida).
+  - Dada uma ficha nova, quando as rotinas misturam dia da semana e rótulo de rotação (Treino A, B, C), então o salvamento é bloqueado indicando a rotina (RB01); com todas do mesmo tipo é aceito.
+  - Dada uma rotina com exercícios do catálogo, com ordem, séries (meta, carga, técnica, descanso), unilateral, grupo e observações, quando o usuário salva, então os dados são gravados como nova versão com autor usuário, data e motivo opcional (RB02): a ficha nova grava a versão 1, e uma ficha existente grava a seguinte sem tocar nas anteriores.
+  - Dado um exercício sem séries, uma meta inválida, uma técnica fora da lista aceita, uma ordem repetida na rotina ou um exercício que não existe no catálogo, quando o usuário salva, então o salvamento é bloqueado, nada é gravado e o erro indica a rotina e a linha, com o valor recebido e o formato esperado.
+  - Dado o texto de uma meta, quando é lido, então 10 vira repetições, 8-12 vira faixa, falha vira até a falha, 60s e 30min viram tempo (em segundos), e qualquer outra forma é recusada.
+- Fora do escopo: listas por série e grupos em sequência (US-008); versões, consulta e restauração (US-010); tela de edição da ficha; ficha de referência (US-007b); importação.
+- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico): só entram versões novas.
+- Notas de domínio: meta aceita repetições (10), faixa (8-12), falha ou tempo (60s, 30min). Carga vazia significa peso corporal ou carga a definir. Técnicas aceitas: aquecimento, drop-set, rest-pause, repetições parciais, negativa, isometria, cluster ou "-". O registro das etapas do drop-set está na US-039 (SL16 resolvida). Sem migração: o modelo e a porta RepositorioDeFichas já existem.
+
+### US-007b: Recriar a ficha de referência (DT01) manualmente
+- Status: a fazer
+- Contexto: ver US-007. Depende da US-007a e da ficha de referência (DT01), as 30 linhas da ficha anexada, que não está no repositório: o usuário precisa fornecê-la (o CSV ou XLSX da DT01, ou as linhas por escrito).
+- Critérios de aceite (cada um vira um teste):
+  - Dada a ficha de referência, com 5 dias (segunda a sexta) e 6 linhas por dia, quando é recriada pelo caso de uso de salvar, então as 30 linhas ficam registradas na versão 1, com cada exercício do catálogo inicial e as rotinas por dia da semana.
+  - Dadas as linhas que a seção 11.8 da especificação trata como ambíguas, quando são recriadas, então cada uma é gravada como o usuário decidiu na ficha fornecida, sem inventar escolha.
+- Fora do escopo: importação da DT01 em imagem, XLSX e CSV (E-06); tela.
+- Falha inaceitável envolvida: nenhuma direta.
+- Notas de domínio: a ficha entra como dado de teste em testes/casos-de-referencia/ficha-de-referencia.ts, para a importação e a exportação reaproveitarem (TE04, TE05, TE10).
 
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência
 - Status: a fazer
