@@ -24,6 +24,9 @@ export interface RepositorioDoCatalogo {
   // Grava o exercício (ativo, origem `usuario`) e seus grupos numa transação: ou entra por inteiro,
   // ou nada. Nome de grupo fora da lista fixa falha com ErroDeValidacao, sem gravar nada.
   criarExercicio(exercicio: NovoExercicio): Promise<void>;
+  // Acrescenta o texto como sinônimo do exercício. Texto igual (exato) já cadastrado nele não muda nada
+  // nem falha; exercício que não existe falha com ErroDeValidacao, sem gravar. Não toca em histórico.
+  adicionarSinonimo(exercicioId: Identificador, texto: string): Promise<void>;
   situacaoDoExercicio(exercicioId: Identificador): Promise<SituacaoDoExercicio | null>;
   // Com histórico (item de qualquer versão de ficha ou exercício de qualquer sessão): só arquivar.
   opcoesDeRemocaoDoExercicio(exercicioId: Identificador): Promise<OpcaoDeRemocao[]>;
