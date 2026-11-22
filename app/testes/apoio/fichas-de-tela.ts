@@ -1,3 +1,4 @@
+import { BuscarExercicios } from '../../src/aplicacao/casos-de-uso/buscar-exercicios';
 import { ListarFichas } from '../../src/aplicacao/casos-de-uso/listar-fichas';
 import { LerFichaParaEdicao } from '../../src/aplicacao/casos-de-uso/ler-ficha-para-edicao';
 import {
@@ -105,6 +106,7 @@ export async function fichasParaTela() {
     ids,
     fichaDaDt01: dt01.fichaId,
     fichaCompleta: completo.fichaId,
+    buscarExercicios: new BuscarExercicios(catalogo.repositorio),
     listarFichas: new ListarFichas(fichas),
     lerFichaParaEdicao: new LerFichaParaEdicao(fichas, catalogo.repositorio),
   };
