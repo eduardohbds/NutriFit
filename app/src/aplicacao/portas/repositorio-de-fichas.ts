@@ -8,6 +8,9 @@ export interface RepositorioDeFichas {
   criarFicha(ficha: Ficha, primeiraVersao: NovaVersaoDaFicha): Promise<VersaoDaFicha>;
   // Grava a versão seguinte (maior número + 1); falha, sem gravar nada, se a ficha não existe.
   salvarNovaVersao(fichaId: Identificador, versao: NovaVersaoDaFicha): Promise<VersaoDaFicha>;
+  // Todas as fichas, arquivadas inclusive, na ordem de criação (a mais antiga primeiro; em empate de
+  // data, a gravada antes). Só a ficha: as versões vêm de listarVersoes e buscarVersaoAtual.
+  listarFichas(): Promise<Ficha[]>;
   // Em ordem crescente de número.
   listarVersoes(fichaId: Identificador): Promise<VersaoDaFicha[]>;
   // A versão atual é a de maior número; nula se a ficha não existe.

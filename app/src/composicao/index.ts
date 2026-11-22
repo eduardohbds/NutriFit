@@ -2,6 +2,7 @@
 import Constants from 'expo-constants';
 
 import { abrirBancoDrizzleDoAparelho } from '../adaptadores/sqlite/banco-drizzle-do-aparelho';
+import { RepositorioDeFichasSqlite } from '../adaptadores/sqlite/repositorio-de-fichas-sqlite';
 import { RepositorioDoCatalogoSqlite } from '../adaptadores/sqlite/repositorio-do-catalogo-sqlite';
 import { ConexaoDoBancoExpo } from '../adaptadores/sqlite/conexao-do-banco-expo';
 import { EsquemaDoBancoExpo } from '../adaptadores/sqlite/esquema-do-banco-expo';
@@ -11,7 +12,9 @@ import { RelogioDoSistema } from '../adaptadores/sistema/relogio-do-sistema';
 import { AbrirBanco } from '../aplicacao/casos-de-uso/abrir-banco';
 import { ConfigurarConexao } from '../aplicacao/casos-de-uso/configurar-conexao';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
+import { LerFichaParaEdicao } from '../aplicacao/casos-de-uso/ler-ficha-para-edicao';
 import { ListarExerciciosDoCatalogo } from '../aplicacao/casos-de-uso/listar-exercicios-do-catalogo';
+import { ListarFichas } from '../aplicacao/casos-de-uso/listar-fichas';
 import { MigrarBanco } from '../aplicacao/casos-de-uso/migrar-banco';
 import { RegistrarFalha } from '../aplicacao/casos-de-uso/registrar-falha';
 
@@ -35,13 +38,24 @@ export const abrirBanco = new AbrirBanco(conexao, migrarBanco, new ConfigurarCon
 
 // As telas só existem depois de o GuardaDoBanco abrir e migrar o banco; por isso a conexão dos
 // repositórios abre sob demanda, na primeira tela que os usa, e é reaproveitada.
+let bancoDoAparelho: ReturnType<typeof abrirBancoDrizzleDoAparelho> | null = null;
 let repositorioDoCatalogo: RepositorioDoCatalogoSqlite | null = null;
+let repositorioDeFichas: RepositorioDeFichasSqlite | null = null;
+
+// Uma só conexão síncrona para todos os repositórios das telas.
+function banco(): ReturnType<typeof abrirBancoDrizzleDoAparelho> {
+  bancoDoAparelho ??= abrirBancoDrizzleDoAparelho(NOME_DO_BANCO);
+  return bancoDoAparelho;
+}
 
 function catalogo(): RepositorioDoCatalogoSqlite {
-  repositorioDoCatalogo ??= new RepositorioDoCatalogoSqlite(
-    abrirBancoDrizzleDoAparelho(NOME_DO_BANCO),
-  );
+  repositorioDoCatalogo ??= new RepositorioDoCatalogoSqlite(banco());
   return repositorioDoCatalogo;
+}
+
+function fichas(): RepositorioDeFichasSqlite {
+  repositorioDeFichas ??= new RepositorioDeFichasSqlite(banco());
+  return repositorioDeFichas;
 }
 
 export function casosDoCatalogo(): {
@@ -51,5 +65,15 @@ export function casosDoCatalogo(): {
   return {
     listarExercicios: new ListarExerciciosDoCatalogo(catalogo()),
     editarGrupos: new EditarGruposDoExercicio(catalogo()),
+  };
+}
+
+export function casosDeFichas(): {
+  listarFichas: ListarFichas;
+  lerFichaParaEdicao: LerFichaParaEdicao;
+} {
+  return {
+    listarFichas: new ListarFichas(fichas()),
+    lerFichaParaEdicao: new LerFichaParaEdicao(fichas(), catalogo()),
   };
 }

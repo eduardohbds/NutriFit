@@ -9,6 +9,7 @@ export default function Inicio() {
     <View>
       <Text>NutriFit</Text>
       <Link href="/catalogo">{textos.catalogo.abrir}</Link>
+      <Link href="/fichas">{textos.fichas.abrir}</Link>
     </View>
   );
 }
