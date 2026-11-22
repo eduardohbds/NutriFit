@@ -11,6 +11,7 @@ import { RegistroDeFalhasEmArquivo } from '../adaptadores/sistema/registro-de-fa
 import { RelogioDoSistema } from '../adaptadores/sistema/relogio-do-sistema';
 import { AbrirBanco } from '../aplicacao/casos-de-uso/abrir-banco';
 import { ConfigurarConexao } from '../aplicacao/casos-de-uso/configurar-conexao';
+import { BuscarExercicios } from '../aplicacao/casos-de-uso/buscar-exercicios';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
 import { LerFichaParaEdicao } from '../aplicacao/casos-de-uso/ler-ficha-para-edicao';
 import { ListarExerciciosDoCatalogo } from '../aplicacao/casos-de-uso/listar-exercicios-do-catalogo';
@@ -69,10 +70,12 @@ export function casosDoCatalogo(): {
 }
 
 export function casosDeFichas(): {
+  buscarExercicios: BuscarExercicios;
   listarFichas: ListarFichas;
   lerFichaParaEdicao: LerFichaParaEdicao;
 } {
   return {
+    buscarExercicios: new BuscarExercicios(catalogo()),
     listarFichas: new ListarFichas(fichas()),
     lerFichaParaEdicao: new LerFichaParaEdicao(fichas(), catalogo()),
   };

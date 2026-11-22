@@ -41,6 +41,23 @@ export const textos = {
     grupo: (grupo: string) => `Grupo ${grupo}`,
     unilateral: 'Unilateral',
     observacoes: (texto: string) => `Observações: ${texto}`,
+    editar: 'Editar',
+    cancelarEdicao: 'Cancelar edição',
+    voltarParaEdicao: 'Voltar à edição',
+    trocarExercicio: (rotina: string, ordem: number) =>
+      `Trocar exercício, ${rotina}, linha ${ordem}`,
+    buscarExercicio: 'Buscar exercício',
+    escolherExercicio: (nome: string) => `Escolher ${nome}`,
+    semResultado: 'Nenhum exercício encontrado.',
+    campo: {
+      quantidade: 'Séries',
+      meta: 'Meta',
+      carga: 'Carga (kg)',
+      tecnica: 'Técnica',
+      descanso: 'Descanso (s)',
+    },
+    rotuloDoCampo: (campo: string, rotina: string, ordem: number) =>
+      `${campo}, ${rotina}, linha ${ordem}`,
     diasDaSemana: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
   },
   validacao: {

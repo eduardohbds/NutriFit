@@ -353,7 +353,7 @@ A história original não cabia num commit: a tela precisa ler fichas (que nenhu
 - Notas de domínio: entra `listarFichas()` na porta `RepositorioDeFichas` (falso, SQLite e contrato) e os casos de uso `ListarFichas` e `LerFichaParaEdicao`; o caminho de volta da planilha é `textosDasSeries`.
 
 ### US-007c2: Editar as linhas da ficha
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-007c. Depende da US-007c1.
 - Pendência herdada da US-007c1: carga ou descanso preenchidos só em algumas séries (outras vazias, possível só por dados gravados direto pela porta) não têm texto de planilha; decidir aqui como a edição os mostra e os recusa.
 - Critérios de aceite (cada um vira um teste):
@@ -371,6 +371,16 @@ A história original não cabia num commit: a tela precisa ler fichas (que nenhu
   - Dada uma ficha nova, quando o usuário a salva, então ela nasce inativa e aparece como versão 1.
 - Fora do escopo: ativar, duplicar e arquivar (US-009).
 - Falha inaceitável envolvida: FI-4.
+
+### US-007d: Editar o resto da ficha (grupo, unilateral, observações, linhas e rotinas)
+- Status: a fazer
+- Contexto: ver US-007c. A US-007c2 edita só o exercício e os campos de séries de cada linha; o resto do RF05 continua só de leitura na tela: grupo em sequência, unilateral, observações, nome da ficha, e incluir, remover e reordenar linhas e rotinas. Depende da US-007c2.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma linha, quando o usuário altera o grupo em sequência, o unilateral ou as observações, então o rascunho guarda a mudança sem gravar nada.
+  - Dada uma rotina, quando o usuário inclui, remove ou reordena linhas, então a ordem do rascunho muda sem gravar nada.
+  - Dada uma ficha, quando o usuário inclui, remove ou renomeia rotinas, ou muda o nome da ficha, então o rascunho guarda a mudança sem gravar nada.
+- Fora do escopo: gravar (US-007c3).
+- Falha inaceitável envolvida: FI-4 (o rascunho nunca toca no banco).
 
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência
 - Status: aceita

@@ -133,7 +133,7 @@ export class RepositorioDoCatalogoEmMemoria implements RepositorioDoCatalogo {
   }
 
   async arquivarExercicio(id: Identificador): Promise<void> {
-    this.existente(id).situacao = 'arquivado';
+    this.arquivarNoCatalogo(id);
   }
 
   async excluirExercicio(id: Identificador): Promise<void> {

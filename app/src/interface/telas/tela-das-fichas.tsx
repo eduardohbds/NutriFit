@@ -6,17 +6,27 @@ import type {
   ItemParaEdicao,
   LerFichaParaEdicao,
 } from '../../aplicacao/casos-de-uso/ler-ficha-para-edicao';
+import type { BuscarExercicios } from '../../aplicacao/casos-de-uso/buscar-exercicios';
 import type { FichaDaLista, ListarFichas } from '../../aplicacao/casos-de-uso/listar-fichas';
+import { rascunhoDaFicha, type RascunhoDaFicha } from '../../aplicacao/rascunho-da-ficha';
+import { EditorDaFicha } from '../componentes/editor-da-ficha';
 import { textos } from '../textos';
 
 export interface PropsDaTelaDasFichas {
   listarFichas: ListarFichas;
   lerFichaParaEdicao: LerFichaParaEdicao;
+  // Sem a busca de exercícios a tela fica só de leitura: a edição precisa do catálogo.
+  buscarExercicios?: BuscarExercicios;
 }
 
-export function TelaDasFichas({ listarFichas, lerFichaParaEdicao }: PropsDaTelaDasFichas) {
+export function TelaDasFichas({
+  listarFichas,
+  lerFichaParaEdicao,
+  buscarExercicios,
+}: PropsDaTelaDasFichas) {
   const [fichas, setFichas] = useState<FichaDaLista[] | null>(null);
   const [aberta, setAberta] = useState<FichaParaEdicao | null>(null);
+  const [rascunho, setRascunho] = useState<RascunhoDaFicha | null>(null);
   const [erro, setErro] = useState<unknown>(null);
 
   useEffect(() => {
@@ -30,7 +40,20 @@ export function TelaDasFichas({ listarFichas, lerFichaParaEdicao }: PropsDaTelaD
     lerFichaParaEdicao.executar(id).then(setAberta, (falha: unknown) => setErro(falha));
   };
 
-  if (aberta) return <FichaAberta ficha={aberta} aoVoltar={() => setAberta(null)} />;
+  if (aberta && rascunho && buscarExercicios) {
+    return (
+      <EditorDaFicha
+        rascunho={rascunho}
+        buscarExercicios={buscarExercicios}
+        aoMudar={setRascunho}
+        aoCancelar={() => setRascunho(null)}
+      />
+    );
+  }
+  if (aberta) {
+    const editar = buscarExercicios ? () => setRascunho(rascunhoDaFicha(aberta)) : undefined;
+    return <FichaAberta ficha={aberta} aoVoltar={() => setAberta(null)} aoEditar={editar} />;
+  }
   return <ListaDeFichas fichas={fichas ?? []} aoAbrir={abrir} />;
 }
 
@@ -62,12 +85,23 @@ function ListaDeFichas(props: PropsDaLista) {
 
 const nomeDoDia = (dia: number): string => textos.fichas.diasDaSemana[dia - 1];
 
-function FichaAberta(props: { ficha: FichaParaEdicao; aoVoltar: () => void }) {
+interface PropsDaFichaAberta {
+  ficha: FichaParaEdicao;
+  aoVoltar: () => void;
+  aoEditar?: () => void;
+}
+
+function FichaAberta(props: PropsDaFichaAberta) {
   return (
     <ScrollView>
       <Pressable role="button" aria-label={textos.fichas.voltar} onPress={props.aoVoltar}>
         <Text>{textos.fichas.voltar}</Text>
       </Pressable>
+      {props.aoEditar && (
+        <Pressable role="button" aria-label={textos.fichas.editar} onPress={props.aoEditar}>
+          <Text>{textos.fichas.editar}</Text>
+        </Pressable>
+      )}
       <Text style={estilos.titulo}>{props.ficha.nome}</Text>
       {props.ficha.rotinas.map((rotina) => (
         <View key={rotina.nome} style={estilos.linha}>

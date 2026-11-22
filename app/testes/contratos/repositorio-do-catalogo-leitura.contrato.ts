@@ -45,6 +45,17 @@ export function contratoDeLeituraDoCatalogo(nome: string, criar: () => CenarioDe
       expect([...lidos[0].gruposIndiretos].sort()).toEqual(['Ombro anterior', 'Tríceps']);
     });
 
+    it('depois de arquivar, a leitura devolve o exercício como arquivado, e não como ativo', async () => {
+      const { repositorio, semear } = criar();
+      const supino = exercicio('0003', { nome: 'Supino Arquivado Teste' });
+      semear([supino]);
+
+      await repositorio.arquivarExercicio(supino.id);
+
+      const [lido] = await repositorio.listarExercicios();
+      expect(lido.situacao).toBe('arquivado');
+    });
+
     it('devolve exercício sem grupo e sem sinônimo com listas vazias (cardio fica fora da contagem)', async () => {
       const { repositorio, semear } = criar();
       semear([exercicio('0002', { nome: 'Corrida Teste' })]);
