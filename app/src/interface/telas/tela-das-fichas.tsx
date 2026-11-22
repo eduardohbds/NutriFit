@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type {
@@ -7,31 +7,39 @@ import type {
   LerFichaParaEdicao,
 } from '../../aplicacao/casos-de-uso/ler-ficha-para-edicao';
 import type { BuscarExercicios } from '../../aplicacao/casos-de-uso/buscar-exercicios';
+import type { SalvarFicha } from '../../aplicacao/casos-de-uso/salvar-ficha';
 import type { FichaDaLista, ListarFichas } from '../../aplicacao/casos-de-uso/listar-fichas';
 import { rascunhoDaFicha, type RascunhoDaFicha } from '../../aplicacao/rascunho-da-ficha';
 import { EditorDaFicha } from '../componentes/editor-da-ficha';
 import { textos } from '../textos';
+import { salvarRascunho } from './salvar-rascunho';
 
 export interface PropsDaTelaDasFichas {
   listarFichas: ListarFichas;
   lerFichaParaEdicao: LerFichaParaEdicao;
   // Sem a busca de exercícios a tela fica só de leitura: a edição precisa do catálogo.
   buscarExercicios?: BuscarExercicios;
+  // Sem o SalvarFicha a edição não oferece o botão de salvar.
+  salvarFicha?: SalvarFicha;
 }
 
 export function TelaDasFichas({
   listarFichas,
   lerFichaParaEdicao,
   buscarExercicios,
+  salvarFicha,
 }: PropsDaTelaDasFichas) {
   const [fichas, setFichas] = useState<FichaDaLista[] | null>(null);
   const [aberta, setAberta] = useState<FichaParaEdicao | null>(null);
   const [rascunho, setRascunho] = useState<RascunhoDaFicha | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [versaoSalva, setVersaoSalva] = useState<number | null>(null);
   const [erro, setErro] = useState<unknown>(null);
 
-  useEffect(() => {
+  const carregarFichas = useCallback(() => {
     listarFichas.executar().then(setFichas, (falha: unknown) => setErro(falha));
   }, [listarFichas]);
+  useEffect(carregarFichas, [carregarFichas]);
 
   // A falha ao ler chega ao limite de erro, que registra e avisa (nunca engolir).
   if (erro) throw erro;
@@ -40,19 +48,49 @@ export function TelaDasFichas({
     lerFichaParaEdicao.executar(id).then(setAberta, (falha: unknown) => setErro(falha));
   };
 
+  const salvar = (motivo: string) => {
+    if (!rascunho || !salvarFicha) return;
+    salvarRascunho(salvarFicha, lerFichaParaEdicao, rascunho, motivo).then(
+      (resultado) => {
+        if ('aviso' in resultado) {
+          setAviso(resultado.aviso);
+          return;
+        }
+        setAberta(resultado.ficha);
+        setRascunho(null);
+        setAviso(null);
+        setVersaoSalva(resultado.numero);
+        carregarFichas();
+      },
+      (falha: unknown) => setErro(falha),
+    );
+  };
+  const cancelar = () => {
+    setRascunho(null);
+    setAviso(null);
+  };
+
   if (aberta && rascunho && buscarExercicios) {
     return (
       <EditorDaFicha
         rascunho={rascunho}
         buscarExercicios={buscarExercicios}
+        aviso={aviso}
         aoMudar={setRascunho}
-        aoCancelar={() => setRascunho(null)}
+        aoSalvar={salvarFicha ? salvar : undefined}
+        aoCancelar={cancelar}
       />
     );
   }
   if (aberta) {
     const editar = buscarExercicios ? () => setRascunho(rascunhoDaFicha(aberta)) : undefined;
-    return <FichaAberta ficha={aberta} aoVoltar={() => setAberta(null)} aoEditar={editar} />;
+    const voltar = () => {
+      setAberta(null);
+      setVersaoSalva(null);
+    };
+    return (
+      <FichaAberta ficha={aberta} versaoSalva={versaoSalva} aoVoltar={voltar} aoEditar={editar} />
+    );
   }
   return <ListaDeFichas fichas={fichas ?? []} aoAbrir={abrir} />;
 }
@@ -89,6 +127,7 @@ interface PropsDaFichaAberta {
   ficha: FichaParaEdicao;
   aoVoltar: () => void;
   aoEditar?: () => void;
+  versaoSalva: number | null;
 }
 
 function FichaAberta(props: PropsDaFichaAberta) {
@@ -103,6 +142,7 @@ function FichaAberta(props: PropsDaFichaAberta) {
         </Pressable>
       )}
       <Text style={estilos.titulo}>{props.ficha.nome}</Text>
+      {props.versaoSalva !== null && <Text>{textos.fichas.versaoSalva(props.versaoSalva)}</Text>}
       {props.ficha.rotinas.map((rotina) => (
         <View key={rotina.nome} style={estilos.linha}>
           <Text style={estilos.nome}>{rotina.nome}</Text>

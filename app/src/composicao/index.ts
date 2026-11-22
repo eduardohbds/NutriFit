@@ -6,6 +6,7 @@ import { RepositorioDeFichasSqlite } from '../adaptadores/sqlite/repositorio-de-
 import { RepositorioDoCatalogoSqlite } from '../adaptadores/sqlite/repositorio-do-catalogo-sqlite';
 import { ConexaoDoBancoExpo } from '../adaptadores/sqlite/conexao-do-banco-expo';
 import { EsquemaDoBancoExpo } from '../adaptadores/sqlite/esquema-do-banco-expo';
+import { GeradorUuidV7 } from '../adaptadores/sistema/gerador-uuid-v7';
 import { CopiaDoBancoEmArquivo } from '../adaptadores/sistema/copia-do-banco-em-arquivo';
 import { RegistroDeFalhasEmArquivo } from '../adaptadores/sistema/registro-de-falhas-em-arquivo';
 import { RelogioDoSistema } from '../adaptadores/sistema/relogio-do-sistema';
@@ -18,6 +19,7 @@ import { ListarExerciciosDoCatalogo } from '../aplicacao/casos-de-uso/listar-exe
 import { ListarFichas } from '../aplicacao/casos-de-uso/listar-fichas';
 import { MigrarBanco } from '../aplicacao/casos-de-uso/migrar-banco';
 import { RegistrarFalha } from '../aplicacao/casos-de-uso/registrar-falha';
+import { SalvarFicha } from '../aplicacao/casos-de-uso/salvar-ficha';
 
 const versaoApp = Constants.expoConfig?.version ?? '0.0.0';
 const NOME_DO_BANCO = 'nutrifit.db';
@@ -73,10 +75,12 @@ export function casosDeFichas(): {
   buscarExercicios: BuscarExercicios;
   listarFichas: ListarFichas;
   lerFichaParaEdicao: LerFichaParaEdicao;
+  salvarFicha: SalvarFicha;
 } {
   return {
     buscarExercicios: new BuscarExercicios(catalogo()),
     listarFichas: new ListarFichas(fichas()),
     lerFichaParaEdicao: new LerFichaParaEdicao(fichas(), catalogo()),
+    salvarFicha: new SalvarFicha(fichas(), catalogo(), new GeradorUuidV7(), new RelogioDoSistema()),
   };
 }
