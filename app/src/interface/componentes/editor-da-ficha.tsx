@@ -23,18 +23,25 @@ interface Linha {
 export interface PropsDoEditorDaFicha {
   rascunho: RascunhoDaFicha;
   buscarExercicios: BuscarExercicios;
+  aviso: string | null;
   aoMudar: (rascunho: RascunhoDaFicha) => void;
+  // Sem esta função não há botão de salvar.
+  aoSalvar?: (motivo: string) => void;
   aoCancelar: () => void;
 }
 
-// Edita um rascunho em memória: nada é gravado aqui (RB02, FI-4). Gravar é da US-007c3.
+// Edita um rascunho em memória: nada é gravado aqui (RB02, FI-4). Quem grava é a tela, pelo
+// SalvarFicha, quando o usuário toca em Salvar.
 export function EditorDaFicha({
   rascunho,
   buscarExercicios,
+  aviso,
   aoMudar,
+  aoSalvar,
   aoCancelar,
 }: PropsDoEditorDaFicha) {
   const [escolhendo, setEscolhendo] = useState<Linha | null>(null);
+  const [motivo, setMotivo] = useState('');
 
   if (escolhendo) {
     const escolher = (exercicio: Parameters<typeof comExercicio>[3]) => {
@@ -56,6 +63,7 @@ export function EditorDaFicha({
         <Text>{textos.fichas.cancelarEdicao}</Text>
       </Pressable>
       <Text style={estilos.titulo}>{rascunho.nome}</Text>
+      {aviso !== null && <Text>{aviso}</Text>}
       {rascunho.rotinas.map((rotina, indice) => (
         <RotinaEditavel
           key={rotina.nome}
@@ -66,6 +74,17 @@ export function EditorDaFicha({
           }
         />
       ))}
+      <TextInput
+        aria-label={textos.fichas.motivo}
+        value={motivo}
+        onChangeText={setMotivo}
+        style={estilos.campo}
+      />
+      {aoSalvar && (
+        <Pressable role="button" aria-label={textos.fichas.salvar} onPress={() => aoSalvar(motivo)}>
+          <Text>{textos.fichas.salvar}</Text>
+        </Pressable>
+      )}
     </ScrollView>
   );
 }

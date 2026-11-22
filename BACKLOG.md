@@ -363,13 +363,12 @@ A história original não cabia num commit: a tela precisa ler fichas (que nenhu
 - Falha inaceitável envolvida: FI-4.
 
 ### US-007c3: Salvar a ficha pela tela
-- Status: a fazer
-- Contexto: ver US-007c. Depende da US-007c2.
+- Status: aceita
+- Contexto: ver US-007c. Depende da US-007c2. Salva a ficha que já existe como versão nova; a ficha nova (versão 1, inativa) depende de a tela criar rotinas e linhas, e por isso o critério foi para a US-007d (decisão do usuário).
 - Critérios de aceite (cada um vira um teste):
   - Dada uma edição válida, quando o usuário salva, então a tela grava uma versão nova pelo `SalvarFicha` e mostra o número dela; o motivo é opcional.
   - Dado um salvamento bloqueado por uma regra (tipo de rotina, séries, meta, técnica, descanso, grupo), quando a tela mostra o aviso, então o texto diz a rotina e a linha, o valor recebido e o formato esperado, em português do Brasil e vindo do arquivo único de textos, e nada do que foi digitado se perde.
-  - Dada uma ficha nova, quando o usuário a salva, então ela nasce inativa e aparece como versão 1.
-- Fora do escopo: ativar, duplicar e arquivar (US-009).
+- Fora do escopo: ficha nova pela tela (US-007d); ativar, duplicar e arquivar (US-009).
 - Falha inaceitável envolvida: FI-4.
 
 ### US-007d: Editar o resto da ficha (grupo, unilateral, observações, linhas e rotinas)
@@ -379,7 +378,8 @@ A história original não cabia num commit: a tela precisa ler fichas (que nenhu
   - Dada uma linha, quando o usuário altera o grupo em sequência, o unilateral ou as observações, então o rascunho guarda a mudança sem gravar nada.
   - Dada uma rotina, quando o usuário inclui, remove ou reordena linhas, então a ordem do rascunho muda sem gravar nada.
   - Dada uma ficha, quando o usuário inclui, remove ou renomeia rotinas, ou muda o nome da ficha, então o rascunho guarda a mudança sem gravar nada.
-- Fora do escopo: gravar (US-007c3).
+  - Dada uma ficha nova montada na tela, quando o usuário a salva, então ela nasce inativa e aparece como versão 1 (veio da US-007c3).
+- Fora do escopo: gravar a ficha existente como versão nova (US-007c3).
 - Falha inaceitável envolvida: FI-4 (o rascunho nunca toca no banco).
 
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência

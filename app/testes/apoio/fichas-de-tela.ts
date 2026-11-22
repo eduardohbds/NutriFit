@@ -90,12 +90,8 @@ export async function fichasParaTela() {
   const ids: IdsPorNome = new Map(
     exercicios.flatMap((e) => [e.nome, ...e.sinonimos].map((nome) => [nome, e.id] as const)),
   );
-  const salvar = new SalvarFicha(
-    fichas,
-    catalogo.repositorio,
-    new GeradorDeIdentificadorSequencial(),
-    new RelogioFixo(),
-  );
+  const gerador = new GeradorDeIdentificadorSequencial();
+  const salvar = new SalvarFicha(fichas, catalogo.repositorio, gerador, new RelogioFixo());
   const dt01 = await salvar.executar(pedidoDaDt01(ids));
   const completo = await salvar.executar(pedidoCompleto(ids));
   const ajuste = { ...pedidoCompleto(ids), fichaId: completo.fichaId, motivo: 'ajuste' };
@@ -107,6 +103,7 @@ export async function fichasParaTela() {
     fichaDaDt01: dt01.fichaId,
     fichaCompleta: completo.fichaId,
     buscarExercicios: new BuscarExercicios(catalogo.repositorio),
+    salvarFicha: salvar,
     listarFichas: new ListarFichas(fichas),
     lerFichaParaEdicao: new LerFichaParaEdicao(fichas, catalogo.repositorio),
   };

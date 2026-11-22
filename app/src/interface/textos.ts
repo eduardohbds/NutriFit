@@ -43,6 +43,11 @@ export const textos = {
     observacoes: (texto: string) => `Observações: ${texto}`,
     editar: 'Editar',
     cancelarEdicao: 'Cancelar edição',
+    salvar: 'Salvar',
+    motivo: 'Motivo (opcional)',
+    versaoSalva: (numero: number) => `Versão ${numero} salva`,
+    avisoDeLinha: (campo: string, recebido: string, esperado: string) =>
+      `${campo}. Valor recebido: ${recebido}. Formato esperado: ${esperado}.`,
     voltarParaEdicao: 'Voltar à edição',
     trocarExercicio: (rotina: string, ordem: number) =>
       `Trocar exercício, ${rotina}, linha ${ordem}`,
