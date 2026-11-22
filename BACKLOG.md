@@ -337,18 +337,40 @@ A história original não cabia num commit: ela mistura as regras de uma ficha v
 - Falha inaceitável envolvida: nenhuma direta.
 - Notas de domínio: a ficha entra como dado de teste em testes/casos-de-referencia/ficha-de-referencia.ts, para a importação e a exportação reaproveitarem (TE04, TE05, TE10).
 
-### US-007c: Tela de edição da ficha
-- Status: a fazer
-- Contexto: ver US-007. A US-007 original previa a tela de criar e editar a ficha, mas as US-007a, US-007b e US-008 entregaram só os casos de uso e as regras (`SalvarFicha`, listas por série, grupos em sequência). Sem a tela, o usuário não consegue montar nem alterar a ficha no aparelho (RF05, F02). Depende da US-007a, da US-008 e da tela do catálogo (US-004c).
+### US-007c: Tela de edição da ficha (quebrada em US-007c1, US-007c2 e US-007c3)
+A história original não cabia num commit: a tela precisa ler fichas (que nenhuma porta lista ainda), editar linhas com o catálogo e salvar pelo `SalvarFicha`. Contexto comum: as US-007a, US-007b e US-008 entregaram só os casos de uso e as regras; sem a tela, o usuário não monta nem altera a ficha no aparelho (RF05, F02). Depende da US-007a, da US-008 e da tela do catálogo (US-004c). Falha inaceitável envolvida em todas: FI-4 (apagar ou alterar versão, sessão ou histórico): a tela só lê e cria versões novas. A rota do Expo Router fica fina e a tela em `src/interface`, com o teste de tela no `renderRouter` (seção 10 do AGENTS.md).
+
+### US-007c1: Listar fichas e abrir a ficha (leitura)
+- Status: aceita
+- Contexto: ver US-007c. Primeira parte: o usuário vê as fichas e o conteúdo da versão atual, sem editar.
 - Critérios de aceite (cada um vira um teste):
-  - Dada uma ficha existente, quando o usuário abre a edição, então a tela mostra as rotinas e as linhas da versão atual, com exercício, ordem, grupo, séries, meta, carga, técnica, descanso, unilateral e observações.
+  - Dadas fichas gravadas, quando o usuário abre a lista, então vê o nome, a situação e a versão atual de cada uma, com a ativa primeiro e as arquivadas fora das escolhas.
+  - Dada uma ficha existente, quando o usuário a abre, então a tela mostra as rotinas e as linhas da versão atual, com exercício, ordem, grupo, séries, meta, carga, técnica, descanso, unilateral e observações, nos mesmos textos da planilha (lista por barra quando as séries diferem).
+  - Dada a ficha de referência (DT01), quando é aberta, então aparecem as 5 rotinas por dia da semana e as 30 linhas, com Esteira e a observação "ou Corrida" e o nome do catálogo no lugar do sinônimo.
+  - Dado o texto lido de uma ficha, quando volta para o `SalvarFicha`, então grava uma versão idêntica, sem perder nada (base da edição).
+- Fora do escopo: editar, escolher exercício e salvar (US-007c2 e US-007c3); ativar, duplicar e arquivar (US-009); versões (US-010).
+- Falha inaceitável envolvida: FI-4, só leitura.
+- Notas de domínio: entra `listarFichas()` na porta `RepositorioDeFichas` (falso, SQLite e contrato) e os casos de uso `ListarFichas` e `LerFichaParaEdicao`; o caminho de volta da planilha é `textosDasSeries`.
+
+### US-007c2: Editar as linhas da ficha
+- Status: a fazer
+- Contexto: ver US-007c. Depende da US-007c1.
+- Pendência herdada da US-007c1: carga ou descanso preenchidos só em algumas séries (outras vazias, possível só por dados gravados direto pela porta) não têm texto de planilha; decidir aqui como a edição os mostra e os recusa.
+- Critérios de aceite (cada um vira um teste):
   - Dada uma linha, quando o usuário escolhe o exercício, então só os do catálogo são oferecidos, com busca por nome ou sinônimo.
-  - Dados os campos de séries preenchidos como na planilha (valor único ou lista por barra, como 90/90/90/120), quando o usuário salva, então a tela grava uma versão nova pelo `SalvarFicha` e mostra o número dela; o motivo é opcional.
+  - Dados os campos de séries, quando o usuário os digita como na planilha (valor único ou lista por barra, como 90/90/90/120), então a tela guarda o rascunho sem gravar nada.
+- Fora do escopo: gravar (US-007c3).
+- Falha inaceitável envolvida: FI-4.
+
+### US-007c3: Salvar a ficha pela tela
+- Status: a fazer
+- Contexto: ver US-007c. Depende da US-007c2.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma edição válida, quando o usuário salva, então a tela grava uma versão nova pelo `SalvarFicha` e mostra o número dela; o motivo é opcional.
   - Dado um salvamento bloqueado por uma regra (tipo de rotina, séries, meta, técnica, descanso, grupo), quando a tela mostra o aviso, então o texto diz a rotina e a linha, o valor recebido e o formato esperado, em português do Brasil e vindo do arquivo único de textos, e nada do que foi digitado se perde.
   - Dada uma ficha nova, quando o usuário a salva, então ela nasce inativa e aparece como versão 1.
-- Fora do escopo: ativar, duplicar e arquivar (US-009); histórico, comparação e restauração de versões (US-010); travar exercícios (US-011); importação e exportação (E-10); execução dos grupos em sequência na tela de treino (E-04).
-- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico): a tela só cria versões novas.
-- Notas de domínio: a rota do Expo Router fica fina e a tela em `src/interface`, com o teste de tela no `renderRouter` (seção 10 do AGENTS.md). A leitura da ficha e da versão atual pode pedir um caso de uso de leitura novo; se pedir porta nova, a história para e chama o usuário. Se não couber num commit, quebrar em listar fichas, editar linhas e salvar.
+- Fora do escopo: ativar, duplicar e arquivar (US-009).
+- Falha inaceitável envolvida: FI-4.
 
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência
 - Status: aceita

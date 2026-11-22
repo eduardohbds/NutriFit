@@ -1,4 +1,4 @@
-import { and, asc, eq, max } from 'drizzle-orm';
+import { and, asc, eq, max, sql } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 import type { RepositorioDeFichas } from '../../aplicacao/portas/repositorio-de-fichas';
@@ -51,6 +51,16 @@ export class RepositorioDeFichasSqlite implements RepositorioDeFichas {
       return proximo;
     });
     return this.versaoDeNumero(fichaId, numero);
+  }
+
+  // A data de criação pode empatar entre fichas gravadas juntas; o rowid desempata pela gravação.
+  async listarFichas(): Promise<Ficha[]> {
+    const linhas = this.banco
+      .select()
+      .from(ficha)
+      .orderBy(asc(ficha.criadaEm), sql`${ficha}.rowid`)
+      .all();
+    return linhas.map(lerFicha);
   }
 
   async listarVersoes(fichaId: Identificador): Promise<VersaoDaFicha[]> {
@@ -156,6 +166,16 @@ function gravarSerie(tx: Gravador, itemId: Identificador, s: SeriePlanejada, pos
       descansoSegundos: s.descansoSegundos,
     })
     .run();
+}
+
+function lerFicha(linha: typeof ficha.$inferSelect): Ficha {
+  return {
+    id: Identificador.de(linha.id),
+    nome: linha.nome,
+    situacao: linha.situacao as Ficha['situacao'],
+    origem: linha.origem as Ficha['origem'],
+    criadaEm: InstanteUtc.de(linha.criadaEm),
+  };
 }
 
 type LinhaDaVersao = typeof versaoFicha.$inferSelect;

@@ -95,6 +95,34 @@ export function contratoDoRepositorioDeFichas(nome: string, criar: () => Cenario
       expect(guardada.rotinas[0].itens[0].series).toHaveLength(2);
     });
 
+    it('listar as fichas devolve só as fichas, na ordem de criação, sem versões', async () => {
+      const { repositorio, fabrica } = iniciar();
+      const primeira = fabrica.ficha();
+      const segunda = { ...fabrica.ficha(), nome: 'Treino B', situacao: 'arquivada' as const };
+      await repositorio.criarFicha(primeira, fabrica.versao({ series: 1, cargaEmQuilos: 40 }));
+      await repositorio.criarFicha(segunda, fabrica.versao({ series: 2, cargaEmQuilos: 45 }));
+
+      const fichas = await repositorio.listarFichas();
+
+      expect(fichas).toEqual([primeira, segunda]);
+    });
+
+    it('listar as fichas sem nenhuma gravada devolve lista vazia', async () => {
+      const { repositorio } = iniciar();
+
+      expect(await repositorio.listarFichas()).toEqual([]);
+    });
+
+    it('salvar uma versão nova não duplica nem muda a ficha listada', async () => {
+      const { repositorio, fabrica } = iniciar();
+      const ficha = fabrica.ficha();
+      await repositorio.criarFicha(ficha, fabrica.versao({ series: 1, cargaEmQuilos: 40 }));
+      const versao2 = fabrica.versao({ series: 2, cargaEmQuilos: 45 });
+      await repositorio.salvarNovaVersao(ficha.id, versao2);
+
+      expect(await repositorio.listarFichas()).toEqual([ficha]);
+    });
+
     it('salvar versão de uma ficha que não existe falha sem gravar nada', async () => {
       const { repositorio, fabrica } = iniciar();
       const inexistente = Identificador.de('00000000-0000-7000-8000-00000000ffff');

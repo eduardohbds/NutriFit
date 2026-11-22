@@ -19,9 +19,11 @@ function copiar(versao: VersaoDaFicha): VersaoDaFicha {
 }
 
 export class RepositorioDeFichasEmMemoria implements RepositorioDeFichas {
+  private readonly fichasGravadas = new Map<string, Ficha>();
   private readonly versoesPorFicha = new Map<string, VersaoDaFicha[]>();
 
   async criarFicha(ficha: Ficha, primeiraVersao: NovaVersaoDaFicha): Promise<VersaoDaFicha> {
+    this.fichasGravadas.set(ficha.id.valor, { ...ficha });
     this.versoesPorFicha.set(ficha.id.valor, []);
     return this.salvarNovaVersao(ficha.id, primeiraVersao);
   }
@@ -35,6 +37,10 @@ export class RepositorioDeFichasEmMemoria implements RepositorioDeFichas {
     const gravada = copiar({ ...versao, fichaId, numero: versoes.length + 1 });
     versoes.push(gravada);
     return copiar(gravada);
+  }
+
+  async listarFichas(): Promise<Ficha[]> {
+    return [...this.fichasGravadas.values()].map((ficha) => ({ ...ficha }));
   }
 
   async listarVersoes(fichaId: Identificador): Promise<VersaoDaFicha[]> {
