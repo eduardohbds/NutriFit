@@ -3,13 +3,16 @@ import { TelaDasFichas } from '../src/interface/telas/tela-das-fichas';
 
 // Rota fina: a tela de verdade fica em src/interface (AGENTS.md seção 3).
 export default function Fichas() {
-  const { listarFichas, lerFichaParaEdicao, buscarExercicios, salvarFicha } = casosDeFichas();
+  const casos = casosDeFichas();
   return (
     <TelaDasFichas
-      listarFichas={listarFichas}
-      lerFichaParaEdicao={lerFichaParaEdicao}
-      buscarExercicios={buscarExercicios}
-      salvarFicha={salvarFicha}
+      listarFichas={casos.listarFichas}
+      lerFichaParaEdicao={casos.lerFichaParaEdicao}
+      buscarExercicios={casos.buscarExercicios}
+      salvarFicha={casos.salvarFicha}
+      ativarFicha={casos.ativarFicha}
+      duplicarFicha={casos.duplicarFicha}
+      arquivarFicha={casos.arquivarFicha}
     />
   );
 }

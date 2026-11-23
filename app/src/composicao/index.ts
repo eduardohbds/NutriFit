@@ -12,7 +12,10 @@ import { RegistroDeFalhasEmArquivo } from '../adaptadores/sistema/registro-de-fa
 import { RelogioDoSistema } from '../adaptadores/sistema/relogio-do-sistema';
 import { AbrirBanco } from '../aplicacao/casos-de-uso/abrir-banco';
 import { ConfigurarConexao } from '../aplicacao/casos-de-uso/configurar-conexao';
+import { ArquivarFicha } from '../aplicacao/casos-de-uso/arquivar-ficha';
+import { AtivarFicha } from '../aplicacao/casos-de-uso/ativar-ficha';
 import { BuscarExercicios } from '../aplicacao/casos-de-uso/buscar-exercicios';
+import { DuplicarFicha } from '../aplicacao/casos-de-uso/duplicar-ficha';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
 import { LerFichaParaEdicao } from '../aplicacao/casos-de-uso/ler-ficha-para-edicao';
 import { ListarExerciciosDoCatalogo } from '../aplicacao/casos-de-uso/listar-exercicios-do-catalogo';
@@ -76,11 +79,17 @@ export function casosDeFichas(): {
   listarFichas: ListarFichas;
   lerFichaParaEdicao: LerFichaParaEdicao;
   salvarFicha: SalvarFicha;
+  ativarFicha: AtivarFicha;
+  duplicarFicha: DuplicarFicha;
+  arquivarFicha: ArquivarFicha;
 } {
   return {
     buscarExercicios: new BuscarExercicios(catalogo()),
     listarFichas: new ListarFichas(fichas()),
     lerFichaParaEdicao: new LerFichaParaEdicao(fichas(), catalogo()),
     salvarFicha: new SalvarFicha(fichas(), catalogo(), new GeradorUuidV7(), new RelogioDoSistema()),
+    ativarFicha: new AtivarFicha(fichas()),
+    duplicarFicha: new DuplicarFicha(fichas(), new GeradorUuidV7(), new RelogioDoSistema()),
+    arquivarFicha: new ArquivarFicha(fichas()),
   };
 }
