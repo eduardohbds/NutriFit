@@ -407,7 +407,7 @@ A história original não cabia num commit: ela mistura campos que faltam em cad
 - Notas de domínio: o rascunho passa a guardar o tipo de rotina (dia da semana ou rotação), lido da primeira rotina da ficha, para saber como nomear a rotina nova (RB01); os nomes dos dias saem de um só lugar, no domínio.
 
 ### US-007d4: Ficha nova pela tela
-- Status: em andamento
+- Status: aceita
 - Contexto: ver US-007d. Depende da US-007d3.
 - Critérios de aceite (cada um vira um teste):
   - Dada a lista de fichas, quando o usuário toca em Nova ficha, então abre um rascunho vazio, pedindo o nome e o tipo de rotina (dia da semana ou rotação).
