@@ -1,3 +1,4 @@
+import { DIAS_DA_SEMANA } from '../dominio/dia-da-semana';
 import type { Identificador } from '../dominio/identificador';
 import { ErroDeValidacao } from '../dominio/erro-de-validacao';
 import type { FichaParaEdicao, ItemParaEdicao } from './casos-de-uso/ler-ficha-para-edicao';
@@ -26,9 +27,13 @@ export interface RotinaEmEdicao {
   itens: ItemEmEdicao[];
 }
 
+// Como as rotinas da ficha se identificam (RB01): todas por dia da semana ou todas por rótulo.
+export type TipoDeRotina = 'dia-da-semana' | 'rotacao';
+
 export interface RascunhoDaFicha {
   fichaId: Identificador;
   nome: string;
+  tipoDeRotina: TipoDeRotina;
   rotinas: RotinaEmEdicao[];
 }
 
@@ -55,10 +60,17 @@ function itemEmEdicao(item: ItemParaEdicao): ItemEmEdicao {
   };
 }
 
+// A ficha é por dia da semana quando a primeira rotina tem dia; RB01 garante que as outras seguem.
+function tipoDeRotinaDa(ficha: FichaParaEdicao): TipoDeRotina {
+  const dia = ficha.rotinas[0]?.diaDaSemana;
+  return typeof dia === 'number' ? 'dia-da-semana' : 'rotacao';
+}
+
 export function rascunhoDaFicha(ficha: FichaParaEdicao): RascunhoDaFicha {
   return {
     fichaId: ficha.fichaId,
     nome: ficha.nome,
+    tipoDeRotina: tipoDeRotinaDa(ficha),
     rotinas: ficha.rotinas.map((rotina) => ({
       nome: rotina.nome,
       diaDaSemana: rotina.diaDaSemana,
@@ -255,4 +267,73 @@ export function comLinhaMovida(
     [movidos[item], movidos[alvo]] = [movidos[alvo], movidos[item]];
     return movidos;
   });
+}
+
+const LETRAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+// A rotina nova nasce vazia: na ficha por dia, com o primeiro dia da semana livre e o nome dele;
+// na ficha por rotação, com o primeiro "Treino A, B, C..." ainda não usado. Nulo se não há vaga.
+function proximaRotina(rascunho: RascunhoDaFicha): RotinaEmEdicao | null {
+  if (rascunho.tipoDeRotina === 'dia-da-semana') {
+    const usados = new Set(rascunho.rotinas.map((r) => r.diaDaSemana));
+    const dia = DIAS_DA_SEMANA.findIndex((_, posicao) => !usados.has(posicao + 1)) + 1;
+    return dia === 0 ? null : { nome: DIAS_DA_SEMANA[dia - 1], diaDaSemana: dia, itens: [] };
+  }
+  const usados = new Set(rascunho.rotinas.map((r) => r.nome.trim()));
+  const letra = [...LETRAS].find((l) => !usados.has(`Treino ${l}`));
+  return letra ? { nome: `Treino ${letra}`, diaDaSemana: null, itens: [] } : null;
+}
+
+// A tela só oferece Nova rotina quando há vaga (um dia livre ou um rótulo livre).
+export function podeIncluirRotina(rascunho: RascunhoDaFicha): boolean {
+  return proximaRotina(rascunho) !== null;
+}
+
+function exigirRotina(rascunho: RascunhoDaFicha, rotina: number): void {
+  if (rascunho.rotinas[rotina]) return;
+  throw new ErroDeValidacao('rotina', 'rotina existente no rascunho', String(rotina));
+}
+
+export function comRotinaNova(rascunho: RascunhoDaFicha): RascunhoDaFicha {
+  const nova = proximaRotina(rascunho);
+  if (!nova) {
+    throw new ErroDeValidacao(
+      'rotina',
+      'um dia ou rótulo livre para a rotina nova',
+      'nenhum livre',
+    );
+  }
+  return { ...rascunho, rotinas: [...rascunho.rotinas, nova] };
+}
+
+// Tirar a última rotina deixa a ficha sem rotinas; quem a barra é o SalvarFicha, ao salvar.
+export function semRotina(rascunho: RascunhoDaFicha, rotina: number): RascunhoDaFicha {
+  exigirRotina(rascunho, rotina);
+  return { ...rascunho, rotinas: rascunho.rotinas.filter((_, posicao) => posicao !== rotina) };
+}
+
+// O nome em branco é aceito no rascunho; o dia da semana da rotina não muda.
+export function comRotinaRenomeada(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  nome: string,
+): RascunhoDaFicha {
+  exigirRotina(rascunho, rotina);
+  const renomear = (r: RotinaEmEdicao, posicao: number) =>
+    posicao === rotina ? { ...r, nome } : r;
+  return { ...rascunho, rotinas: rascunho.rotinas.map(renomear) };
+}
+
+// Subir a primeira ou descer a última rotina não faz nada: devolve o mesmo rascunho.
+export function comRotinaMovida(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  deslocamento: -1 | 1,
+): RascunhoDaFicha {
+  exigirRotina(rascunho, rotina);
+  const alvo = rotina + deslocamento;
+  if (alvo < 0 || alvo >= rascunho.rotinas.length) return rascunho;
+  const movidas = [...rascunho.rotinas];
+  [movidas[rotina], movidas[alvo]] = [movidas[alvo], movidas[rotina]];
+  return { ...rascunho, rotinas: movidas };
 }

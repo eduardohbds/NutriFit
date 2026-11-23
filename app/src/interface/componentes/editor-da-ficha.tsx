@@ -8,10 +8,15 @@ import {
   comLinhaMovida,
   comLinhaNova,
   comNome,
+  comRotinaMovida,
+  comRotinaNova,
+  comRotinaRenomeada,
   comObservacoes,
   comTexto,
   comUnilateral,
+  podeIncluirRotina,
   semLinha,
+  semRotina,
   type CampoDeSeries,
   type ItemEmEdicao,
   type RascunhoDaFicha,
@@ -27,6 +32,15 @@ const CAMPOS: CampoDeSeries[] = ['quantidade', 'meta', 'carga', 'tecnica', 'desc
 interface Escolha {
   rotina: number;
   item: number | null;
+}
+
+// O que o usuário pode mudar numa rotina; subir e descer faltam na primeira e na última.
+interface EdicoesDaRotina {
+  renomear: (nome: string) => void;
+  subir?: () => void;
+  descer?: () => void;
+  remover: () => void;
+  adicionarLinha: () => void;
 }
 
 // O que o usuário pode mudar numa linha; cada função devolve o rascunho novo à tela.
@@ -95,6 +109,17 @@ export function EditorDaFicha({
     remover: () => aoMudar(semLinha(rascunho, rotina, item)),
   });
 
+  const edicoesDaRotina = (rotina: number): EdicoesDaRotina => ({
+    renomear: (nome) => aoMudar(comRotinaRenomeada(rascunho, rotina, nome)),
+    subir: rotina > 0 ? () => aoMudar(comRotinaMovida(rascunho, rotina, -1)) : undefined,
+    descer:
+      rotina < rascunho.rotinas.length - 1
+        ? () => aoMudar(comRotinaMovida(rascunho, rotina, 1))
+        : undefined,
+    remover: () => aoMudar(semRotina(rascunho, rotina)),
+    adicionarLinha: () => setEscolhendo({ rotina, item: null }),
+  });
+
   return (
     <ScrollView>
       <Pressable role="button" aria-label={textos.fichas.cancelarEdicao} onPress={aoCancelar}>
@@ -111,10 +136,18 @@ export function EditorDaFicha({
         <RotinaEditavel
           key={indice}
           rotina={rotina}
+          posicao={indice + 1}
+          edicoes={edicoesDaRotina(indice)}
           edicoesDe={(item) => edicoesDe(indice, item, rotina.itens.length - 1)}
-          aoAdicionar={() => setEscolhendo({ rotina: indice, item: null })}
         />
       ))}
+      {podeIncluirRotina(rascunho) && (
+        <BotaoDeAcao
+          rotulo={textos.fichas.novaRotina}
+          nome={textos.fichas.novaRotina}
+          aoTocar={() => aoMudar(comRotinaNova(rascunho))}
+        />
+      )}
       <TextInput
         aria-label={textos.fichas.motivo}
         value={motivo}
@@ -132,14 +165,41 @@ export function EditorDaFicha({
 
 interface PropsDaRotinaEditavel {
   rotina: RotinaEmEdicao;
+  posicao: number;
+  edicoes: EdicoesDaRotina;
   edicoesDe: (item: number) => EdicoesDaLinha;
-  aoAdicionar: () => void;
 }
 
-function RotinaEditavel({ rotina, edicoesDe, aoAdicionar }: PropsDaRotinaEditavel) {
+function RotinaEditavel({ rotina, posicao, edicoes, edicoesDe }: PropsDaRotinaEditavel) {
   return (
     <View style={estilos.rotina}>
-      <Text style={estilos.nome}>{rotina.nome}</Text>
+      <TextInput
+        aria-label={textos.fichas.nomeDaRotina(posicao)}
+        value={rotina.nome}
+        onChangeText={edicoes.renomear}
+        style={estilos.nome}
+      />
+      <View style={estilos.movimentos}>
+        {edicoes.subir && (
+          <BotaoDeAcao
+            rotulo={textos.fichas.subir}
+            nome={textos.fichas.subirRotina(rotina.nome)}
+            aoTocar={edicoes.subir}
+          />
+        )}
+        {edicoes.descer && (
+          <BotaoDeAcao
+            rotulo={textos.fichas.descer}
+            nome={textos.fichas.descerRotina(rotina.nome)}
+            aoTocar={edicoes.descer}
+          />
+        )}
+        <BotaoDeAcao
+          rotulo={textos.fichas.remover}
+          nome={textos.fichas.removerRotina(rotina.nome)}
+          aoTocar={edicoes.remover}
+        />
+      </View>
       {rotina.itens.map((item, posicao) => (
         <LinhaEditavel
           key={posicao}
@@ -152,7 +212,7 @@ function RotinaEditavel({ rotina, edicoesDe, aoAdicionar }: PropsDaRotinaEditave
       <BotaoDeAcao
         rotulo={textos.fichas.adicionar}
         nome={textos.fichas.adicionarLinha(rotina.nome)}
-        aoTocar={aoAdicionar}
+        aoTocar={edicoes.adicionarLinha}
       />
     </View>
   );
@@ -238,7 +298,7 @@ function LinhaEditavel({ rotina, ordem, item, edicoes }: PropsDaLinhaEditavel) {
 const estilos = StyleSheet.create({
   titulo: { fontSize: 20, fontWeight: '600', padding: 16 },
   rotina: { paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1 },
-  nome: { fontSize: 16 },
+  nome: { fontSize: 16, borderWidth: 1, padding: 6 },
   linha: { paddingVertical: 8 },
   campo: { borderWidth: 1, padding: 6 },
   movimentos: { flexDirection: 'row', gap: 12 },
