@@ -1,3 +1,5 @@
+import { DIAS_DA_SEMANA } from '../dominio/dia-da-semana';
+
 // Todo texto exibido ao usuário fica aqui, em português do Brasil (RES23, RNF35).
 export const textos = {
   migracao: {
@@ -47,6 +49,11 @@ export const textos = {
     descerLinha: (rotina: string, ordem: number) => `Descer, ${rotina}, linha ${ordem}`,
     removerLinha: (rotina: string, ordem: number) => `Remover, ${rotina}, linha ${ordem}`,
     adicionar: 'Adicionar linha',
+    novaRotina: 'Nova rotina',
+    nomeDaRotina: (posicao: number) => `Nome da rotina ${posicao}`,
+    subirRotina: (nome: string) => `Subir rotina, ${nome}`,
+    descerRotina: (nome: string) => `Descer rotina, ${nome}`,
+    removerRotina: (nome: string) => `Remover rotina, ${nome}`,
     subir: 'Subir',
     descer: 'Descer',
     remover: 'Remover',
@@ -85,7 +92,7 @@ export const textos = {
     nomeDaFicha: 'Nome da ficha',
     rotuloDoCampo: (campo: string, rotina: string, ordem: number) =>
       `${campo}, ${rotina}, linha ${ordem}`,
-    diasDaSemana: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+    diasDaSemana: DIAS_DA_SEMANA as readonly string[],
   },
   validacao: {
     recusado: (recebido: string, esperado: string) =>

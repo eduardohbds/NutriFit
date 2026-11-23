@@ -395,13 +395,16 @@ A história original não cabia num commit: ela mistura campos que faltam em cad
 - Falha inaceitável envolvida: FI-4.
 
 ### US-007d3: Incluir, remover, renomear e reordenar rotinas
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-007d. Depende da US-007d2.
 - Critérios de aceite (cada um vira um teste):
-  - Dada uma ficha, quando o usuário inclui, remove, renomeia ou reordena rotinas, então o rascunho guarda a mudança sem gravar nada; a rotina nova nasce vazia, com o próximo dia da semana livre (ficha por dia) ou o próximo rótulo (ficha por rotação).
-  - Dada uma ficha sem nenhuma rotina, quando o usuário salva, então o salvamento é bloqueado (regra nova no `SalvarFicha`).
-- Fora do escopo: ficha nova (US-007d4).
+  - Dada uma ficha, quando o usuário inclui, remove, renomeia ou reordena rotinas, então o rascunho guarda a mudança sem gravar nada; a rotina nova nasce vazia, com o primeiro dia da semana livre e o nome desse dia (ficha por dia, e sem dia livre a tela não oferece Nova rotina) ou o primeiro rótulo "Treino A", "Treino B"... ainda não usado (ficha por rotação).
+  - Dada uma edição com rotinas incluídas, removidas, renomeadas ou reordenadas, quando o usuário salva, então a versão nova traz as rotinas na ordem do rascunho e as anteriores continuam idênticas.
+  - Dada uma ficha sem nenhuma rotina, quando o usuário salva, então o salvamento é bloqueado com o valor recebido "0 rotinas" e o formato esperado "ao menos 1 rotina" (regra nova no `SalvarFicha`).
+  - Dada uma rotina com o nome em branco, quando o usuário salva, então o salvamento é bloqueado indicando a rotina pela posição; o nome é aparado (regra nova no `SalvarFicha`).
+- Fora do escopo: ficha nova (US-007d4); mudar o dia da semana de uma rotina existente.
 - Falha inaceitável envolvida: FI-4.
+- Notas de domínio: o rascunho passa a guardar o tipo de rotina (dia da semana ou rotação), lido da primeira rotina da ficha, para saber como nomear a rotina nova (RB01); os nomes dos dias saem de um só lugar, no domínio.
 
 ### US-007d4: Ficha nova pela tela
 - Status: a fazer

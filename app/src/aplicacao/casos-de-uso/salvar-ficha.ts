@@ -15,7 +15,8 @@ import { exigirTipoUnicoDeRotina } from '../../dominio/identificacao-de-rotina';
 import type { Identificador } from '../../dominio/identificador';
 import { listaPorSerie } from '../../dominio/lista-por-serie';
 import { MetaDeSerie } from '../../dominio/meta-de-serie';
-import { exigirRotinasComLinhas } from '../../dominio/rotina-com-linhas';
+import { nomeDaRotina } from '../../dominio/nome-da-rotina';
+import { exigirFichaComRotinas, exigirRotinasComLinhas } from '../../dominio/rotina-com-linhas';
 import { lerTecnica } from '../../dominio/tecnica-de-serie';
 import type { GeradorDeIdentificador } from '../portas/gerador-de-identificador';
 import type { Relogio } from '../portas/relogio';
@@ -134,8 +135,10 @@ export class SalvarFicha {
   // ficha existente ganha a versão seguinte e as anteriores não são tocadas.
   async executar(pedido: PedidoDeFicha): Promise<ResultadoDaFicha> {
     const nome = exigirNome(pedido.nome);
-    exigirTipoUnicoDeRotina(pedido.rotinas);
-    exigirRotinasComLinhas(pedido.rotinas);
+    exigirFichaComRotinas(pedido.rotinas);
+    const rotinas = pedido.rotinas.map((r, i) => ({ ...r, nome: nomeDaRotina(r.nome, i + 1) }));
+    exigirTipoUnicoDeRotina(rotinas);
+    exigirRotinasComLinhas(rotinas);
     const existentes = new Set((await this.catalogo.listarExercicios()).map((e) => e.id.valor));
     const versao: NovaVersaoDaFicha = {
       id: this.gerador.gerar(),
@@ -143,7 +146,7 @@ export class SalvarFicha {
       criadaEm: this.relogio.agora(),
       motivo: pedido.motivo?.trim() || null,
       resumo: null,
-      rotinas: pedido.rotinas.map((r) => this.montarRotina(r, existentes)),
+      rotinas: rotinas.map((r) => this.montarRotina(r, existentes)),
     };
     if (pedido.fichaId) return this.novaVersao(pedido.fichaId, versao, nome);
     return this.criarFicha(nome, versao);
