@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { FichaDaLista } from '../../aplicacao/casos-de-uso/listar-fichas';
 import { textos } from '../textos';
+import { BotaoDeAcao } from './botao-de-acao';
 
 export interface AcoesDaLista {
   ativar?: (ficha: FichaDaLista) => void;
@@ -67,21 +68,21 @@ function LinhaDaLista({ ficha, aoAbrir, aoAtivar, aoDuplicar, aoArquivar }: Prop
       </Pressable>
       <View style={estilos.acoes}>
         {aoAtivar && ficha.situacao !== 'ativa' && (
-          <BotaoDaLinha
+          <BotaoDeAcao
             rotulo={textos.fichas.ativar}
             nome={textos.fichas.ativarFicha(ficha.nome)}
             aoTocar={aoAtivar}
           />
         )}
         {aoDuplicar && (
-          <BotaoDaLinha
+          <BotaoDeAcao
             rotulo={textos.fichas.duplicar}
             nome={textos.fichas.duplicarFicha(ficha.nome)}
             aoTocar={aoDuplicar}
           />
         )}
         {aoArquivar && (
-          <BotaoDaLinha
+          <BotaoDeAcao
             rotulo={textos.fichas.arquivar}
             nome={textos.fichas.arquivarFicha(ficha.nome)}
             aoTocar={aoArquivar}
@@ -89,14 +90,6 @@ function LinhaDaLista({ ficha, aoAbrir, aoAtivar, aoDuplicar, aoArquivar }: Prop
         )}
       </View>
     </View>
-  );
-}
-
-function BotaoDaLinha(props: { rotulo: string; nome: string; aoTocar: () => void }) {
-  return (
-    <Pressable role="button" aria-label={props.nome} onPress={props.aoTocar} style={estilos.botao}>
-      <Text>{props.rotulo}</Text>
-    </Pressable>
   );
 }
 
@@ -111,12 +104,12 @@ function ConfirmacaoDeArquivamento({ ficha, aoConfirmar, aoCancelar }: PropsDaCo
   return (
     <View style={estilos.linha}>
       <Text>{textos.fichas.confirmarArquivar(ficha.nome)}</Text>
-      <BotaoDaLinha
+      <BotaoDeAcao
         rotulo={textos.fichas.confirmarArquivamento}
         nome={textos.fichas.confirmarArquivamento}
         aoTocar={aoConfirmar}
       />
-      <BotaoDaLinha
+      <BotaoDeAcao
         rotulo={textos.fichas.cancelarArquivamento}
         nome={textos.fichas.cancelarArquivamento}
         aoTocar={aoCancelar}
@@ -130,5 +123,4 @@ const estilos = StyleSheet.create({
   linha: { paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1 },
   nome: { fontSize: 16 },
   acoes: { flexDirection: 'row', gap: 12, paddingTop: 8 },
-  botao: { paddingVertical: 6 },
 });

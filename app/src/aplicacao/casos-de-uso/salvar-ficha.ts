@@ -15,6 +15,7 @@ import { exigirTipoUnicoDeRotina } from '../../dominio/identificacao-de-rotina';
 import type { Identificador } from '../../dominio/identificador';
 import { listaPorSerie } from '../../dominio/lista-por-serie';
 import { MetaDeSerie } from '../../dominio/meta-de-serie';
+import { exigirRotinasComLinhas } from '../../dominio/rotina-com-linhas';
 import { lerTecnica } from '../../dominio/tecnica-de-serie';
 import type { GeradorDeIdentificador } from '../portas/gerador-de-identificador';
 import type { Relogio } from '../portas/relogio';
@@ -134,6 +135,7 @@ export class SalvarFicha {
   async executar(pedido: PedidoDeFicha): Promise<ResultadoDaFicha> {
     const nome = exigirNome(pedido.nome);
     exigirTipoUnicoDeRotina(pedido.rotinas);
+    exigirRotinasComLinhas(pedido.rotinas);
     const existentes = new Set((await this.catalogo.listarExercicios()).map((e) => e.id.valor));
     const versao: NovaVersaoDaFicha = {
       id: this.gerador.gerar(),
