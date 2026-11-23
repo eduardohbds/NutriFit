@@ -1,5 +1,6 @@
 import { FabricaDeFichas } from '../apoio/ficha-de-exemplo';
 import type { RepositorioDeFichas } from '../../src/aplicacao/portas/repositorio-de-fichas';
+import { ErroDeValidacao } from '../../src/dominio/erro-de-validacao';
 import { Identificador } from '../../src/dominio/identificador';
 
 export interface CenarioDeFichas {
@@ -121,6 +122,84 @@ export function contratoDoRepositorioDeFichas(nome: string, criar: () => Cenario
       await repositorio.salvarNovaVersao(ficha.id, versao2);
 
       expect(await repositorio.listarFichas()).toEqual([ficha]);
+    });
+
+    describe('situação da ficha (US-009a)', () => {
+      async function gravar(
+        repositorio: RepositorioDeFichas,
+        fabrica: FabricaDeFichas,
+        situacao: 'ativa' | 'inativa' | 'arquivada',
+      ) {
+        const ficha = { ...fabrica.ficha(), situacao };
+        await repositorio.criarFicha(ficha, fabrica.versao({ series: 1, cargaEmQuilos: 40 }));
+        return ficha;
+      }
+      const situacoes = async (repositorio: RepositorioDeFichas) =>
+        (await repositorio.listarFichas()).map((ficha) => ficha.situacao);
+
+      it('ativar uma ficha deixa a que estava ativa como inativa (SL09)', async () => {
+        const { repositorio, fabrica } = iniciar();
+        await gravar(repositorio, fabrica, 'ativa');
+        const outra = await gravar(repositorio, fabrica, 'inativa');
+
+        await repositorio.ativarFicha(outra.id);
+
+        expect(await situacoes(repositorio)).toEqual(['inativa', 'ativa']);
+      });
+
+      it('ativar não mexe nas fichas arquivadas, só troca a ativa anterior', async () => {
+        const { repositorio, fabrica } = iniciar();
+        await gravar(repositorio, fabrica, 'arquivada');
+        await gravar(repositorio, fabrica, 'ativa');
+        const alvo = await gravar(repositorio, fabrica, 'inativa');
+
+        await repositorio.ativarFicha(alvo.id);
+
+        expect(await situacoes(repositorio)).toEqual(['arquivada', 'inativa', 'ativa']);
+      });
+
+      it('ativar sem nenhuma ficha ativa só marca a escolhida', async () => {
+        const { repositorio, fabrica } = iniciar();
+        const alvo = await gravar(repositorio, fabrica, 'inativa');
+
+        await repositorio.ativarFicha(alvo.id);
+
+        expect(await situacoes(repositorio)).toEqual(['ativa']);
+      });
+
+      it('ativar uma ficha que não existe falha com ErroDeValidacao e não altera nada', async () => {
+        const { repositorio, fabrica } = iniciar();
+        await gravar(repositorio, fabrica, 'ativa');
+        const inexistente = Identificador.de('00000000-0000-7000-8000-00000000ffff');
+
+        await expect(repositorio.ativarFicha(inexistente)).rejects.toBeInstanceOf(ErroDeValidacao);
+
+        expect(await situacoes(repositorio)).toEqual(['ativa']);
+      });
+
+      it('arquivar muda só a situação: a ficha e as versões continuam guardadas (RB04)', async () => {
+        const { repositorio, fabrica } = iniciar();
+        const ficha = await gravar(repositorio, fabrica, 'ativa');
+        await repositorio.salvarNovaVersao(
+          ficha.id,
+          fabrica.versao({ series: 2, cargaEmQuilos: 45 }),
+        );
+        const versoesAntes = await repositorio.listarVersoes(ficha.id);
+
+        await repositorio.arquivarFicha(ficha.id);
+
+        expect(await repositorio.listarFichas()).toEqual([{ ...ficha, situacao: 'arquivada' }]);
+        expect(await repositorio.listarVersoes(ficha.id)).toEqual(versoesAntes);
+      });
+
+      it('arquivar uma ficha que não existe falha com ErroDeValidacao', async () => {
+        const { repositorio } = iniciar();
+        const inexistente = Identificador.de('00000000-0000-7000-8000-00000000ffff');
+
+        await expect(repositorio.arquivarFicha(inexistente)).rejects.toBeInstanceOf(
+          ErroDeValidacao,
+        );
+      });
     });
 
     it('salvar versão de uma ficha que não existe falha sem gravar nada', async () => {

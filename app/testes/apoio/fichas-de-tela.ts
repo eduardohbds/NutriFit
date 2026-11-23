@@ -103,6 +103,7 @@ export async function fichasParaTela() {
     fichaDaDt01: dt01.fichaId,
     fichaCompleta: completo.fichaId,
     buscarExercicios: new BuscarExercicios(catalogo.repositorio),
+    gerador,
     salvarFicha: salvar,
     listarFichas: new ListarFichas(fichas),
     lerFichaParaEdicao: new LerFichaParaEdicao(fichas, catalogo.repositorio),

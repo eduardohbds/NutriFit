@@ -11,6 +11,13 @@ export interface RepositorioDeFichas {
   // Todas as fichas, arquivadas inclusive, na ordem de criação (a mais antiga primeiro; em empate de
   // data, a gravada antes). Só a ficha: as versões vêm de listarVersoes e buscarVersaoAtual.
   listarFichas(): Promise<Ficha[]>;
+  // Marca a ficha como ativa e, na mesma transação, a que estava ativa volta a inativa (SL09). Só
+  // muda a situação: versão, sessão e série não são tocadas (RB02, FI-4). Falha com
+  // ErroDeValidacao, sem alterar nada, se a ficha não existe.
+  ativarFicha(fichaId: Identificador): Promise<void>;
+  // Muda só a situação para arquivada: a ficha, as versões e as sessões continuam guardadas (RB04).
+  // Falha com ErroDeValidacao, sem alterar nada, se a ficha não existe.
+  arquivarFicha(fichaId: Identificador): Promise<void>;
   // Em ordem crescente de número.
   listarVersoes(fichaId: Identificador): Promise<VersaoDaFicha[]>;
   // A versão atual é a de maior número; nula se a ficha não existe.

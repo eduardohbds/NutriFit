@@ -63,6 +63,26 @@ export class RepositorioDeFichasSqlite implements RepositorioDeFichas {
     return linhas.map(lerFicha);
   }
 
+  // Uma só ficha ativa (SL09): o índice único parcial barra duas, e por isso a anterior vira
+  // inativa antes de a escolhida virar ativa, tudo na mesma transação. Só situação; nunca versão,
+  // sessão ou série (RB02, FI-4).
+  async ativarFicha(fichaId: Identificador): Promise<void> {
+    this.banco.transaction((tx) => {
+      if (!existeFicha(tx, fichaId))
+        throw new ErroDeValidacao('ficha', 'ficha existente', fichaId.valor);
+      tx.update(ficha).set({ situacao: 'inativa' }).where(eq(ficha.situacao, 'ativa')).run();
+      tx.update(ficha).set({ situacao: 'ativa' }).where(eq(ficha.id, fichaId.valor)).run();
+    });
+  }
+
+  async arquivarFicha(fichaId: Identificador): Promise<void> {
+    this.banco.transaction((tx) => {
+      if (!existeFicha(tx, fichaId))
+        throw new ErroDeValidacao('ficha', 'ficha existente', fichaId.valor);
+      tx.update(ficha).set({ situacao: 'arquivada' }).where(eq(ficha.id, fichaId.valor)).run();
+    });
+  }
+
   async listarVersoes(fichaId: Identificador): Promise<VersaoDaFicha[]> {
     const linhas = this.banco
       .select()

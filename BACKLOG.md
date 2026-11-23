@@ -394,16 +394,29 @@ A história original não cabia num commit: a tela precisa ler fichas (que nenhu
 - Falha inaceitável envolvida: nenhuma direta.
 - Notas de domínio: um valor único vale para todas as séries; lista separada por barra exige exatamente um valor por série (seção 11.3). Descanso aceita segundos (90) ou minutos e segundos (1:30).
 
-### US-009: Ativar, duplicar e arquivar fichas
-- Status: a fazer
-- Contexto: o treino do dia depende de haver uma ficha ativa, e fichas antigas precisam sair das escolhas sem perder as sessões (RF05).
+### US-009: Ativar, duplicar e arquivar fichas (quebrada em US-009a e US-009b)
+A história original não cabia num commit: ela mistura as regras e as portas (ativar, duplicar, arquivar) e os botões da tela. Contexto comum: o treino do dia depende de haver uma ficha ativa, e fichas antigas precisam sair das escolhas sem perder as sessões (RF05). SL09 (uma ficha ativa por vez) foi confirmada pelo usuário; o esquema já a impõe com um índice único parcial. Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico): ativar, duplicar e arquivar só mudam a situação ou inserem, e nada é excluído.
+
+### US-009a: Ativar, duplicar e arquivar fichas (casos de uso e portas)
+- Status: aceita
+- Contexto: ver US-009. Depende da US-007a e da US-007c1 (`listarFichas`).
 - Critérios de aceite (cada um vira um teste):
-  - Dadas duas fichas, quando o usuário marca uma como ativa, então a outra deixa de ser ativa (SL09).
-  - Dada uma ficha, quando o usuário a duplica, então surge uma ficha nova com conteúdo idêntico e histórico de versões próprio.
-  - Dada uma ficha com sessões, quando é arquivada, então some das escolhas e suas sessões continuam no histórico.
-- Fora do escopo: exclusão definitiva de fichas com sessões (proibida).
-- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: SL09 (uma ficha ativa por vez) é proposta a confirmar com o usuário.
+  - Dadas duas fichas, quando o usuário marca uma como ativa, então a outra deixa de ser ativa (SL09); ativar a que já está ativa não muda nada, e ficha arquivada não é ativada (recusada com o valor recebido e o formato esperado).
+  - Dada uma ficha, quando o usuário a duplica, então surge uma ficha nova inativa, com origem duplicada, nome "<nome> (cópia)" e conteúdo idêntico ao da versão atual como versão 1; o histórico de versões da cópia é próprio e a original não muda. Ficha arquivada também pode ser duplicada.
+  - Dada uma ficha com sessões, quando é arquivada, então some das escolhas e suas versões e sessões continuam no histórico (RB04); arquivar a ativa deixa o app sem ficha ativa.
+- Fora do escopo: botões na tela (US-009b); exclusão definitiva de fichas com sessões (proibida).
+- Falha inaceitável envolvida: FI-4.
+- Notas de domínio: entram `ativarFicha` e `arquivarFicha` na porta `RepositorioDeFichas` (falso, SQLite e contrato) e os casos de uso `AtivarFicha`, `ArquivarFicha` e `DuplicarFicha`; o `arquivarFicha` da porta do catálogo (US-002c) continua como está.
+
+### US-009b: Botões de ativar, duplicar e arquivar na tela das fichas
+- Status: a fazer
+- Contexto: ver US-009. Depende da US-009a e da US-007c1.
+- Critérios de aceite (cada um vira um teste):
+  - Dada a lista de fichas, quando o usuário toca em Ativar, então a ficha passa a aparecer como ativa e a anterior como inativa.
+  - Dada uma ficha, quando o usuário toca em Duplicar, então a cópia aparece na lista como inativa.
+  - Dada uma ficha, quando o usuário toca em Arquivar e confirma, então ela some da lista; sem confirmar, nada muda.
+- Fora do escopo: ver versões e restaurar (US-010).
+- Falha inaceitável envolvida: FI-4.
 
 ### US-010: Consultar versões e desfazer
 - Status: a fazer
