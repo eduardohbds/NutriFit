@@ -407,13 +407,14 @@ A história original não cabia num commit: ela mistura campos que faltam em cad
 - Notas de domínio: o rascunho passa a guardar o tipo de rotina (dia da semana ou rotação), lido da primeira rotina da ficha, para saber como nomear a rotina nova (RB01); os nomes dos dias saem de um só lugar, no domínio.
 
 ### US-007d4: Ficha nova pela tela
-- Status: a fazer
+- Status: em andamento
 - Contexto: ver US-007d. Depende da US-007d3.
 - Critérios de aceite (cada um vira um teste):
   - Dada a lista de fichas, quando o usuário toca em Nova ficha, então abre um rascunho vazio, pedindo o nome e o tipo de rotina (dia da semana ou rotação).
   - Dada uma ficha nova montada na tela, quando o usuário a salva, então ela nasce inativa e aparece como versão 1.
 - Fora do escopo: ativar a ficha nova (US-009b já cobre, pela lista).
 - Falha inaceitável envolvida: FI-4.
+- Notas de domínio: a ficha nova começa sem rotinas (o usuário inclui pela Nova rotina da US-007d3), o tipo de rotina é escolhido antes de abrir o editor e o nome é digitado no editor; o rascunho passa a aceitar ficha ainda sem identificador, e o botão Nova ficha só aparece quando a tela recebe a busca de exercícios e o salvamento.
 
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência
 - Status: aceita

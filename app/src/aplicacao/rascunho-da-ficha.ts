@@ -31,7 +31,8 @@ export interface RotinaEmEdicao {
 export type TipoDeRotina = 'dia-da-semana' | 'rotacao';
 
 export interface RascunhoDaFicha {
-  fichaId: Identificador;
+  // Nulo na ficha nova, que só ganha identificador quando o SalvarFicha a grava.
+  fichaId: Identificador | null;
   nome: string;
   tipoDeRotina: TipoDeRotina;
   rotinas: RotinaEmEdicao[];
@@ -171,7 +172,7 @@ function rotinaDoPedido(rotina: RotinaEmEdicao): RotinaPedida {
 // O rascunho em si nunca grava nada.
 export function pedidoDoRascunho(rascunho: RascunhoDaFicha, motivo: string): PedidoDeFicha {
   return {
-    fichaId: rascunho.fichaId,
+    fichaId: rascunho.fichaId ?? undefined,
     nome: rascunho.nome,
     motivo: opcional(motivo.trim()),
     rotinas: rascunho.rotinas.map(rotinaDoPedido),
@@ -336,4 +337,9 @@ export function comRotinaMovida(
   const movidas = [...rascunho.rotinas];
   [movidas[rotina], movidas[alvo]] = [movidas[alvo], movidas[rotina]];
   return { ...rascunho, rotinas: movidas };
+}
+
+// A ficha nova começa vazia: sem identificador (ele nasce no SalvarFicha), sem nome e sem rotinas.
+export function rascunhoDeFichaNova(tipoDeRotina: TipoDeRotina): RascunhoDaFicha {
+  return { fichaId: null, nome: '', tipoDeRotina, rotinas: [] };
 }

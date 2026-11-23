@@ -6,6 +6,7 @@ import { textos } from '../textos';
 import { BotaoDeAcao } from './botao-de-acao';
 
 export interface AcoesDaLista {
+  nova?: () => void;
   ativar?: (ficha: FichaDaLista) => void;
   duplicar?: (ficha: FichaDaLista) => void;
   // Chamada só depois de o usuário confirmar o arquivamento.
@@ -29,6 +30,13 @@ export function ListaDeFichas({ fichas, aoAbrir, acoes }: PropsDaListaDeFichas) 
   return (
     <ScrollView>
       <Text style={estilos.titulo}>{textos.fichas.titulo}</Text>
+      {acoes.nova && (
+        <BotaoDeAcao
+          rotulo={textos.fichas.novaFicha}
+          nome={textos.fichas.novaFicha}
+          aoTocar={acoes.nova}
+        />
+      )}
       {arquivando && (
         <ConfirmacaoDeArquivamento
           ficha={arquivando}
