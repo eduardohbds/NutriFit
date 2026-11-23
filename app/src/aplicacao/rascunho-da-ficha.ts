@@ -339,7 +339,7 @@ export function comRotinaMovida(
   return { ...rascunho, rotinas: movidas };
 }
 
-// Esqueleto do Red (US-007d4): o comportamento entra no Green.
+// A ficha nova começa vazia: sem identificador (ele nasce no SalvarFicha), sem nome e sem rotinas.
 export function rascunhoDeFichaNova(tipoDeRotina: TipoDeRotina): RascunhoDaFicha {
-  throw new Error(`não implementado: ${tipoDeRotina}`);
+  return { fichaId: null, nome: '', tipoDeRotina, rotinas: [] };
 }

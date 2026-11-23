@@ -12,8 +12,14 @@ import type { AtivarFicha } from '../../aplicacao/casos-de-uso/ativar-ficha';
 import type { DuplicarFicha } from '../../aplicacao/casos-de-uso/duplicar-ficha';
 import type { SalvarFicha } from '../../aplicacao/casos-de-uso/salvar-ficha';
 import type { FichaDaLista, ListarFichas } from '../../aplicacao/casos-de-uso/listar-fichas';
-import { rascunhoDaFicha, type RascunhoDaFicha } from '../../aplicacao/rascunho-da-ficha';
+import {
+  rascunhoDaFicha,
+  rascunhoDeFichaNova,
+  type RascunhoDaFicha,
+  type TipoDeRotina,
+} from '../../aplicacao/rascunho-da-ficha';
 import { EditorDaFicha } from '../componentes/editor-da-ficha';
+import { EscolhaDoTipoDeRotina } from '../componentes/escolha-do-tipo-de-rotina';
 import { ListaDeFichas, type AcoesDaLista } from '../componentes/lista-de-fichas';
 import { textos } from '../textos';
 import { salvarRascunho } from './salvar-rascunho';
@@ -43,6 +49,7 @@ export function TelaDasFichas({
   const [fichas, setFichas] = useState<FichaDaLista[] | null>(null);
   const [aberta, setAberta] = useState<FichaParaEdicao | null>(null);
   const [rascunho, setRascunho] = useState<RascunhoDaFicha | null>(null);
+  const [escolhendoTipo, setEscolhendoTipo] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const [versaoSalva, setVersaoSalva] = useState<number | null>(null);
   const [erro, setErro] = useState<unknown>(null);
@@ -86,7 +93,7 @@ export function TelaDasFichas({
     setAviso(null);
   };
 
-  if (aberta && rascunho && buscarExercicios) {
+  if (rascunho && buscarExercicios) {
     return (
       <EditorDaFicha
         rascunho={rascunho}
@@ -96,6 +103,15 @@ export function TelaDasFichas({
         aoSalvar={salvarFicha ? salvar : undefined}
         aoCancelar={cancelar}
       />
+    );
+  }
+  if (escolhendoTipo) {
+    const escolher = (tipo: TipoDeRotina) => {
+      setRascunho(rascunhoDeFichaNova(tipo));
+      setEscolhendoTipo(false);
+    };
+    return (
+      <EscolhaDoTipoDeRotina aoEscolher={escolher} aoCancelar={() => setEscolhendoTipo(false)} />
     );
   }
   if (aberta) {
@@ -108,7 +124,9 @@ export function TelaDasFichas({
       <FichaAberta ficha={aberta} versaoSalva={versaoSalva} aoVoltar={voltar} aoEditar={editar} />
     );
   }
+  const podeCriar = buscarExercicios && salvarFicha;
   const acoes: AcoesDaLista = {
+    nova: podeCriar ? () => setEscolhendoTipo(true) : undefined,
     ativar: ativarFicha && ((ficha) => mudar(ativarFicha.executar(ficha.id))),
     duplicar: duplicarFicha && ((ficha) => mudar(duplicarFicha.executar(ficha.id))),
     arquivar: arquivarFicha && ((ficha) => mudar(arquivarFicha.executar(ficha.id))),
