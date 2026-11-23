@@ -67,18 +67,21 @@ export function rascunhoDaFicha(ficha: FichaParaEdicao): RascunhoDaFicha {
   };
 }
 
-// Devolve um rascunho novo com a linha trocada; o anterior não muda. Linha que não existe é erro de
-// quem chama, e não some em silêncio.
+// Linha que não existe é erro de quem chama, e não some em silêncio.
+function exigirLinha(rascunho: RascunhoDaFicha, rotina: number, item: number): void {
+  if (rascunho.rotinas[rotina]?.itens[item]) return;
+  const esperado = 'rotina e linha existentes no rascunho';
+  throw new ErroDeValidacao('linha', esperado, `${rotina}/${item}`);
+}
+
+// Devolve um rascunho novo com a linha trocada; o anterior não muda.
 function comItem(
   rascunho: RascunhoDaFicha,
   rotina: number,
   item: number,
   alterar: (atual: ItemEmEdicao) => ItemEmEdicao,
 ): RascunhoDaFicha {
-  if (!rascunho.rotinas[rotina]?.itens[item]) {
-    const esperado = 'rotina e linha existentes no rascunho';
-    throw new ErroDeValidacao('linha', esperado, `${rotina}/${item}`);
-  }
+  exigirLinha(rascunho, rotina, item);
   const trocarItem = (itens: ItemEmEdicao[]) =>
     itens.map((atual, posicao) => (posicao === item ? alterar(atual) : atual));
   return {
@@ -193,4 +196,63 @@ export function comUnilateral(
 // O nome em branco é aceito no rascunho; quem o recusa é o SalvarFicha.
 export function comNome(rascunho: RascunhoDaFicha, nome: string): RascunhoDaFicha {
   return { ...rascunho, nome };
+}
+
+// Troca os itens de uma rotina; rotina que não existe é erro de quem chama.
+function comItensDaRotina(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  alterar: (itens: ItemEmEdicao[]) => ItemEmEdicao[],
+): RascunhoDaFicha {
+  if (!rascunho.rotinas[rotina]) {
+    throw new ErroDeValidacao('rotina', 'rotina existente no rascunho', String(rotina));
+  }
+  return {
+    ...rascunho,
+    rotinas: rascunho.rotinas.map((r, posicao) =>
+      posicao === rotina ? { ...r, itens: alterar(r.itens) } : r,
+    ),
+  };
+}
+
+// A linha nova entra no fim com 3 séries e meta 10; o resto o usuário preenche.
+export function comLinhaNova(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  exercicio: ExercicioEscolhido,
+): RascunhoDaFicha {
+  const nova: ItemEmEdicao = {
+    exercicioId: exercicio.id,
+    exercicioNome: exercicio.nome,
+    grupo: '',
+    unilateral: false,
+    observacoes: '',
+    textos: { quantidade: '3', meta: '10', carga: '', tecnica: '', descanso: '' },
+  };
+  return comItensDaRotina(rascunho, rotina, (itens) => [...itens, nova]);
+}
+
+// Tirar a última linha deixa a rotina vazia; quem a barra é o SalvarFicha, na hora de salvar.
+export function semLinha(rascunho: RascunhoDaFicha, rotina: number, item: number): RascunhoDaFicha {
+  exigirLinha(rascunho, rotina, item);
+  return comItensDaRotina(rascunho, rotina, (itens) =>
+    itens.filter((_, posicao) => posicao !== item),
+  );
+}
+
+// Subir a primeira ou descer a última linha não faz nada: devolve o mesmo rascunho.
+export function comLinhaMovida(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  item: number,
+  deslocamento: -1 | 1,
+): RascunhoDaFicha {
+  exigirLinha(rascunho, rotina, item);
+  const alvo = item + deslocamento;
+  if (alvo < 0 || alvo >= rascunho.rotinas[rotina].itens.length) return rascunho;
+  return comItensDaRotina(rascunho, rotina, (itens) => {
+    const movidos = [...itens];
+    [movidos[item], movidos[alvo]] = [movidos[alvo], movidos[item]];
+    return movidos;
+  });
 }

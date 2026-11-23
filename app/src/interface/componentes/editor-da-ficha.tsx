@@ -5,23 +5,28 @@ import type { BuscarExercicios } from '../../aplicacao/casos-de-uso/buscar-exerc
 import {
   comExercicio,
   comGrupo,
+  comLinhaMovida,
+  comLinhaNova,
   comNome,
   comObservacoes,
   comTexto,
   comUnilateral,
+  semLinha,
   type CampoDeSeries,
   type ItemEmEdicao,
   type RascunhoDaFicha,
   type RotinaEmEdicao,
 } from '../../aplicacao/rascunho-da-ficha';
 import { textos } from '../textos';
+import { BotaoDeAcao } from './botao-de-acao';
 import { EscolhaDeExercicio } from './escolha-de-exercicio';
 
 const CAMPOS: CampoDeSeries[] = ['quantidade', 'meta', 'carga', 'tecnica', 'descanso'];
 
-interface Linha {
+// A linha a trocar, ou `item` nulo quando a escolha é de uma linha nova no fim da rotina.
+interface Escolha {
   rotina: number;
-  item: number;
+  item: number | null;
 }
 
 // O que o usuário pode mudar numa linha; cada função devolve o rascunho novo à tela.
@@ -31,6 +36,10 @@ interface EdicoesDaLinha {
   grupo: (texto: string) => void;
   observacoes: (texto: string) => void;
   unilateral: (valor: boolean) => void;
+  // Ausentes na primeira linha (subir) e na última (descer), que não têm para onde ir.
+  subir?: () => void;
+  descer?: () => void;
+  remover: () => void;
 }
 
 export interface PropsDoEditorDaFicha {
@@ -53,12 +62,17 @@ export function EditorDaFicha({
   aoSalvar,
   aoCancelar,
 }: PropsDoEditorDaFicha) {
-  const [escolhendo, setEscolhendo] = useState<Linha | null>(null);
+  const [escolhendo, setEscolhendo] = useState<Escolha | null>(null);
   const [motivo, setMotivo] = useState('');
 
   if (escolhendo) {
     const escolher = (exercicio: Parameters<typeof comExercicio>[3]) => {
-      aoMudar(comExercicio(rascunho, escolhendo.rotina, escolhendo.item, exercicio));
+      const { rotina, item } = escolhendo;
+      aoMudar(
+        item === null
+          ? comLinhaNova(rascunho, rotina, exercicio)
+          : comExercicio(rascunho, rotina, item, exercicio),
+      );
       setEscolhendo(null);
     };
     return (
@@ -70,12 +84,15 @@ export function EditorDaFicha({
     );
   }
 
-  const edicoesDe = (rotina: number, item: number): EdicoesDaLinha => ({
+  const edicoesDe = (rotina: number, item: number, ultimo: number): EdicoesDaLinha => ({
     trocar: () => setEscolhendo({ rotina, item }),
     digitar: (campo, texto) => aoMudar(comTexto(rascunho, rotina, item, campo, texto)),
     grupo: (texto) => aoMudar(comGrupo(rascunho, rotina, item, texto)),
     observacoes: (texto) => aoMudar(comObservacoes(rascunho, rotina, item, texto)),
     unilateral: (valor) => aoMudar(comUnilateral(rascunho, rotina, item, valor)),
+    subir: item > 0 ? () => aoMudar(comLinhaMovida(rascunho, rotina, item, -1)) : undefined,
+    descer: item < ultimo ? () => aoMudar(comLinhaMovida(rascunho, rotina, item, 1)) : undefined,
+    remover: () => aoMudar(semLinha(rascunho, rotina, item)),
   });
 
   return (
@@ -92,9 +109,10 @@ export function EditorDaFicha({
       {aviso !== null && <Text>{aviso}</Text>}
       {rascunho.rotinas.map((rotina, indice) => (
         <RotinaEditavel
-          key={rotina.nome}
+          key={indice}
           rotina={rotina}
-          edicoesDe={(item) => edicoesDe(indice, item)}
+          edicoesDe={(item) => edicoesDe(indice, item, rotina.itens.length - 1)}
+          aoAdicionar={() => setEscolhendo({ rotina: indice, item: null })}
         />
       ))}
       <TextInput
@@ -115,9 +133,10 @@ export function EditorDaFicha({
 interface PropsDaRotinaEditavel {
   rotina: RotinaEmEdicao;
   edicoesDe: (item: number) => EdicoesDaLinha;
+  aoAdicionar: () => void;
 }
 
-function RotinaEditavel({ rotina, edicoesDe }: PropsDaRotinaEditavel) {
+function RotinaEditavel({ rotina, edicoesDe, aoAdicionar }: PropsDaRotinaEditavel) {
   return (
     <View style={estilos.rotina}>
       <Text style={estilos.nome}>{rotina.nome}</Text>
@@ -130,6 +149,11 @@ function RotinaEditavel({ rotina, edicoesDe }: PropsDaRotinaEditavel) {
           edicoes={edicoesDe(posicao)}
         />
       ))}
+      <BotaoDeAcao
+        rotulo={textos.fichas.adicionar}
+        nome={textos.fichas.adicionarLinha(rotina.nome)}
+        aoTocar={aoAdicionar}
+      />
     </View>
   );
 }
@@ -155,6 +179,27 @@ function LinhaEditavel({ rotina, ordem, item, edicoes }: PropsDaLinhaEditavel) {
       >
         <Text>{textos.fichas.trocarExercicio(rotina, ordem)}</Text>
       </Pressable>
+      <View style={estilos.movimentos}>
+        {edicoes.subir && (
+          <BotaoDeAcao
+            rotulo={textos.fichas.subir}
+            nome={textos.fichas.subirLinha(rotina, ordem)}
+            aoTocar={edicoes.subir}
+          />
+        )}
+        {edicoes.descer && (
+          <BotaoDeAcao
+            rotulo={textos.fichas.descer}
+            nome={textos.fichas.descerLinha(rotina, ordem)}
+            aoTocar={edicoes.descer}
+          />
+        )}
+        <BotaoDeAcao
+          rotulo={textos.fichas.remover}
+          nome={textos.fichas.removerLinha(rotina, ordem)}
+          aoTocar={edicoes.remover}
+        />
+      </View>
       {CAMPOS.map((campo) => (
         <View key={campo}>
           <Text>{textos.fichas.campo[campo]}</Text>
@@ -196,4 +241,5 @@ const estilos = StyleSheet.create({
   nome: { fontSize: 16 },
   linha: { paddingVertical: 8 },
   campo: { borderWidth: 1, padding: 6 },
+  movimentos: { flexDirection: 'row', gap: 12 },
 });
