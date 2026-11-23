@@ -43,6 +43,20 @@ export class RepositorioDeFichasEmMemoria implements RepositorioDeFichas {
     return [...this.fichasGravadas.values()].map((ficha) => ({ ...ficha }));
   }
 
+  async ativarFicha(fichaId: Identificador): Promise<void> {
+    this.existente(fichaId);
+    for (const [id, ficha] of this.fichasGravadas) {
+      if (ficha.situacao === 'ativa')
+        this.fichasGravadas.set(id, { ...ficha, situacao: 'inativa' });
+    }
+    this.mudarSituacao(fichaId, 'ativa');
+  }
+
+  async arquivarFicha(fichaId: Identificador): Promise<void> {
+    this.existente(fichaId);
+    this.mudarSituacao(fichaId, 'arquivada');
+  }
+
   async listarVersoes(fichaId: Identificador): Promise<VersaoDaFicha[]> {
     return (this.versoesPorFicha.get(fichaId.valor) ?? []).map(copiar);
   }
@@ -50,5 +64,15 @@ export class RepositorioDeFichasEmMemoria implements RepositorioDeFichas {
   async buscarVersaoAtual(fichaId: Identificador): Promise<VersaoDaFicha | null> {
     const versoes = await this.listarVersoes(fichaId);
     return versoes.at(-1) ?? null;
+  }
+
+  private existente(fichaId: Identificador): Ficha {
+    const ficha = this.fichasGravadas.get(fichaId.valor);
+    if (!ficha) throw new ErroDeValidacao('ficha', 'ficha existente', fichaId.valor);
+    return ficha;
+  }
+
+  private mudarSituacao(fichaId: Identificador, situacao: Ficha['situacao']): void {
+    this.fichasGravadas.set(fichaId.valor, { ...this.existente(fichaId), situacao });
   }
 }
