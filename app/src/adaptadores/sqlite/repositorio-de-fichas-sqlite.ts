@@ -42,10 +42,14 @@ export class RepositorioDeFichasSqlite implements RepositorioDeFichas {
   async salvarNovaVersao(
     fichaId: Identificador,
     versao: NovaVersaoDaFicha,
+    novoNome?: string,
   ): Promise<VersaoDaFicha> {
     const numero = this.banco.transaction((tx) => {
       if (!existeFicha(tx, fichaId))
         throw new ErroDeValidacao('ficha', 'ficha existente', fichaId.valor);
+      if (novoNome !== undefined) {
+        tx.update(ficha).set({ nome: novoNome }).where(eq(ficha.id, fichaId.valor)).run();
+      }
       const proximo = (ultimoNumero(tx, fichaId) ?? 0) + 1;
       gravarVersao(tx, fichaId, proximo, versao);
       return proximo;

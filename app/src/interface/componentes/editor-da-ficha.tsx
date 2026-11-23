@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
 import type { BuscarExercicios } from '../../aplicacao/casos-de-uso/buscar-exercicios';
 import {
   comExercicio,
+  comGrupo,
+  comNome,
+  comObservacoes,
   comTexto,
+  comUnilateral,
   type CampoDeSeries,
   type ItemEmEdicao,
   type RascunhoDaFicha,
@@ -18,6 +22,15 @@ const CAMPOS: CampoDeSeries[] = ['quantidade', 'meta', 'carga', 'tecnica', 'desc
 interface Linha {
   rotina: number;
   item: number;
+}
+
+// O que o usuário pode mudar numa linha; cada função devolve o rascunho novo à tela.
+interface EdicoesDaLinha {
+  trocar: () => void;
+  digitar: (campo: CampoDeSeries, texto: string) => void;
+  grupo: (texto: string) => void;
+  observacoes: (texto: string) => void;
+  unilateral: (valor: boolean) => void;
 }
 
 export interface PropsDoEditorDaFicha {
@@ -57,21 +70,31 @@ export function EditorDaFicha({
     );
   }
 
+  const edicoesDe = (rotina: number, item: number): EdicoesDaLinha => ({
+    trocar: () => setEscolhendo({ rotina, item }),
+    digitar: (campo, texto) => aoMudar(comTexto(rascunho, rotina, item, campo, texto)),
+    grupo: (texto) => aoMudar(comGrupo(rascunho, rotina, item, texto)),
+    observacoes: (texto) => aoMudar(comObservacoes(rascunho, rotina, item, texto)),
+    unilateral: (valor) => aoMudar(comUnilateral(rascunho, rotina, item, valor)),
+  });
+
   return (
     <ScrollView>
       <Pressable role="button" aria-label={textos.fichas.cancelarEdicao} onPress={aoCancelar}>
         <Text>{textos.fichas.cancelarEdicao}</Text>
       </Pressable>
-      <Text style={estilos.titulo}>{rascunho.nome}</Text>
+      <TextInput
+        aria-label={textos.fichas.nomeDaFicha}
+        value={rascunho.nome}
+        onChangeText={(nome) => aoMudar(comNome(rascunho, nome))}
+        style={estilos.titulo}
+      />
       {aviso !== null && <Text>{aviso}</Text>}
       {rascunho.rotinas.map((rotina, indice) => (
         <RotinaEditavel
           key={rotina.nome}
           rotina={rotina}
-          aoTrocar={(item) => setEscolhendo({ rotina: indice, item })}
-          aoDigitar={(item, campo, texto) =>
-            aoMudar(comTexto(rascunho, indice, item, campo, texto))
-          }
+          edicoesDe={(item) => edicoesDe(indice, item)}
         />
       ))}
       <TextInput
@@ -91,11 +114,10 @@ export function EditorDaFicha({
 
 interface PropsDaRotinaEditavel {
   rotina: RotinaEmEdicao;
-  aoTrocar: (item: number) => void;
-  aoDigitar: (item: number, campo: CampoDeSeries, texto: string) => void;
+  edicoesDe: (item: number) => EdicoesDaLinha;
 }
 
-function RotinaEditavel({ rotina, aoTrocar, aoDigitar }: PropsDaRotinaEditavel) {
+function RotinaEditavel({ rotina, edicoesDe }: PropsDaRotinaEditavel) {
   return (
     <View style={estilos.rotina}>
       <Text style={estilos.nome}>{rotina.nome}</Text>
@@ -105,8 +127,7 @@ function RotinaEditavel({ rotina, aoTrocar, aoDigitar }: PropsDaRotinaEditavel) 
           rotina={rotina.nome}
           ordem={posicao + 1}
           item={item}
-          aoTrocar={() => aoTrocar(posicao)}
-          aoDigitar={(campo, texto) => aoDigitar(posicao, campo, texto)}
+          edicoes={edicoesDe(posicao)}
         />
       ))}
     </View>
@@ -117,18 +138,20 @@ interface PropsDaLinhaEditavel {
   rotina: string;
   ordem: number;
   item: ItemEmEdicao;
-  aoTrocar: () => void;
-  aoDigitar: (campo: CampoDeSeries, texto: string) => void;
+  edicoes: EdicoesDaLinha;
 }
 
-function LinhaEditavel({ rotina, ordem, item, aoTrocar, aoDigitar }: PropsDaLinhaEditavel) {
+const rotuloDe = (campo: string, rotina: string, ordem: number) =>
+  textos.fichas.rotuloDoCampo(campo, rotina, ordem);
+
+function LinhaEditavel({ rotina, ordem, item, edicoes }: PropsDaLinhaEditavel) {
   return (
     <View style={estilos.linha}>
       <Text>{textos.fichas.exercicio(ordem, item.exercicioNome)}</Text>
       <Pressable
         role="button"
         aria-label={textos.fichas.trocarExercicio(rotina, ordem)}
-        onPress={aoTrocar}
+        onPress={edicoes.trocar}
       >
         <Text>{textos.fichas.trocarExercicio(rotina, ordem)}</Text>
       </Pressable>
@@ -136,13 +159,33 @@ function LinhaEditavel({ rotina, ordem, item, aoTrocar, aoDigitar }: PropsDaLinh
         <View key={campo}>
           <Text>{textos.fichas.campo[campo]}</Text>
           <TextInput
-            aria-label={textos.fichas.rotuloDoCampo(textos.fichas.campo[campo], rotina, ordem)}
+            aria-label={rotuloDe(textos.fichas.campo[campo], rotina, ordem)}
             value={item.textos[campo]}
-            onChangeText={(texto) => aoDigitar(campo, texto)}
+            onChangeText={(texto) => edicoes.digitar(campo, texto)}
             style={estilos.campo}
           />
         </View>
       ))}
+      <Text>{textos.fichas.campo.grupo}</Text>
+      <TextInput
+        aria-label={rotuloDe(textos.fichas.campo.grupo, rotina, ordem)}
+        value={item.grupo}
+        onChangeText={edicoes.grupo}
+        style={estilos.campo}
+      />
+      <Text>{textos.fichas.campo.unilateral}</Text>
+      <Switch
+        aria-label={rotuloDe(textos.fichas.campo.unilateral, rotina, ordem)}
+        value={item.unilateral}
+        onValueChange={edicoes.unilateral}
+      />
+      <Text>{textos.fichas.campo.observacoes}</Text>
+      <TextInput
+        aria-label={rotuloDe(textos.fichas.campo.observacoes, rotina, ordem)}
+        value={item.observacoes}
+        onChangeText={edicoes.observacoes}
+        style={estilos.campo}
+      />
     </View>
   );
 }

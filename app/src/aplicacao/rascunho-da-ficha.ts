@@ -13,9 +13,10 @@ export type TextosEmEdicao = Record<CampoDeSeries, string>;
 export interface ItemEmEdicao {
   exercicioId: Identificador;
   exercicioNome: string;
-  grupo: string | null;
+  // Texto como o usuário digita: vazio significa sem grupo, e a regra da letra fica no SalvarFicha.
+  grupo: string;
   unilateral: boolean;
-  observacoes: string | null;
+  observacoes: string;
   textos: TextosEmEdicao;
 }
 
@@ -41,9 +42,9 @@ function itemEmEdicao(item: ItemParaEdicao): ItemEmEdicao {
   return {
     exercicioId: item.exercicioId,
     exercicioNome: item.exercicioNome,
-    grupo: item.grupo,
+    grupo: item.grupo ?? '',
     unilateral: item.unilateral,
-    observacoes: item.observacoes,
+    observacoes: item.observacoes ?? '',
     textos: {
       quantidade: String(quantidade),
       meta,
@@ -133,9 +134,9 @@ function itemDoPedido(rotina: string, item: ItemEmEdicao, posicao: number): Item
   return {
     ordem,
     exercicioId: item.exercicioId,
-    grupo: item.grupo,
+    grupo: opcional(item.grupo.trim()),
     unilateral: item.unilateral,
-    observacoes: item.observacoes,
+    observacoes: opcional(item.observacoes.trim()),
     listas: {
       quantidade: quantidadeDeSeries(rotina, ordem, quantidade),
       meta,
@@ -160,4 +161,36 @@ export function pedidoDoRascunho(rascunho: RascunhoDaFicha, motivo: string): Ped
     motivo: opcional(motivo.trim()),
     rotinas: rascunho.rotinas.map(rotinaDoPedido),
   };
+}
+
+export function comGrupo(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  item: number,
+  texto: string,
+): RascunhoDaFicha {
+  return comItem(rascunho, rotina, item, (atual) => ({ ...atual, grupo: texto }));
+}
+
+export function comObservacoes(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  item: number,
+  texto: string,
+): RascunhoDaFicha {
+  return comItem(rascunho, rotina, item, (atual) => ({ ...atual, observacoes: texto }));
+}
+
+export function comUnilateral(
+  rascunho: RascunhoDaFicha,
+  rotina: number,
+  item: number,
+  valor: boolean,
+): RascunhoDaFicha {
+  return comItem(rascunho, rotina, item, (atual) => ({ ...atual, unilateral: valor }));
+}
+
+// O nome em branco é aceito no rascunho; quem o recusa é o SalvarFicha.
+export function comNome(rascunho: RascunhoDaFicha, nome: string): RascunhoDaFicha {
+  return { ...rascunho, nome };
 }
