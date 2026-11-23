@@ -7,10 +7,14 @@ import type {
   LerFichaParaEdicao,
 } from '../../aplicacao/casos-de-uso/ler-ficha-para-edicao';
 import type { BuscarExercicios } from '../../aplicacao/casos-de-uso/buscar-exercicios';
+import type { ArquivarFicha } from '../../aplicacao/casos-de-uso/arquivar-ficha';
+import type { AtivarFicha } from '../../aplicacao/casos-de-uso/ativar-ficha';
+import type { DuplicarFicha } from '../../aplicacao/casos-de-uso/duplicar-ficha';
 import type { SalvarFicha } from '../../aplicacao/casos-de-uso/salvar-ficha';
 import type { FichaDaLista, ListarFichas } from '../../aplicacao/casos-de-uso/listar-fichas';
 import { rascunhoDaFicha, type RascunhoDaFicha } from '../../aplicacao/rascunho-da-ficha';
 import { EditorDaFicha } from '../componentes/editor-da-ficha';
+import { ListaDeFichas, type AcoesDaLista } from '../componentes/lista-de-fichas';
 import { textos } from '../textos';
 import { salvarRascunho } from './salvar-rascunho';
 
@@ -21,6 +25,10 @@ export interface PropsDaTelaDasFichas {
   buscarExercicios?: BuscarExercicios;
   // Sem o SalvarFicha a edição não oferece o botão de salvar.
   salvarFicha?: SalvarFicha;
+  // Sem estes casos de uso a lista não oferece o botão correspondente.
+  ativarFicha?: AtivarFicha;
+  duplicarFicha?: DuplicarFicha;
+  arquivarFicha?: ArquivarFicha;
 }
 
 export function TelaDasFichas({
@@ -28,6 +36,9 @@ export function TelaDasFichas({
   lerFichaParaEdicao,
   buscarExercicios,
   salvarFicha,
+  ativarFicha,
+  duplicarFicha,
+  arquivarFicha,
 }: PropsDaTelaDasFichas) {
   const [fichas, setFichas] = useState<FichaDaLista[] | null>(null);
   const [aberta, setAberta] = useState<FichaParaEdicao | null>(null);
@@ -65,6 +76,11 @@ export function TelaDasFichas({
       (falha: unknown) => setErro(falha),
     );
   };
+  // Ativar, duplicar e arquivar só mudam situação ou inserem (FI-4); a lista é lida de novo depois,
+  // e a falha chega ao limite de erro.
+  const mudar = (acao: Promise<unknown>) => {
+    acao.then(carregarFichas, (falha: unknown) => setErro(falha));
+  };
   const cancelar = () => {
     setRascunho(null);
     setAviso(null);
@@ -92,33 +108,12 @@ export function TelaDasFichas({
       <FichaAberta ficha={aberta} versaoSalva={versaoSalva} aoVoltar={voltar} aoEditar={editar} />
     );
   }
-  return <ListaDeFichas fichas={fichas ?? []} aoAbrir={abrir} />;
-}
-
-interface PropsDaLista {
-  fichas: FichaDaLista[];
-  aoAbrir: (id: FichaDaLista['id']) => void;
-}
-
-function ListaDeFichas(props: PropsDaLista) {
-  return (
-    <ScrollView>
-      <Text style={estilos.titulo}>{textos.fichas.titulo}</Text>
-      {props.fichas.map((ficha) => (
-        <Pressable
-          key={ficha.id.valor}
-          role="button"
-          aria-label={textos.fichas.abrirFicha(ficha.nome)}
-          onPress={() => props.aoAbrir(ficha.id)}
-          style={estilos.linha}
-        >
-          <Text style={estilos.nome}>{ficha.nome}</Text>
-          <Text>{textos.fichas.situacao[ficha.situacao as 'ativa' | 'inativa']}</Text>
-          <Text>{textos.fichas.versao(ficha.versaoAtual)}</Text>
-        </Pressable>
-      ))}
-    </ScrollView>
-  );
+  const acoes: AcoesDaLista = {
+    ativar: ativarFicha && ((ficha) => mudar(ativarFicha.executar(ficha.id))),
+    duplicar: duplicarFicha && ((ficha) => mudar(duplicarFicha.executar(ficha.id))),
+    arquivar: arquivarFicha && ((ficha) => mudar(arquivarFicha.executar(ficha.id))),
+  };
+  return <ListaDeFichas fichas={fichas ?? []} aoAbrir={abrir} acoes={acoes} />;
 }
 
 const nomeDoDia = (dia: number): string => textos.fichas.diasDaSemana[dia - 1];

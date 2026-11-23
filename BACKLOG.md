@@ -409,7 +409,7 @@ A história original não cabia num commit: ela mistura as regras e as portas (a
 - Notas de domínio: entram `ativarFicha` e `arquivarFicha` na porta `RepositorioDeFichas` (falso, SQLite e contrato) e os casos de uso `AtivarFicha`, `ArquivarFicha` e `DuplicarFicha`; o `arquivarFicha` da porta do catálogo (US-002c) continua como está.
 
 ### US-009b: Botões de ativar, duplicar e arquivar na tela das fichas
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-009. Depende da US-009a e da US-007c1.
 - Critérios de aceite (cada um vira um teste):
   - Dada a lista de fichas, quando o usuário toca em Ativar, então a ficha passa a aparecer como ativa e a anterior como inativa.
