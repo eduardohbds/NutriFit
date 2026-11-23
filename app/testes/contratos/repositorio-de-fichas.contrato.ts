@@ -124,6 +124,54 @@ export function contratoDoRepositorioDeFichas(nome: string, criar: () => Cenario
       expect(await repositorio.listarFichas()).toEqual([ficha]);
     });
 
+    describe('nome da ficha ao salvar uma versão (US-007d1)', () => {
+      it('com o nome novo, a ficha é renomeada na mesma gravação da versão', async () => {
+        const { repositorio, fabrica } = iniciar();
+        const ficha = fabrica.ficha();
+        await repositorio.criarFicha(ficha, fabrica.versao({ series: 1, cargaEmQuilos: 40 }));
+
+        const versao = await repositorio.salvarNovaVersao(
+          ficha.id,
+          fabrica.versao({ series: 2, cargaEmQuilos: 45 }),
+          'Treino Novo',
+        );
+
+        expect(versao.numero).toBe(2);
+        expect(await repositorio.listarFichas()).toEqual([{ ...ficha, nome: 'Treino Novo' }]);
+      });
+
+      it('sem o nome novo, o nome da ficha continua o mesmo', async () => {
+        const { repositorio, fabrica } = iniciar();
+        const ficha = fabrica.ficha();
+        await repositorio.criarFicha(ficha, fabrica.versao({ series: 1, cargaEmQuilos: 40 }));
+
+        await repositorio.salvarNovaVersao(
+          ficha.id,
+          fabrica.versao({ series: 2, cargaEmQuilos: 45 }),
+        );
+
+        expect(await repositorio.listarFichas()).toEqual([ficha]);
+      });
+
+      it('renomear não altera as versões anteriores (RB02)', async () => {
+        const { repositorio, fabrica } = iniciar();
+        const ficha = fabrica.ficha();
+        const primeira = await repositorio.criarFicha(
+          ficha,
+          fabrica.versao({ series: 1, cargaEmQuilos: 40 }),
+        );
+
+        await repositorio.salvarNovaVersao(
+          ficha.id,
+          fabrica.versao({ series: 2, cargaEmQuilos: 45 }),
+          'Treino Novo',
+        );
+
+        const [versao1] = await repositorio.listarVersoes(ficha.id);
+        expect(versao1).toEqual(primeira);
+      });
+    });
+
     describe('situação da ficha (US-009a)', () => {
       async function gravar(
         repositorio: RepositorioDeFichas,

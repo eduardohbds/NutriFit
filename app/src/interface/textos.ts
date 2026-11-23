@@ -70,7 +70,11 @@ export const textos = {
       carga: 'Carga (kg)',
       tecnica: 'Técnica',
       descanso: 'Descanso (s)',
+      grupo: 'Grupo',
+      unilateral: 'Unilateral',
+      observacoes: 'Observações',
     },
+    nomeDaFicha: 'Nome da ficha',
     rotuloDoCampo: (campo: string, rotina: string, ordem: number) =>
       `${campo}, ${rotina}, linha ${ordem}`,
     diasDaSemana: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],

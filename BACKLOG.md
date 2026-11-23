@@ -371,16 +371,37 @@ A história original não cabia num commit: a tela precisa ler fichas (que nenhu
 - Fora do escopo: ficha nova pela tela (US-007d); ativar, duplicar e arquivar (US-009).
 - Falha inaceitável envolvida: FI-4.
 
-### US-007d: Editar o resto da ficha (grupo, unilateral, observações, linhas e rotinas)
-- Status: a fazer
-- Contexto: ver US-007c. A US-007c2 edita só o exercício e os campos de séries de cada linha; o resto do RF05 continua só de leitura na tela: grupo em sequência, unilateral, observações, nome da ficha, e incluir, remover e reordenar linhas e rotinas. Depende da US-007c2.
+### US-007d: Editar o resto da ficha e criar ficha nova (quebrada em US-007d1, US-007d2 e US-007d3)
+A história original não cabia num commit: ela mistura campos que faltam em cada linha, mudanças na estrutura (incluir, remover e reordenar linhas e rotinas) e a criação da ficha nova. Contexto comum: a US-007c2 edita só o exercício e os campos de séries; o resto do RF05 continua só de leitura na tela, e sem criar rotinas e linhas o app não monta uma ficha do zero. Depende da US-007c3. Decisões do usuário: reordenar por botões Subir e Descer; remover só tira do rascunho (versões antigas e sessões ficam, RB02, FI-4); rotina sem nenhuma linha é bloqueada no salvamento, com a rotina indicada; linha nova nasce com 3 séries e meta 10; na ficha nova o tipo de rotina (dia da semana ou rotação) é escolhido uma vez e vale para todas (RB01). Falha inaceitável envolvida em todas: FI-4 (o rascunho nunca toca no banco; só o salvamento insere versão nova).
+
+### US-007d1: Grupo, unilateral, observações e nome da ficha na edição
+- Status: aceita
+- Contexto: ver US-007d. Depende da US-007c3.
 - Critérios de aceite (cada um vira um teste):
-  - Dada uma linha, quando o usuário altera o grupo em sequência, o unilateral ou as observações, então o rascunho guarda a mudança sem gravar nada.
-  - Dada uma rotina, quando o usuário inclui, remove ou reordena linhas, então a ordem do rascunho muda sem gravar nada.
-  - Dada uma ficha, quando o usuário inclui, remove ou renomeia rotinas, ou muda o nome da ficha, então o rascunho guarda a mudança sem gravar nada.
-  - Dada uma ficha nova montada na tela, quando o usuário a salva, então ela nasce inativa e aparece como versão 1 (veio da US-007c3).
-- Fora do escopo: gravar a ficha existente como versão nova (US-007c3).
-- Falha inaceitável envolvida: FI-4 (o rascunho nunca toca no banco).
+  - Dada uma linha, quando o usuário altera o grupo em sequência, o unilateral ou as observações, então o rascunho guarda a mudança sem gravar nada, e o salvamento grava os três na versão nova (grupo isolado ou fora de A a Z é bloqueado com a rotina e a linha, VE17).
+  - Dada uma ficha, quando o usuário muda o nome e salva, então a ficha passa a ter o nome novo na mesma gravação da versão nova, e as versões anteriores continuam idênticas; nome em branco é bloqueado sem gravar nada.
+- Fora do escopo: incluir, remover e reordenar linhas e rotinas (US-007d2); ficha nova (US-007d3).
+- Falha inaceitável envolvida: FI-4.
+- Notas de domínio: `salvarNovaVersao` da porta `RepositorioDeFichas` ganha o nome novo como parâmetro opcional, para renomear na mesma transação; o `SalvarFicha` passa a recusar nome em branco.
+
+### US-007d2: Incluir, remover e reordenar linhas e rotinas
+- Status: a fazer
+- Contexto: ver US-007d. Depende da US-007d1.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma rotina, quando o usuário inclui uma linha escolhendo o exercício do catálogo, então ela entra no fim com 3 séries e meta 10; ao remover ou subir e descer, a ordem do rascunho muda sem gravar nada.
+  - Dada uma ficha, quando o usuário inclui, remove, renomeia ou reordena rotinas, então o rascunho guarda a mudança sem gravar nada.
+  - Dada uma rotina sem nenhuma linha, quando o usuário salva, então o salvamento é bloqueado indicando a rotina (regra nova no `SalvarFicha`).
+- Fora do escopo: ficha nova (US-007d3).
+- Falha inaceitável envolvida: FI-4.
+
+### US-007d3: Ficha nova pela tela
+- Status: a fazer
+- Contexto: ver US-007d. Depende da US-007d2.
+- Critérios de aceite (cada um vira um teste):
+  - Dada a lista de fichas, quando o usuário toca em Nova ficha, então abre um rascunho vazio, pedindo o nome e o tipo de rotina (dia da semana ou rotação).
+  - Dada uma ficha nova montada na tela, quando o usuário a salva, então ela nasce inativa e aparece como versão 1.
+- Fora do escopo: ativar a ficha nova (US-009b já cobre, pela lista).
+- Falha inaceitável envolvida: FI-4.
 
 ### US-008: Técnica, descanso e meta por série, e grupos em sequência
 - Status: aceita

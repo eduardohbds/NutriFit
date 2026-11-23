@@ -111,6 +111,16 @@ function seriesPorListas(listas: ListasDoItem): SeriePedida[] {
   }));
 }
 
+// O nome da ficha é aparado e não pode ficar em branco. Numa ficha existente ele é gravado junto com
+// a versão nova, e as versões anteriores não são tocadas (RB02).
+function exigirNome(nome: string): string {
+  const aparado = nome.trim();
+  if (aparado === '') {
+    throw new ErroDeValidacao('nome da ficha', 'texto com ao menos 1 caractere', nome);
+  }
+  return aparado;
+}
+
 export class SalvarFicha {
   constructor(
     private readonly fichas: RepositorioDeFichas,
@@ -122,6 +132,7 @@ export class SalvarFicha {
   // Valida tudo antes de gravar: ou entra a versão inteira, ou nada (RB02, FI-4). Só inserção: a
   // ficha existente ganha a versão seguinte e as anteriores não são tocadas.
   async executar(pedido: PedidoDeFicha): Promise<ResultadoDaFicha> {
+    const nome = exigirNome(pedido.nome);
     exigirTipoUnicoDeRotina(pedido.rotinas);
     const existentes = new Set((await this.catalogo.listarExercicios()).map((e) => e.id.valor));
     const versao: NovaVersaoDaFicha = {
@@ -132,15 +143,16 @@ export class SalvarFicha {
       resumo: null,
       rotinas: pedido.rotinas.map((r) => this.montarRotina(r, existentes)),
     };
-    if (pedido.fichaId) return this.novaVersao(pedido.fichaId, versao);
-    return this.criarFicha(pedido.nome, versao);
+    if (pedido.fichaId) return this.novaVersao(pedido.fichaId, versao, nome);
+    return this.criarFicha(nome, versao);
   }
 
   private async novaVersao(
     fichaId: Identificador,
     versao: NovaVersaoDaFicha,
+    nome: string,
   ): Promise<ResultadoDaFicha> {
-    return { fichaId, versao: await this.fichas.salvarNovaVersao(fichaId, versao) };
+    return { fichaId, versao: await this.fichas.salvarNovaVersao(fichaId, versao, nome) };
   }
 
   // Inativa: ativar é da US-009, e só uma ficha pode estar ativa.

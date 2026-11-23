@@ -31,9 +31,13 @@ export class RepositorioDeFichasEmMemoria implements RepositorioDeFichas {
   async salvarNovaVersao(
     fichaId: Identificador,
     versao: NovaVersaoDaFicha,
+    novoNome?: string,
   ): Promise<VersaoDaFicha> {
     const versoes = this.versoesPorFicha.get(fichaId.valor);
     if (!versoes) throw new ErroDeValidacao('ficha', 'ficha existente', fichaId.valor);
+    if (novoNome !== undefined) {
+      this.fichasGravadas.set(fichaId.valor, { ...this.existente(fichaId), nome: novoNome });
+    }
     const gravada = copiar({ ...versao, fichaId, numero: versoes.length + 1 });
     versoes.push(gravada);
     return copiar(gravada);

@@ -7,7 +7,13 @@ export interface RepositorioDeFichas {
   // Grava a ficha e a versão 1 numa única transação.
   criarFicha(ficha: Ficha, primeiraVersao: NovaVersaoDaFicha): Promise<VersaoDaFicha>;
   // Grava a versão seguinte (maior número + 1); falha, sem gravar nada, se a ficha não existe.
-  salvarNovaVersao(fichaId: Identificador, versao: NovaVersaoDaFicha): Promise<VersaoDaFicha>;
+  // Com `novoNome`, a ficha também é renomeada na mesma transação (só a ficha: as versões anteriores
+  // não são tocadas, RB02). Sem ele, o nome continua o mesmo.
+  salvarNovaVersao(
+    fichaId: Identificador,
+    versao: NovaVersaoDaFicha,
+    novoNome?: string,
+  ): Promise<VersaoDaFicha>;
   // Todas as fichas, arquivadas inclusive, na ordem de criação (a mais antiga primeiro; em empate de
   // data, a gravada antes). Só a ficha: as versões vêm de listarVersoes e buscarVersaoAtual.
   listarFichas(): Promise<Ficha[]>;
