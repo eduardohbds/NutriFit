@@ -452,17 +452,36 @@ A história original não cabia num commit: ela mistura as regras e as portas (a
 - Fora do escopo: ver versões e restaurar (US-010).
 - Falha inaceitável envolvida: FI-4.
 
-### US-010: Consultar versões e desfazer
-- Status: a fazer
-- Contexto: mudanças reversíveis são um dos pilares do produto, e o desfazer é a rede de segurança das alterações da IA (RF06, RB03).
+### US-010: Consultar versões e desfazer (quebrada em US-010a, US-010b e US-010c)
+A história original não cabia num commit: ela mistura a diferença entre versões, o histórico com restauração e duas telas. Contexto comum: mudanças reversíveis são um dos pilares do produto, e o desfazer é a rede de segurança das alterações da IA (RF06, RB03). Falha inaceitável envolvida em todas: FI-4 (apagar ou alterar versão, sessão ou histórico): desfazer nunca apaga, sempre cria versão nova com o conteúdo escolhido (FL04). Fora do escopo: marca de desfeita no histórico da IA (US-037). Decisões do usuário: o resumo da diferença é calculado ao ler, e não gravado; restaurar grava a versão nova com o motivo automático "Restaurada a versão N"; o nome da ficha não volta, porque é da ficha e não das versões.
+
+### US-010a: Histórico e restauração de versões (casos de uso)
+- Status: aceita
+- Contexto: ver US-010. Depende da US-007a (versões que só recebem inserção).
 - Critérios de aceite (cada um vira um teste):
-  - Dada uma ficha criada e editada 3 vezes, quando o usuário abre o histórico, então vê 4 versões com autor (usuário, IA ou importação), data, motivo e resumo da diferença.
-  - Dadas as versões 1 a 4, quando o usuário restaura a versão 2, então é criada a versão 5 idêntica à 2 e as versões 1 a 4 continuam existindo.
-  - Dadas duas versões, quando o usuário as compara, então as linhas alteradas aparecem destacadas lado a lado.
-  - Dada uma ficha com uma única versão, quando o histórico é aberto, então a restauração não é oferecida.
-- Fora do escopo: marca de desfeita no histórico da IA (US-037).
-- Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico).
-- Notas de domínio: desfazer nunca apaga; sempre cria versão nova com o conteúdo escolhido (FL04).
+  - Dadas duas versões, quando são comparadas, então a diferença lista as rotinas e as linhas adicionadas, removidas e alteradas (as rotinas se casam pelo nome e as linhas, dentro de cada rotina, pelo exercício e pela ordem; linha mudada de lugar conta como removida e adicionada) e o resumo diz, por exemplo, "2 linhas alteradas, 1 linha adicionada, 1 linha removida", ou "Sem diferenças".
+  - Dada uma ficha criada e editada 3 vezes, quando o usuário abre o histórico, então vê 4 versões em ordem, com autor (usuário, IA ou importação), data, motivo e o resumo de cada uma em relação à anterior (a primeira é "Versão inicial").
+  - Dadas as versões 1 a 4, quando o usuário restaura a versão 2, então é criada a versão 5 idêntica à 2, com identificadores novos, autor usuário e motivo "Restaurada a versão 2", e as versões 1 a 4 continuam idênticas.
+  - Dada uma ficha com uma única versão, ou a versão atual, quando o histórico é aberto, então a restauração não é oferecida, e pedir para restaurá-la é recusado.
+- Fora do escopo: telas do histórico e da comparação (US-010b e US-010c).
+- Falha inaceitável envolvida: FI-4.
+- Notas de domínio: sem migração e sem porta nova (`listarVersoes` e `salvarNovaVersao` bastam). Reordenar rotinas não aparece na diferença.
+
+### US-010b: Tela do histórico e restaurar
+- Status: a fazer
+- Contexto: ver US-010. Depende da US-010a e da US-007c1.
+- Critérios de aceite (cada um vira um teste):
+  - Dada uma ficha aberta, quando o usuário abre o histórico, então vê as versões com autor, data, motivo e resumo, e o botão Restaurar nas versões que não são a atual (e em nenhuma se há uma só).
+  - Dada uma versão anterior, quando o usuário toca em Restaurar, então a tela pede confirmação dizendo quantas mudanças posteriores deixam de valer (CE16) e, ao confirmar, grava a versão nova e mostra o número dela; sem confirmar, nada muda.
+- Fora do escopo: comparação (US-010c).
+- Falha inaceitável envolvida: FI-4.
+
+### US-010c: Comparar duas versões lado a lado
+- Status: a fazer
+- Contexto: ver US-010. Depende da US-010b.
+- Critérios de aceite (cada um vira um teste):
+  - Dadas duas versões escolhidas no histórico, quando o usuário as compara, então as duas aparecem lado a lado, com as linhas adicionadas, removidas e alteradas destacadas, e os campos alterados indicados.
+- Falha inaceitável envolvida: FI-4, só leitura.
 
 ### US-011: Travar exercícios contra a IA
 - Status: a fazer

@@ -1,12 +1,7 @@
 import { ErroDeValidacao } from '../../dominio/erro-de-validacao';
-import type {
-  Ficha,
-  ItemDaRotina,
-  NovaVersaoDaFicha,
-  Rotina,
-  SeriePlanejada,
-} from '../../dominio/ficha';
+import type { Ficha, NovaVersaoDaFicha } from '../../dominio/ficha';
 import type { Identificador } from '../../dominio/identificador';
+import { copiarRotinas } from '../copiar-rotinas';
 import { fichaExistente } from '../ficha-existente';
 import type { GeradorDeIdentificador } from '../portas/gerador-de-identificador';
 import type { Relogio } from '../portas/relogio';
@@ -40,22 +35,8 @@ export class DuplicarFicha {
       criadaEm: agora,
       motivo: `Duplicada de "${original.nome}"`,
       resumo: null,
-      rotinas: atual.rotinas.map((rotina) => this.copiarRotina(rotina)),
+      rotinas: copiarRotinas(atual.rotinas, this.gerador),
     };
     return { fichaId: copia.id, versao: await this.fichas.criarFicha(copia, versao) };
-  }
-
-  private copiarRotina(rotina: Rotina): Rotina {
-    const itens = rotina.itens.map((item) => this.copiarItem(item));
-    return { ...rotina, id: this.gerador.gerar(), itens };
-  }
-
-  private copiarItem(item: ItemDaRotina): ItemDaRotina {
-    const series = item.series.map((serie) => this.copiarSerie(serie));
-    return { ...item, id: this.gerador.gerar(), series };
-  }
-
-  private copiarSerie(serie: SeriePlanejada): SeriePlanejada {
-    return { ...serie, id: this.gerador.gerar(), meta: { ...serie.meta } };
   }
 }
