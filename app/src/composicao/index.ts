@@ -16,12 +16,14 @@ import { ArquivarFicha } from '../aplicacao/casos-de-uso/arquivar-ficha';
 import { AtivarFicha } from '../aplicacao/casos-de-uso/ativar-ficha';
 import { BuscarExercicios } from '../aplicacao/casos-de-uso/buscar-exercicios';
 import { DuplicarFicha } from '../aplicacao/casos-de-uso/duplicar-ficha';
+import { HistoricoDaFicha } from '../aplicacao/casos-de-uso/historico-da-ficha';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
 import { LerFichaParaEdicao } from '../aplicacao/casos-de-uso/ler-ficha-para-edicao';
 import { ListarExerciciosDoCatalogo } from '../aplicacao/casos-de-uso/listar-exercicios-do-catalogo';
 import { ListarFichas } from '../aplicacao/casos-de-uso/listar-fichas';
 import { MigrarBanco } from '../aplicacao/casos-de-uso/migrar-banco';
 import { RegistrarFalha } from '../aplicacao/casos-de-uso/registrar-falha';
+import { RestaurarVersao } from '../aplicacao/casos-de-uso/restaurar-versao';
 import { SalvarFicha } from '../aplicacao/casos-de-uso/salvar-ficha';
 
 const versaoApp = Constants.expoConfig?.version ?? '0.0.0';
@@ -82,6 +84,8 @@ export function casosDeFichas(): {
   ativarFicha: AtivarFicha;
   duplicarFicha: DuplicarFicha;
   arquivarFicha: ArquivarFicha;
+  historicoDaFicha: HistoricoDaFicha;
+  restaurarVersao: RestaurarVersao;
 } {
   return {
     buscarExercicios: new BuscarExercicios(catalogo()),
@@ -91,5 +95,7 @@ export function casosDeFichas(): {
     ativarFicha: new AtivarFicha(fichas()),
     duplicarFicha: new DuplicarFicha(fichas(), new GeradorUuidV7(), new RelogioDoSistema()),
     arquivarFicha: new ArquivarFicha(fichas()),
+    historicoDaFicha: new HistoricoDaFicha(fichas()),
+    restaurarVersao: new RestaurarVersao(fichas(), new GeradorUuidV7(), new RelogioDoSistema()),
   };
 }

@@ -13,6 +13,8 @@ export default function Fichas() {
       ativarFicha={casos.ativarFicha}
       duplicarFicha={casos.duplicarFicha}
       arquivarFicha={casos.arquivarFicha}
+      historicoDaFicha={casos.historicoDaFicha}
+      restaurarVersao={casos.restaurarVersao}
     />
   );
 }
