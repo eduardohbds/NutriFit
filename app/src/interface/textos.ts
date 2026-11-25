@@ -49,6 +49,25 @@ export const textos = {
     descerLinha: (rotina: string, ordem: number) => `Descer, ${rotina}, linha ${ordem}`,
     removerLinha: (rotina: string, ordem: number) => `Remover, ${rotina}, linha ${ordem}`,
     adicionar: 'Adicionar linha',
+    historico: 'Histórico',
+    tituloDoHistorico: (nome: string) => `Histórico de ${nome}`,
+    voltarParaFicha: 'Voltar à ficha',
+    autorDaVersao: (autor: 'usuario' | 'ia' | 'importacao') =>
+      `Autor: ${{ usuario: 'Usuário', ia: 'IA', importacao: 'Importação' }[autor]}`,
+    dataDaVersao: (data: string) => `Em ${data}`,
+    motivoDaVersao: (motivo: string) => `Motivo: ${motivo}`,
+    restaurar: 'Restaurar',
+    restaurarVersao: (numero: number) => `Restaurar versão ${numero}`,
+    confirmarRestauracao: (numero: number, posteriores: number) =>
+      `Restaurar a versão ${numero}? Cria uma versão nova com o conteúdo dela, e ${
+        posteriores === 1
+          ? 'a mudança posterior deixa'
+          : `as ${posteriores} mudanças posteriores deixam`
+      } de valer na versão atual. Nada é apagado.`,
+    confirmarRestauracaoBotao: 'Confirmar restauração',
+    cancelarRestauracao: 'Cancelar restauração',
+    versaoRestaurada: (nova: number, restaurada: number) =>
+      `Versão ${nova} criada: restaurada a versão ${restaurada}`,
     novaFicha: 'Nova ficha',
     escolherTipoDeRotina: 'Como as rotinas da ficha se identificam?',
     tipoPorDia: 'Por dia da semana',

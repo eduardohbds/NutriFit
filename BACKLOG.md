@@ -468,13 +468,14 @@ A história original não cabia num commit: ela mistura a diferença entre vers�
 - Notas de domínio: sem migração e sem porta nova (`listarVersoes` e `salvarNovaVersao` bastam). Reordenar rotinas não aparece na diferença.
 
 ### US-010b: Tela do histórico e restaurar
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-010. Depende da US-010a e da US-007c1.
 - Critérios de aceite (cada um vira um teste):
   - Dada uma ficha aberta, quando o usuário abre o histórico, então vê as versões com autor, data, motivo e resumo, e o botão Restaurar nas versões que não são a atual (e em nenhuma se há uma só).
   - Dada uma versão anterior, quando o usuário toca em Restaurar, então a tela pede confirmação dizendo quantas mudanças posteriores deixam de valer (CE16) e, ao confirmar, grava a versão nova e mostra o número dela; sem confirmar, nada muda.
 - Fora do escopo: comparação (US-010c).
 - Falha inaceitável envolvida: FI-4.
+- Notas de domínio: o histórico mostra a versão mais recente primeiro; o botão Histórico só aparece quando a tela recebe o `HistoricoDaFicha`, e o Restaurar, quando recebe também o `RestaurarVersao`; depois de restaurar, a tela relê a ficha e a lista, e fica no histórico mostrando a versão nova.
 
 ### US-010c: Comparar duas versões lado a lado
 - Status: a fazer

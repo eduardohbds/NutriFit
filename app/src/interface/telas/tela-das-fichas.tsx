@@ -10,6 +10,11 @@ import type { BuscarExercicios } from '../../aplicacao/casos-de-uso/buscar-exerc
 import type { ArquivarFicha } from '../../aplicacao/casos-de-uso/arquivar-ficha';
 import type { AtivarFicha } from '../../aplicacao/casos-de-uso/ativar-ficha';
 import type { DuplicarFicha } from '../../aplicacao/casos-de-uso/duplicar-ficha';
+import type {
+  EntradaDoHistorico,
+  HistoricoDaFicha,
+} from '../../aplicacao/casos-de-uso/historico-da-ficha';
+import type { RestaurarVersao } from '../../aplicacao/casos-de-uso/restaurar-versao';
 import type { SalvarFicha } from '../../aplicacao/casos-de-uso/salvar-ficha';
 import type { FichaDaLista, ListarFichas } from '../../aplicacao/casos-de-uso/listar-fichas';
 import {
@@ -20,6 +25,7 @@ import {
 } from '../../aplicacao/rascunho-da-ficha';
 import { EditorDaFicha } from '../componentes/editor-da-ficha';
 import { EscolhaDoTipoDeRotina } from '../componentes/escolha-do-tipo-de-rotina';
+import { HistoricoDaFichaAberta } from '../componentes/historico-da-ficha-aberta';
 import { ListaDeFichas, type AcoesDaLista } from '../componentes/lista-de-fichas';
 import { textos } from '../textos';
 import { salvarRascunho } from './salvar-rascunho';
@@ -35,6 +41,9 @@ export interface PropsDaTelaDasFichas {
   ativarFicha?: AtivarFicha;
   duplicarFicha?: DuplicarFicha;
   arquivarFicha?: ArquivarFicha;
+  // Sem o histórico a ficha aberta não oferece Histórico; sem a restauração o histórico só lê.
+  historicoDaFicha?: HistoricoDaFicha;
+  restaurarVersao?: RestaurarVersao;
 }
 
 export function TelaDasFichas({
@@ -45,10 +54,14 @@ export function TelaDasFichas({
   ativarFicha,
   duplicarFicha,
   arquivarFicha,
+  historicoDaFicha,
+  restaurarVersao,
 }: PropsDaTelaDasFichas) {
   const [fichas, setFichas] = useState<FichaDaLista[] | null>(null);
   const [aberta, setAberta] = useState<FichaParaEdicao | null>(null);
   const [rascunho, setRascunho] = useState<RascunhoDaFicha | null>(null);
+  const [historico, setHistorico] = useState<EntradaDoHistorico[] | null>(null);
+  const [mensagemDoHistorico, setMensagemDoHistorico] = useState<string | null>(null);
   const [escolhendoTipo, setEscolhendoTipo] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const [versaoSalva, setVersaoSalva] = useState<number | null>(null);
@@ -88,6 +101,26 @@ export function TelaDasFichas({
   const mudar = (acao: Promise<unknown>) => {
     acao.then(carregarFichas, (falha: unknown) => setErro(falha));
   };
+  const abrirHistorico = (ficha: FichaParaEdicao) => {
+    historicoDaFicha
+      ?.executar(ficha.fichaId)
+      .then(setHistorico, (falha: unknown) => setErro(falha));
+  };
+  // Restaurar só insere uma versão nova (FL04, RB02): depois a ficha, o histórico e a lista são
+  // lidos de novo, e a tela fica no histórico mostrando a versão criada.
+  const restaurar = (ficha: FichaParaEdicao, numero: number) => {
+    if (!restaurarVersao || !historicoDaFicha) return;
+    const { fichaId } = ficha;
+    restaurarVersao
+      .executar({ fichaId, numero })
+      .then(async (resultado) => {
+        setAberta(await lerFichaParaEdicao.executar(fichaId));
+        setHistorico(await historicoDaFicha.executar(fichaId));
+        setMensagemDoHistorico(textos.fichas.versaoRestaurada(resultado.versao.numero, numero));
+        carregarFichas();
+      })
+      .catch((falha: unknown) => setErro(falha));
+  };
   const cancelar = () => {
     setRascunho(null);
     setAviso(null);
@@ -114,6 +147,21 @@ export function TelaDasFichas({
       <EscolhaDoTipoDeRotina aoEscolher={escolher} aoCancelar={() => setEscolhendoTipo(false)} />
     );
   }
+  if (aberta && historico) {
+    const voltarParaFicha = () => {
+      setHistorico(null);
+      setMensagemDoHistorico(null);
+    };
+    return (
+      <HistoricoDaFichaAberta
+        nome={aberta.nome}
+        entradas={historico}
+        mensagem={mensagemDoHistorico}
+        aoRestaurar={restaurarVersao ? (numero) => restaurar(aberta, numero) : undefined}
+        aoVoltar={voltarParaFicha}
+      />
+    );
+  }
   if (aberta) {
     const editar = buscarExercicios ? () => setRascunho(rascunhoDaFicha(aberta)) : undefined;
     const voltar = () => {
@@ -121,7 +169,13 @@ export function TelaDasFichas({
       setVersaoSalva(null);
     };
     return (
-      <FichaAberta ficha={aberta} versaoSalva={versaoSalva} aoVoltar={voltar} aoEditar={editar} />
+      <FichaAberta
+        ficha={aberta}
+        versaoSalva={versaoSalva}
+        aoVoltar={voltar}
+        aoEditar={editar}
+        aoAbrirHistorico={historicoDaFicha ? () => abrirHistorico(aberta) : undefined}
+      />
     );
   }
   const podeCriar = buscarExercicios && salvarFicha;
@@ -140,6 +194,7 @@ interface PropsDaFichaAberta {
   ficha: FichaParaEdicao;
   aoVoltar: () => void;
   aoEditar?: () => void;
+  aoAbrirHistorico?: () => void;
   versaoSalva: number | null;
 }
 
@@ -152,6 +207,15 @@ function FichaAberta(props: PropsDaFichaAberta) {
       {props.aoEditar && (
         <Pressable role="button" aria-label={textos.fichas.editar} onPress={props.aoEditar}>
           <Text>{textos.fichas.editar}</Text>
+        </Pressable>
+      )}
+      {props.aoAbrirHistorico && (
+        <Pressable
+          role="button"
+          aria-label={textos.fichas.historico}
+          onPress={props.aoAbrirHistorico}
+        >
+          <Text>{textos.fichas.historico}</Text>
         </Pressable>
       )}
       <Text style={estilos.titulo}>{props.ficha.nome}</Text>

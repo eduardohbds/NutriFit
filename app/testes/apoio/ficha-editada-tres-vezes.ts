@@ -1,6 +1,8 @@
 import type { ItemPedido, PedidoDeFicha } from '../../src/aplicacao/casos-de-uso/salvar-ficha';
 import { fichasParaTela } from './fichas-de-tela';
 
+export const NOME_DA_FICHA_EDITADA = 'Treino com histórico';
+
 // Uma ficha criada e editada 3 vezes, ou seja, com 4 versões:
 //   1: Supino; 2: Supino e Remada (incluí a remada); 3: Supino com 60 kg (subi a carga);
 //   4: só o Supino com 60 kg (tirei a remada).
@@ -19,7 +21,7 @@ export async function fichaEditadaTresVezes() {
   const pedido = (itens: ItemPedido[], motivo?: string, fichaId?: PedidoDeFicha['fichaId']) => ({
     fichaId,
     motivo,
-    nome: 'Treino com histórico',
+    nome: NOME_DA_FICHA_EDITADA,
     rotinas: [{ nome: 'Treino A', diaDaSemana: null, itens }],
   });
   const primeira = await pronto.salvarFicha.executar(pedido([item(1, supino, null)]));
