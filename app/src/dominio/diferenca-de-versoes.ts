@@ -1,4 +1,4 @@
-import type { ItemDaRotina, Rotina, SeriePlanejada, VersaoDaFicha } from './ficha';
+import type { ItemDaRotina, SeriePlanejada, VersaoDaFicha } from './ficha';
 import type { Identificador } from './identificador';
 
 export type TipoDeMudanca = 'adicionada' | 'removida' | 'alterada';
@@ -75,44 +75,75 @@ function alinhar(antes: ItemDaRotina[], depois: ItemDaRotina[]): Par[] {
   return pares;
 }
 
-function linhasDaRotina(
-  nome: string,
-  antes: Rotina | null,
-  depois: Rotina | null,
-): DiferencaDeLinha[] {
-  const linhas: DiferencaDeLinha[] = [];
-  for (const par of alinhar(antes?.itens ?? [], depois?.itens ?? [])) {
-    const base = { rotina: nome, exercicioId: (par.antes ?? par.depois)!.exercicioId };
-    if (!par.depois) linhas.push({ ...base, tipo: 'removida', campos: [] });
-    else if (!par.antes) linhas.push({ ...base, tipo: 'adicionada', campos: [] });
-    else {
-      const campos = camposAlterados(par.antes, par.depois);
-      if (campos.length > 0) linhas.push({ ...base, tipo: 'alterada', campos });
-    }
-  }
-  return linhas;
+export interface LinhaComparada {
+  tipo: 'igual' | TipoDeMudanca;
+  antes: ItemDaRotina | null;
+  depois: ItemDaRotina | null;
+  campos: string[];
 }
 
-// As rotinas se casam pelo nome (a primeira de cada nome ainda sem par); dentro de cada uma, as
-// linhas se casam pelo exercício e pela ordem. Reordenar as rotinas não conta como diferença.
+export interface RotinaComparada {
+  nome: string;
+  situacao: 'igual' | 'adicionada' | 'removida';
+  linhas: LinhaComparada[];
+}
+
+function linhaComparada(par: Par): LinhaComparada {
+  const antes = par.antes ?? null;
+  const depois = par.depois ?? null;
+  if (!depois) return { tipo: 'removida', antes, depois, campos: [] };
+  if (!antes) return { tipo: 'adicionada', antes, depois, campos: [] };
+  const campos = camposAlterados(antes, depois);
+  return { tipo: campos.length > 0 ? 'alterada' : 'igual', antes, depois, campos };
+}
+
+const linhasLadoALado = (antes: ItemDaRotina[], depois: ItemDaRotina[]): LinhaComparada[] =>
+  alinhar(antes, depois).map(linhaComparada);
+
+// As duas versões alinhadas, com todas as linhas (as iguais também) para mostrar lado a lado. As
+// rotinas se casam pelo nome (a primeira de cada nome ainda sem par), na ordem da versão de antes,
+// e as novas vêm no fim; dentro de cada uma, as linhas se casam pelo exercício e pela ordem.
+// Reordenar as rotinas não conta como diferença.
+export function comparacaoLadoALado(
+  anterior: VersaoDaFicha,
+  atual: VersaoDaFicha,
+): RotinaComparada[] {
+  const usadas = new Set<number>();
+  const rotinas: RotinaComparada[] = [];
+  for (const antes of anterior.rotinas) {
+    const posicao = atual.rotinas.findIndex((r, p) => r.nome === antes.nome && !usadas.has(p));
+    const depois = posicao < 0 ? [] : atual.rotinas[posicao].itens;
+    if (posicao >= 0) usadas.add(posicao);
+    const situacao = posicao < 0 ? 'removida' : 'igual';
+    rotinas.push({ nome: antes.nome, situacao, linhas: linhasLadoALado(antes.itens, depois) });
+  }
+  atual.rotinas.forEach((depois, posicao) => {
+    if (usadas.has(posicao)) return;
+    const linhas = linhasLadoALado([], depois.itens);
+    rotinas.push({ nome: depois.nome, situacao: 'adicionada', linhas });
+  });
+  return rotinas;
+}
+
+// Só o que mudou: as rotinas adicionadas e removidas e as linhas que não são iguais.
 export function diferencaDeVersoes(
   anterior: VersaoDaFicha,
   atual: VersaoDaFicha,
 ): DiferencaDeVersoes {
-  const usadas = new Set<number>();
-  const rotinas: DiferencaDeRotina[] = [];
-  const linhas: DiferencaDeLinha[] = [];
-  for (const antes of anterior.rotinas) {
-    const posicao = atual.rotinas.findIndex((r, p) => r.nome === antes.nome && !usadas.has(p));
-    if (posicao < 0) rotinas.push({ nome: antes.nome, tipo: 'removida' });
-    else usadas.add(posicao);
-    linhas.push(...linhasDaRotina(antes.nome, antes, posicao < 0 ? null : atual.rotinas[posicao]));
-  }
-  atual.rotinas.forEach((depois, posicao) => {
-    if (usadas.has(posicao)) return;
-    rotinas.push({ nome: depois.nome, tipo: 'adicionada' });
-    linhas.push(...linhasDaRotina(depois.nome, null, depois));
-  });
+  const comparadas = comparacaoLadoALado(anterior, atual);
+  const rotinas: DiferencaDeRotina[] = comparadas
+    .filter((r) => r.situacao !== 'igual')
+    .map((r) => ({ nome: r.nome, tipo: r.situacao as 'adicionada' | 'removida' }));
+  const linhas: DiferencaDeLinha[] = comparadas.flatMap((r) =>
+    r.linhas
+      .filter((l) => l.tipo !== 'igual')
+      .map((l) => ({
+        rotina: r.nome,
+        exercicioId: (l.antes ?? l.depois)!.exercicioId,
+        tipo: l.tipo as TipoDeMudanca,
+        campos: l.campos,
+      })),
+  );
   return { rotinas, linhas };
 }
 

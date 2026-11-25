@@ -15,6 +15,7 @@ export default function Fichas() {
       arquivarFicha={casos.arquivarFicha}
       historicoDaFicha={casos.historicoDaFicha}
       restaurarVersao={casos.restaurarVersao}
+      compararVersoes={casos.compararVersoes}
     />
   );
 }

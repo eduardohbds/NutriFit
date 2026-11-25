@@ -15,6 +15,7 @@ import { ConfigurarConexao } from '../aplicacao/casos-de-uso/configurar-conexao'
 import { ArquivarFicha } from '../aplicacao/casos-de-uso/arquivar-ficha';
 import { AtivarFicha } from '../aplicacao/casos-de-uso/ativar-ficha';
 import { BuscarExercicios } from '../aplicacao/casos-de-uso/buscar-exercicios';
+import { CompararVersoes } from '../aplicacao/casos-de-uso/comparar-versoes';
 import { DuplicarFicha } from '../aplicacao/casos-de-uso/duplicar-ficha';
 import { HistoricoDaFicha } from '../aplicacao/casos-de-uso/historico-da-ficha';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
@@ -86,6 +87,7 @@ export function casosDeFichas(): {
   arquivarFicha: ArquivarFicha;
   historicoDaFicha: HistoricoDaFicha;
   restaurarVersao: RestaurarVersao;
+  compararVersoes: CompararVersoes;
 } {
   return {
     buscarExercicios: new BuscarExercicios(catalogo()),
@@ -97,5 +99,6 @@ export function casosDeFichas(): {
     arquivarFicha: new ArquivarFicha(fichas()),
     historicoDaFicha: new HistoricoDaFicha(fichas()),
     restaurarVersao: new RestaurarVersao(fichas(), new GeradorUuidV7(), new RelogioDoSistema()),
+    compararVersoes: new CompararVersoes(fichas(), catalogo()),
   };
 }

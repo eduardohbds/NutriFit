@@ -478,11 +478,12 @@ A história original não cabia num commit: ela mistura a diferença entre vers�
 - Notas de domínio: o histórico mostra a versão mais recente primeiro; o botão Histórico só aparece quando a tela recebe o `HistoricoDaFicha`, e o Restaurar, quando recebe também o `RestaurarVersao`; depois de restaurar, a tela relê a ficha e a lista, e fica no histórico mostrando a versão nova.
 
 ### US-010c: Comparar duas versões lado a lado
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-010. Depende da US-010b.
 - Critérios de aceite (cada um vira um teste):
   - Dadas duas versões escolhidas no histórico, quando o usuário as compara, então as duas aparecem lado a lado, com as linhas adicionadas, removidas e alteradas destacadas, e os campos alterados indicados.
 - Falha inaceitável envolvida: FI-4, só leitura.
+- Notas de domínio: o usuário escolhe as duas versões no histórico (Escolher versão N para comparar; uma terceira escolha tira a primeira) e toca em Comparar versões; a versão menor fica à esquerda, qualquer que seja a ordem da escolha; as linhas iguais aparecem sem marca, e as adicionadas, removidas e alteradas (com os campos) aparecem marcadas; o botão só existe quando a tela recebe o `CompararVersoes` e há ao menos duas versões. Só leitura: nada é gravado.
 
 ### US-011: Travar exercícios contra a IA
 - Status: a fazer
