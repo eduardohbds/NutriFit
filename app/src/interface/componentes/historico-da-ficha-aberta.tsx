@@ -13,6 +13,8 @@ export interface PropsDoHistoricoDaFichaAberta {
   mensagem: string | null;
   // Sem esta função o histórico só lê, sem botão Restaurar.
   aoRestaurar?: (numero: number) => void;
+  // Sem esta função o histórico não oferece escolher versões para comparar.
+  aoComparar?: (primeira: number, segunda: number) => void;
   aoVoltar: () => void;
 }
 
@@ -23,9 +25,17 @@ export function HistoricoDaFichaAberta({
   entradas,
   mensagem,
   aoRestaurar,
+  aoComparar,
   aoVoltar,
 }: PropsDoHistoricoDaFichaAberta) {
   const [confirmando, setConfirmando] = useState<number | null>(null);
+  const [escolhidas, setEscolhidas] = useState<number[]>([]);
+  const podeComparar = aoComparar !== undefined && entradas.length > 1;
+  // Uma terceira escolha tira a primeira: ficam sempre só duas.
+  const alternar = (numero: number) =>
+    setEscolhidas((atuais) =>
+      atuais.includes(numero) ? atuais.filter((n) => n !== numero) : [...atuais, numero].slice(-2),
+    );
   const atual = Math.max(...entradas.map((entrada) => entrada.numero));
   const confirmar = (numero: number) => {
     setConfirmando(null);
@@ -41,6 +51,13 @@ export function HistoricoDaFichaAberta({
       />
       <Text style={estilos.titulo}>{textos.fichas.tituloDoHistorico(nome)}</Text>
       {mensagem !== null && <Text>{mensagem}</Text>}
+      {podeComparar && escolhidas.length === 2 && (
+        <BotaoDeAcao
+          rotulo={textos.fichas.compararVersoes}
+          nome={textos.fichas.compararVersoes}
+          aoTocar={() => aoComparar(escolhidas[0], escolhidas[1])}
+        />
+      )}
       {confirmando !== null && (
         <ConfirmacaoDeRestauracao
           numero={confirmando}
@@ -53,6 +70,8 @@ export function HistoricoDaFichaAberta({
         <VersaoDoHistorico
           key={entrada.numero}
           entrada={entrada}
+          escolhida={escolhidas.includes(entrada.numero)}
+          aoAlternarComparacao={podeComparar ? () => alternar(entrada.numero) : undefined}
           aoRestaurar={
             aoRestaurar && entrada.podeRestaurar ? () => setConfirmando(entrada.numero) : undefined
           }
@@ -64,10 +83,17 @@ export function HistoricoDaFichaAberta({
 
 interface PropsDaVersaoDoHistorico {
   entrada: EntradaDoHistorico;
+  escolhida: boolean;
+  aoAlternarComparacao?: () => void;
   aoRestaurar?: () => void;
 }
 
-function VersaoDoHistorico({ entrada, aoRestaurar }: PropsDaVersaoDoHistorico) {
+function VersaoDoHistorico({
+  entrada,
+  escolhida,
+  aoAlternarComparacao,
+  aoRestaurar,
+}: PropsDaVersaoDoHistorico) {
   return (
     <View style={estilos.versao}>
       <Text style={estilos.numero}>{textos.fichas.versao(entrada.numero)}</Text>
@@ -75,6 +101,17 @@ function VersaoDoHistorico({ entrada, aoRestaurar }: PropsDaVersaoDoHistorico) {
       <Text>{textos.fichas.dataDaVersao(formatarDataEHora(entrada.criadaEm))}</Text>
       {entrada.motivo !== null && <Text>{textos.fichas.motivoDaVersao(entrada.motivo)}</Text>}
       <Text>{entrada.resumo}</Text>
+      {aoAlternarComparacao && (
+        <BotaoDeAcao
+          rotulo={escolhida ? textos.fichas.desmarcar : textos.fichas.escolher}
+          nome={
+            escolhida
+              ? textos.fichas.desmarcarComparacao(entrada.numero)
+              : textos.fichas.escolherParaComparar(entrada.numero)
+          }
+          aoTocar={aoAlternarComparacao}
+        />
+      )}
       {aoRestaurar && (
         <BotaoDeAcao
           rotulo={textos.fichas.restaurar}

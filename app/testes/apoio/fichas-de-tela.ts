@@ -1,6 +1,7 @@
 import { ArquivarFicha } from '../../src/aplicacao/casos-de-uso/arquivar-ficha';
 import { AtivarFicha } from '../../src/aplicacao/casos-de-uso/ativar-ficha';
 import { BuscarExercicios } from '../../src/aplicacao/casos-de-uso/buscar-exercicios';
+import { CompararVersoes } from '../../src/aplicacao/casos-de-uso/comparar-versoes';
 import { DuplicarFicha } from '../../src/aplicacao/casos-de-uso/duplicar-ficha';
 import { HistoricoDaFicha } from '../../src/aplicacao/casos-de-uso/historico-da-ficha';
 import { RestaurarVersao } from '../../src/aplicacao/casos-de-uso/restaurar-versao';
@@ -109,6 +110,7 @@ export async function fichasParaTela() {
     fichaCompleta: completo.fichaId,
     buscarExercicios: new BuscarExercicios(catalogo.repositorio),
     gerador,
+    compararVersoes: new CompararVersoes(fichas, catalogo.repositorio),
     historicoDaFicha: new HistoricoDaFicha(fichas),
     restaurarVersao: new RestaurarVersao(fichas, gerador, new RelogioFixo()),
     ativarFicha: new AtivarFicha(fichas),

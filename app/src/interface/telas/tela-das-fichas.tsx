@@ -11,6 +11,10 @@ import type { ArquivarFicha } from '../../aplicacao/casos-de-uso/arquivar-ficha'
 import type { AtivarFicha } from '../../aplicacao/casos-de-uso/ativar-ficha';
 import type { DuplicarFicha } from '../../aplicacao/casos-de-uso/duplicar-ficha';
 import type {
+  ComparacaoDeVersoes,
+  CompararVersoes,
+} from '../../aplicacao/casos-de-uso/comparar-versoes';
+import type {
   EntradaDoHistorico,
   HistoricoDaFicha,
 } from '../../aplicacao/casos-de-uso/historico-da-ficha';
@@ -23,6 +27,7 @@ import {
   type RascunhoDaFicha,
   type TipoDeRotina,
 } from '../../aplicacao/rascunho-da-ficha';
+import { ComparacaoDeVersoesAberta } from '../componentes/comparacao-de-versoes-aberta';
 import { EditorDaFicha } from '../componentes/editor-da-ficha';
 import { EscolhaDoTipoDeRotina } from '../componentes/escolha-do-tipo-de-rotina';
 import { HistoricoDaFichaAberta } from '../componentes/historico-da-ficha-aberta';
@@ -44,6 +49,8 @@ export interface PropsDaTelaDasFichas {
   // Sem o histórico a ficha aberta não oferece Histórico; sem a restauração o histórico só lê.
   historicoDaFicha?: HistoricoDaFicha;
   restaurarVersao?: RestaurarVersao;
+  // Sem a comparação o histórico não oferece escolher versões.
+  compararVersoes?: CompararVersoes;
 }
 
 export function TelaDasFichas({
@@ -56,11 +63,13 @@ export function TelaDasFichas({
   arquivarFicha,
   historicoDaFicha,
   restaurarVersao,
+  compararVersoes,
 }: PropsDaTelaDasFichas) {
   const [fichas, setFichas] = useState<FichaDaLista[] | null>(null);
   const [aberta, setAberta] = useState<FichaParaEdicao | null>(null);
   const [rascunho, setRascunho] = useState<RascunhoDaFicha | null>(null);
   const [historico, setHistorico] = useState<EntradaDoHistorico[] | null>(null);
+  const [comparacao, setComparacao] = useState<ComparacaoDeVersoes | null>(null);
   const [mensagemDoHistorico, setMensagemDoHistorico] = useState<string | null>(null);
   const [escolhendoTipo, setEscolhendoTipo] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -121,6 +130,12 @@ export function TelaDasFichas({
       })
       .catch((falha: unknown) => setErro(falha));
   };
+  const comparar = (ficha: FichaParaEdicao, primeira: number, segunda: number) => {
+    const { fichaId } = ficha;
+    compararVersoes
+      ?.executar({ fichaId, numeroA: primeira, numeroB: segunda })
+      .then(setComparacao, (falha: unknown) => setErro(falha));
+  };
   const cancelar = () => {
     setRascunho(null);
     setAviso(null);
@@ -147,6 +162,11 @@ export function TelaDasFichas({
       <EscolhaDoTipoDeRotina aoEscolher={escolher} aoCancelar={() => setEscolhendoTipo(false)} />
     );
   }
+  if (aberta && comparacao) {
+    return (
+      <ComparacaoDeVersoesAberta comparacao={comparacao} aoVoltar={() => setComparacao(null)} />
+    );
+  }
   if (aberta && historico) {
     const voltarParaFicha = () => {
       setHistorico(null);
@@ -158,6 +178,7 @@ export function TelaDasFichas({
         entradas={historico}
         mensagem={mensagemDoHistorico}
         aoRestaurar={restaurarVersao ? (numero) => restaurar(aberta, numero) : undefined}
+        aoComparar={compararVersoes ? (a, b) => comparar(aberta, a, b) : undefined}
         aoVoltar={voltarParaFicha}
       />
     );

@@ -1,4 +1,5 @@
 import { DIAS_DA_SEMANA } from '../dominio/dia-da-semana';
+import type { TextosDasSeries } from '../dominio/textos-das-series';
 
 // Todo texto exibido ao usuário fica aqui, em português do Brasil (RES23, RNF35).
 export const textos = {
@@ -50,6 +51,29 @@ export const textos = {
     removerLinha: (rotina: string, ordem: number) => `Remover, ${rotina}, linha ${ordem}`,
     adicionar: 'Adicionar linha',
     historico: 'Histórico',
+    escolherParaComparar: (numero: number) => `Escolher versão ${numero} para comparar`,
+    desmarcarComparacao: (numero: number) => `Desmarcar versão ${numero}`,
+    compararVersoes: 'Comparar versões',
+    escolher: 'Comparar',
+    desmarcar: 'Desmarcar',
+    voltarParaHistorico: 'Voltar ao histórico',
+    tituloDaComparacao: (de: number, para: number) => `Versão ${de} comparada com a versão ${para}`,
+    marcaAdicionada: 'Adicionada',
+    marcaRemovida: 'Removida',
+    marcaAlterada: (campos: string[]) => `Alterada: ${campos.join(', ')}`,
+    rotinaAdicionada: (nome: string) => `Rotina adicionada: ${nome}`,
+    rotinaRemovida: (nome: string) => `Rotina removida: ${nome}`,
+    semLinha: '—',
+    resumoDaLinha: (listas: TextosDasSeries) =>
+      [
+        listas.quantidade === 1 ? '1 série' : `${listas.quantidade} séries`,
+        `Meta: ${listas.meta}`,
+        listas.carga === null ? null : `Carga (kg): ${listas.carga}`,
+        listas.tecnica === null ? null : `Técnica: ${listas.tecnica}`,
+        listas.descanso === null ? null : `Descanso (s): ${listas.descanso}`,
+      ]
+        .filter((parte) => parte !== null)
+        .join(' · '),
     tituloDoHistorico: (nome: string) => `Histórico de ${nome}`,
     voltarParaFicha: 'Voltar à ficha',
     autorDaVersao: (autor: 'usuario' | 'ia' | 'importacao') =>
