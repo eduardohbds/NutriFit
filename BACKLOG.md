@@ -528,21 +528,45 @@ A história original não cabia num commit: ela mistura a regra de qual rotina s
 - Falha inaceitável envolvida: nenhuma direta.
 - Notas de domínio: a tela mostra a ficha ativa, a rotina (sugerida ou escolhida) e os exercícios dela, lidos da versão atual pelo `LerFichaParaEdicao`; as rotinas da ficha aparecem como botões para ver outra, inclusive a sugerida; Importar, Pedir à IA e Treino livre aparecem desativados com "Em breve" até E-10, E-11 e US-040; os links para o catálogo e para as fichas continuam na tela. Mudança nos testes aprovados das rotas (rota-do-catalogo e rota-das-fichas): o mock da composição passa a trazer `casosDoInicio`, porque a rota inicial agora o chama.
 
-### US-013: Registrar uma série
-- Status: a fazer
-- Contexto: o registro de cada série com carga, repetições e RIR é a base de todas as métricas e da IA (RF02, RB08 a RB10).
+### US-013: Registrar uma série (quebrada em US-013a a US-013d)
+A história original não cabia num commit: ela mistura as regras puras da série (RIR, quando é obrigatório, valores inválidos), a leitura do que vem preenchido (última sessão, descanso), a criação da sessão do treino e a tela de registro, que é a que toca a FI-1. Os oito critérios foram distribuídos entre as quatro, na ordem abaixo; a US-013d guarda o RNF01.
+
+### US-013a: Regras puras da série concluída
+- Status: aceita
+- Contexto: ver US-013. Primeira parte: nada de tela nem de banco (RF02, RB09 a RB11).
 - Critérios de aceite (cada um vira um teste):
-  - Dado o celular em modo avião, quando o usuário registra uma série de trabalho, então leva até 10 segundos e a série é salva em até 1 segundo (TE01, RNF01).
-  - Dada uma série de trabalho por repetições sem RIR, quando o usuário tenta concluir, então a conclusão é bloqueada e o campo é destacado (RB09).
+  - Dado o RIR, quando o objeto de valor é construído com algo fora de 0 a 5 (negativo, maior que 5, fracionário, não numérico), então não se constrói e o erro diz o valor recebido e o formato esperado.
+  - Dada uma série de trabalho por repetições sem RIR, quando o usuário tenta concluir, então a conclusão é recusada com erro no campo `rir`, que a tela usa para destacá-lo (RB09).
   - Dada uma série com meta "falha", quando é exibida, então vem com RIR 0.
   - Dada uma série de aquecimento, por tempo ou de cardio, quando é concluída, então não pede RIR (RB11).
+  - Dado um valor negativo ou não numérico em carga, repetições ou segundos, quando o usuário confirma, então é rejeitado com erro que diz o campo, o valor recebido e o formato esperado.
+- Fora do escopo: pré-preenchimento pela última sessão e descanso (US-013b), iniciar a sessão (US-013c), tela e gravação (US-013d).
+- Falha inaceitável envolvida: FI-2 (número errado), porque o RIR entra nas séries válidas e no 1RM; a regra fica numa função pura.
+- Notas de domínio: RIR é inteiro de 0 a 5, e 5 significa cinco ou mais (guardado como 5). `Rir` valida a entrada e `concluirSerie` devolve os dados da série prontos; o campo `rir` de `SerieExecutada` continua número (nenhum teste aprovado muda). Repetições e segundos pedem inteiro maior ou igual a 1; carga aceita vírgula ou ponto e vazio é sem carga; repetições do outro lado (unilateral, RB19) são opcionais.
+
+### US-013b: A série vem preenchida e o descanso aparece
+- Status: a fazer
+- Contexto: ver US-013. Só leitura (HistoricoDoExercicio e ficha).
+- Critérios de aceite (cada um vira um teste):
   - Dado um exercício já feito antes, quando a série é exibida, então vem preenchida com os valores da última sessão do mesmo exercício; sem histórico, com os da ficha.
-  - Dado um valor negativo ou não numérico, quando o usuário confirma, então é rejeitado com mensagem que diz o valor recebido e o formato esperado.
-  - Dado o RIR, quando o objeto de valor é construído com algo fora de 0 a 5, então não se constrói (AGENTS.md, seção 5).
   - Dada uma série concluída, quando a próxima é exibida, então o descanso planejado aparece como referência, sem cronômetro.
 - Fora do escopo: cronômetro de descanso (descartado pelo usuário).
+- Falha inaceitável envolvida: nenhuma direta.
+
+### US-013c: Iniciar a sessão do treino do dia
+- Status: a fazer
+- Contexto: ver US-013. A ponte entre a tela inicial (US-012b) e o registro: cria a sessão presa à versão usada na época (RB04). Os critérios saem do refinamento antes do Red.
+- Falha inaceitável envolvida: FI-4 (a sessão guarda a versão, e nada é reescrito).
+
+### US-013d: Tela de registro da série
+- Status: a fazer
+- Contexto: ver US-013. A tela que junta as anteriores e grava pelo `RegistrarSerie`.
+- Critérios de aceite (cada um vira um teste):
+  - Dado o celular em modo avião, quando o usuário registra uma série de trabalho, então leva até 10 segundos e a série é salva em até 1 segundo (TE01, RNF01).
+  - Dada uma série de trabalho sem RIR, quando o usuário tenta concluir, então a conclusão é bloqueada e o campo é destacado (RB09).
+  - Dado um valor inválido, quando o usuário confirma, então a mensagem diz o valor recebido e o formato esperado.
 - Falha inaceitável envolvida: FI-1 (perder série concluída).
-- Notas de domínio: RIR é inteiro de 0 a 5, em que 5 significa cinco ou mais. Em série unilateral, carga e repetições valem para cada lado e a série conta uma vez (RB19). Cada série guarda data e hora reais.
+- Notas de domínio: em série unilateral, carga e repetições valem para cada lado e a série conta uma vez (RB19). Cada série guarda data e hora reais.
 
 ### US-014: Ajustar a sessão em andamento
 - Status: a fazer
