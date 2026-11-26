@@ -142,6 +142,22 @@ export const textos = {
       `${campo}, ${rotina}, linha ${ordem}`,
     diasDaSemana: DIAS_DA_SEMANA as readonly string[],
   },
+  inicio: {
+    titulo: 'Treino de hoje',
+    fichaAtiva: (nome: string) => `Ficha ativa: ${nome}`,
+    sugerido: 'Sugerido para hoje',
+    escolhida: 'Escolhida por você',
+    escolherOutra: 'Escolher outra rotina',
+    verRotina: (nome: string) => `Ver ${nome}`,
+    semRotinaHoje: (dia: string) =>
+      `Hoje (${dia}) não tem rotina nesta ficha. Escolha uma rotina para ver.`,
+    semFichaAtiva: 'Nenhuma ficha ativa.',
+    criarFicha: 'Criar ficha',
+    importarFicha: 'Importar ficha',
+    pedirParaIa: 'Pedir à IA',
+    treinoLivre: 'Iniciar treino livre',
+    emBreve: 'Em breve',
+  },
   validacao: {
     recusado: (recebido: string, esperado: string) =>
       `Valor recebido: ${recebido}. Formato esperado: ${esperado}.`,

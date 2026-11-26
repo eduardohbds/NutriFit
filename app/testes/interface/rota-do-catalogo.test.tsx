@@ -8,6 +8,10 @@ jest.mock('../../src/composicao', () => {
   const { catalogoInicialParaTela } = require('../apoio/catalogo-de-tela');
   const catalogo = catalogoInicialParaTela();
   return {
+    casosDoInicio: () => ({
+      escolherTreinoDoDia: { executar: async () => ({ situacao: 'sem_ficha_ativa' }) },
+      lerFichaParaEdicao: { executar: async () => null },
+    }),
     casosDoCatalogo: () => ({
       listarExercicios: catalogo.listarExercicios,
       editarGrupos: catalogo.editarGrupos,

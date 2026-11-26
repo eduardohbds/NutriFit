@@ -1,15 +1,13 @@
-import { Link } from 'expo-router';
-import { Text, View } from 'react-native';
+import { casosDoInicio } from '../src/composicao';
+import { TelaInicial } from '../src/interface/telas/tela-inicial';
 
-import { textos } from '../src/interface/textos';
-
-// Rota fina: as telas de verdade ficam em src/interface (AGENTS.md seção 3).
+// Rota fina: a tela de verdade fica em src/interface (AGENTS.md seção 3).
 export default function Inicio() {
+  const { escolherTreinoDoDia, lerFichaParaEdicao } = casosDoInicio();
   return (
-    <View>
-      <Text>NutriFit</Text>
-      <Link href="/catalogo">{textos.catalogo.abrir}</Link>
-      <Link href="/fichas">{textos.fichas.abrir}</Link>
-    </View>
+    <TelaInicial
+      escolherTreinoDoDia={escolherTreinoDoDia}
+      lerFichaParaEdicao={lerFichaParaEdicao}
+    />
   );
 }

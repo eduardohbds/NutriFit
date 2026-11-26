@@ -9,6 +9,10 @@ jest.mock('../../src/composicao', () => {
   const { fichasParaTela } = require('../apoio/fichas-de-tela');
   const pronto = fichasParaTela();
   return {
+    casosDoInicio: () => ({
+      escolherTreinoDoDia: { executar: async () => ({ situacao: 'sem_ficha_ativa' }) },
+      lerFichaParaEdicao: { executar: async () => null },
+    }),
     casosDeFichas: () => ({
       listarFichas: { executar: async () => (await pronto).listarFichas.executar() },
       lerFichaParaEdicao: {

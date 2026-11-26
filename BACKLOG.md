@@ -517,7 +517,7 @@ A história original não cabia num commit: ela mistura a regra de qual rotina s
 - Notas de domínio: a rotação avança a partir da última sessão concluída, não do calendário. O `Relogio` ganha `diaDaSemana()` (1 = segunda a 7 = domingo) e o `RepositorioDeSessoes` ganha `ultimaRotinaConcluida(fichaId)`, que devolve o identificador da rotina; o nome vem das versões da ficha, e as duas portas não se conhecem.
 
 ### US-012b: Tela inicial com o treino do dia
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-012. Depende da US-012a e da US-009b.
 - Critérios de aceite (cada um vira um teste):
   - Dado o app aberto, quando há ficha ativa e rotina para hoje, então a tela inicial mostra o treino de hoje sem toque adicional.
@@ -526,6 +526,7 @@ A história original não cabia num commit: ela mistura a regra de qual rotina s
   - Dada a ausência de ficha ativa, quando o app abre, então oferece criar ficha (leva às fichas) e mostra importar, pedir à IA e treino livre desativados até as histórias deles (CE02, SL18).
 - Fora do escopo: iniciar a sessão.
 - Falha inaceitável envolvida: nenhuma direta.
+- Notas de domínio: a tela mostra a ficha ativa, a rotina (sugerida ou escolhida) e os exercícios dela, lidos da versão atual pelo `LerFichaParaEdicao`; as rotinas da ficha aparecem como botões para ver outra, inclusive a sugerida; Importar, Pedir à IA e Treino livre aparecem desativados com "Em breve" até E-10, E-11 e US-040; os links para o catálogo e para as fichas continuam na tela. Mudança nos testes aprovados das rotas (rota-do-catalogo e rota-das-fichas): o mock da composição passa a trazer `casosDoInicio`, porque a rota inicial agora o chama.
 
 ### US-013: Registrar uma série
 - Status: a fazer
