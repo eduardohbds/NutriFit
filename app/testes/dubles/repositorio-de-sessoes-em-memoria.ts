@@ -79,6 +79,20 @@ export class RepositorioDeSessoesEmMemoria implements RepositorioDeSessoes {
     return cronologicas.flatMap((sessao) => seriesDaSessao(sessao, pedidos));
   }
 
+  // A de maior fim; em empate vale a gravada depois (a ordem do Map é a da gravação).
+  async ultimaRotinaConcluida(fichaId: Identificador): Promise<Identificador | null> {
+    let ultima: Sessao | null = null;
+    for (const sessao of this.sessoes.values()) {
+      const serve =
+        sessao.fichaId?.valor === fichaId.valor &&
+        sessao.situacao === 'concluida' &&
+        sessao.rotinaId !== null &&
+        sessao.fim !== null;
+      if (serve && (!ultima || sessao.fim!.iso >= ultima.fim!.iso)) ultima = sessao;
+    }
+    return ultima?.rotinaId ?? null;
+  }
+
   async buscarSessao(id: Identificador): Promise<Sessao | null> {
     const sessao = this.sessoes.get(id.valor);
     return sessao ? copiar(sessao) : null;

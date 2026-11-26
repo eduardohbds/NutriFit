@@ -499,19 +499,33 @@ A história original não cabia num commit: ela mistura a diferença entre vers�
 ## Épico E-04: Registro de treino (BL06 · P1)
 Objetivo: na academia, com uma mão e sem internet, o usuário executa a ficha do dia, registra cada série em até 10 segundos e vê o resumo da sessão.
 
-### US-012: Escolher o treino do dia
-- Status: a fazer
-- Contexto: abrir o app e já ver o treino de hoje elimina procura entre séries (RF01).
+### US-012: Escolher o treino do dia (quebrada em US-012a e US-012b)
+A história original não cabia num commit: ela mistura a regra de qual rotina sugerir (dia da semana e rotação, com duas portas que ainda não dizem o dia de hoje nem a última rotina feita) e a tela inicial. Contexto comum: abrir o app e já ver o treino de hoje elimina procura entre séries (RF01). Falha inaceitável envolvida: nenhuma direta. Fora do escopo: treino livre sem ficha (US-040) e iniciar a sessão (histórias seguintes do E-04).
+
+### US-012a: O caso de uso EscolherTreinoDoDia
+- Status: aceita
+- Contexto: ver US-012. Depende da US-007a, da US-009a (ficha ativa) e da US-002b (sessões).
 - Critérios de aceite (cada um vira um teste):
-  - Dada uma ficha com rotinas de segunda a sexta e hoje sendo quarta, quando o app abre, então a rotina de quarta aparece sem toque adicional.
-  - Dada uma rotação A, B, C com última sessão B, quando o app abre, então aparece C; depois de C, aparece A.
-  - Dado o treino sugerido, quando o usuário escolhe outra rotina, então nenhuma versão da ficha é criada.
-  - Dado um dia sem rotina, quando o app abre, então mostra aviso e lista as rotinas para escolha (CE01).
-  - Dada a ausência de ficha ativa, quando o app abre, então oferece criar, importar, pedir à IA ou iniciar treino livre (CE02, ajustada pela SL18).
-  - Dado um RelogioFixo em uma quarta-feira, quando o caso de uso EscolherTreinoDoDia roda, então o resultado é determinístico, sem depender do relógio do sistema.
-- Fora do escopo: treino livre sem ficha (US-040).
+  - Dada uma ficha ativa com rotinas de segunda a sexta e hoje sendo quarta, quando o caso de uso roda, então sugere a rotina de quarta, com as rotinas da ficha para escolher outra; sábado e domingo, sem rotina, devolvem o aviso do CE01 com todas as rotinas.
+  - Dada uma rotação A, B, C com a última sessão concluída em B, quando o caso de uso roda, então sugere C; depois de C, A. Sem sessão concluída, sugere a primeira, e sessão parcial, descartada, em andamento ou de outra ficha não avança a rotação.
+  - Dada a rotação e uma ficha editada depois da última sessão, quando o caso de uso roda, então a rotação continua, porque a rotina se casa pelo nome na versão atual; se o nome sumiu, sugere a primeira.
+  - Dada a ausência de ficha ativa (nenhuma, só inativas ou só arquivadas), quando o caso de uso roda, então devolve a situação do CE02/SL18.
+  - Dado um RelogioFixo em uma quarta-feira, quando o caso de uso roda, então o resultado é determinístico, sem depender do relógio do sistema; o relógio do sistema informa o dia da semana no fuso do aparelho (RB16).
+  - Dado o treino sugerido, quando o usuário escolhe outra rotina, então nenhuma versão da ficha é criada: o caso de uso só lê.
+- Fora do escopo: a tela inicial (US-012b).
 - Falha inaceitável envolvida: nenhuma direta.
-- Notas de domínio: a rotação avança a partir da última sessão concluída, não do calendário.
+- Notas de domínio: a rotação avança a partir da última sessão concluída, não do calendário. O `Relogio` ganha `diaDaSemana()` (1 = segunda a 7 = domingo) e o `RepositorioDeSessoes` ganha `ultimaRotinaConcluida(fichaId)`, que devolve o identificador da rotina; o nome vem das versões da ficha, e as duas portas não se conhecem.
+
+### US-012b: Tela inicial com o treino do dia
+- Status: a fazer
+- Contexto: ver US-012. Depende da US-012a e da US-009b.
+- Critérios de aceite (cada um vira um teste):
+  - Dado o app aberto, quando há ficha ativa e rotina para hoje, então a tela inicial mostra o treino de hoje sem toque adicional.
+  - Dado o treino sugerido, quando o usuário escolhe outra rotina, então a tela passa a mostrar essa rotina e nenhuma versão é criada.
+  - Dado um dia sem rotina, quando o app abre, então mostra aviso e lista as rotinas para escolha (CE01).
+  - Dada a ausência de ficha ativa, quando o app abre, então oferece criar ficha (leva às fichas) e mostra importar, pedir à IA e treino livre desativados até as histórias deles (CE02, SL18).
+- Fora do escopo: iniciar a sessão.
+- Falha inaceitável envolvida: nenhuma direta.
 
 ### US-013: Registrar uma série
 - Status: a fazer
