@@ -2,6 +2,7 @@
 import Constants from 'expo-constants';
 
 import { abrirBancoDrizzleDoAparelho } from '../adaptadores/sqlite/banco-drizzle-do-aparelho';
+import { RepositorioDeSessoesSqlite } from '../adaptadores/sqlite/repositorio-de-sessoes-sqlite';
 import { RepositorioDeFichasSqlite } from '../adaptadores/sqlite/repositorio-de-fichas-sqlite';
 import { RepositorioDoCatalogoSqlite } from '../adaptadores/sqlite/repositorio-do-catalogo-sqlite';
 import { ConexaoDoBancoExpo } from '../adaptadores/sqlite/conexao-do-banco-expo';
@@ -17,6 +18,7 @@ import { AtivarFicha } from '../aplicacao/casos-de-uso/ativar-ficha';
 import { BuscarExercicios } from '../aplicacao/casos-de-uso/buscar-exercicios';
 import { CompararVersoes } from '../aplicacao/casos-de-uso/comparar-versoes';
 import { DuplicarFicha } from '../aplicacao/casos-de-uso/duplicar-ficha';
+import { EscolherTreinoDoDia } from '../aplicacao/casos-de-uso/escolher-treino-do-dia';
 import { HistoricoDaFicha } from '../aplicacao/casos-de-uso/historico-da-ficha';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
 import { LerFichaParaEdicao } from '../aplicacao/casos-de-uso/ler-ficha-para-edicao';
@@ -50,6 +52,7 @@ export const abrirBanco = new AbrirBanco(conexao, migrarBanco, new ConfigurarCon
 let bancoDoAparelho: ReturnType<typeof abrirBancoDrizzleDoAparelho> | null = null;
 let repositorioDoCatalogo: RepositorioDoCatalogoSqlite | null = null;
 let repositorioDeFichas: RepositorioDeFichasSqlite | null = null;
+let repositorioDeSessoes: RepositorioDeSessoesSqlite | null = null;
 
 // Uma só conexão síncrona para todos os repositórios das telas.
 function banco(): ReturnType<typeof abrirBancoDrizzleDoAparelho> {
@@ -60,6 +63,11 @@ function banco(): ReturnType<typeof abrirBancoDrizzleDoAparelho> {
 function catalogo(): RepositorioDoCatalogoSqlite {
   repositorioDoCatalogo ??= new RepositorioDoCatalogoSqlite(banco());
   return repositorioDoCatalogo;
+}
+
+function sessoes(): RepositorioDeSessoesSqlite {
+  repositorioDeSessoes ??= new RepositorioDeSessoesSqlite(banco());
+  return repositorioDeSessoes;
 }
 
 function fichas(): RepositorioDeFichasSqlite {
@@ -100,5 +108,16 @@ export function casosDeFichas(): {
     historicoDaFicha: new HistoricoDaFicha(fichas()),
     restaurarVersao: new RestaurarVersao(fichas(), new GeradorUuidV7(), new RelogioDoSistema()),
     compararVersoes: new CompararVersoes(fichas(), catalogo()),
+  };
+}
+
+// A tela inicial: o treino de hoje pelo relógio do aparelho (RB16) e a ficha lida para mostrá-lo.
+export function casosDoInicio(): {
+  escolherTreinoDoDia: EscolherTreinoDoDia;
+  lerFichaParaEdicao: LerFichaParaEdicao;
+} {
+  return {
+    escolherTreinoDoDia: new EscolherTreinoDoDia(fichas(), sessoes(), new RelogioDoSistema()),
+    lerFichaParaEdicao: new LerFichaParaEdicao(fichas(), catalogo()),
   };
 }
