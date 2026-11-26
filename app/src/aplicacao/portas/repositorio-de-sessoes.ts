@@ -19,6 +19,11 @@ export interface RepositorioDeSessoes {
   // Marca a série antiga com `em` e grava a corrigida na mesma posição, numa única transação.
   corrigirSerie(serieId: Identificador, corrigida: SerieExecutada, em: InstanteUtc): Promise<void>;
   buscarSessao(id: Identificador): Promise<Sessao | null>;
+  // Só leitura (FI-4). A rotina da última sessão concluída da ficha, a de maior `fim` (em empate, a
+  // gravada depois). Sessão em andamento, parcial, descartada, de outra ficha ou sem rotina não conta.
+  // Nulo se nenhuma sessão serve. É o identificador da rotina na versão usada na época: o nome vem
+  // das versões da ficha, e as duas portas não se conhecem.
+  ultimaRotinaConcluida(fichaId: Identificador): Promise<Identificador | null>;
   // Só leitura (FI-4). As séries ativas (sem removida_em) de todas as sessões dos exercícios dados,
   // em ordem cronológica das sessões e, dentro de cada uma, na ordem de registro. Lista vazia para
   // nenhum exercício ou exercício sem sessões.

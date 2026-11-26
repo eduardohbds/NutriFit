@@ -7,5 +7,13 @@ export function contratoDoRelogio(nome: string, criar: () => Relogio) {
     it('informa o instante em ISO 8601 UTC', () => {
       expect(criar().agora().iso).toMatch(ISO_UTC);
     });
+
+    it('informa o dia da semana de 1 (segunda) a 7 (domingo)', () => {
+      const dia = criar().diaDaSemana();
+
+      expect(Number.isInteger(dia)).toBe(true);
+      expect(dia).toBeGreaterThanOrEqual(1);
+      expect(dia).toBeLessThanOrEqual(7);
+    });
   });
 }

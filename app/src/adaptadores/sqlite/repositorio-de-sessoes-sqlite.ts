@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull, max, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 import type { RepositorioDeSessoes } from '../../aplicacao/portas/repositorio-de-sessoes';
@@ -143,6 +143,25 @@ export class RepositorioDeSessoesSqlite implements RepositorioDeSessoes {
       exercicioId: Identificador.de(linha.exercicioId),
       serie: lerSerie(linha.serie),
     }));
+  }
+
+  // Só leitura (FI-4). A de maior fim; o rowid desempata pela ordem de gravação.
+  async ultimaRotinaConcluida(fichaId: Identificador): Promise<Identificador | null> {
+    const linha = this.banco
+      .select({ rotinaId: sessao.rotinaId })
+      .from(sessao)
+      .where(
+        and(
+          eq(sessao.fichaId, fichaId.valor),
+          eq(sessao.situacao, 'concluida'),
+          isNotNull(sessao.rotinaId),
+          isNotNull(sessao.fim),
+        ),
+      )
+      .orderBy(desc(sessao.fim), sql`${sessao}.rowid DESC`)
+      .limit(1)
+      .get();
+    return linha?.rotinaId ? Identificador.de(linha.rotinaId) : null;
   }
 
   async buscarSessao(id: Identificador): Promise<Sessao | null> {
