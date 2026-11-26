@@ -545,13 +545,14 @@ A história original não cabia num commit: ela mistura as regras puras da séri
 - Notas de domínio: RIR é inteiro de 0 a 5, e 5 significa cinco ou mais (guardado como 5). `Rir` valida a entrada e `concluirSerie` devolve os dados da série prontos; o campo `rir` de `SerieExecutada` continua número (nenhum teste aprovado muda). Repetições e segundos pedem inteiro maior ou igual a 1; carga aceita vírgula ou ponto e vazio é sem carga; repetições do outro lado (unilateral, RB19) são opcionais.
 
 ### US-013b: A série vem preenchida e o descanso aparece
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-013. Só leitura (HistoricoDoExercicio e ficha).
 - Critérios de aceite (cada um vira um teste):
   - Dado um exercício já feito antes, quando a série é exibida, então vem preenchida com os valores da última sessão do mesmo exercício; sem histórico, com os da ficha.
   - Dada uma série concluída, quando a próxima é exibida, então o descanso planejado aparece como referência, sem cronômetro.
-- Fora do escopo: cronômetro de descanso (descartado pelo usuário).
-- Falha inaceitável envolvida: nenhuma direta.
+- Fora do escopo: cronômetro de descanso (descartado pelo usuário); descartar sessões (a leitura passa a ignorar as descartadas quando a história que as cria existir).
+- Falha inaceitável envolvida: nenhuma direta (só lê; os números mostrados vêm do que foi gravado, sem cálculo).
+- Notas de domínio: o caso de uso `PrepararSerie` recebe o exercício, a sessão em andamento, a posição da série (a partir de 1) e as séries planejadas do item, e devolve a série sugerida: valores da série de mesma posição da última sessão com série de trabalho do exercício (a sessão em andamento não conta; aquecimento não conta; exercícios mesclados contam juntos; além das séries dela, repete a última), ou da ficha, ou vazia. RIR nunca vem do histórico: só vem 0 quando a meta é "falha". O descanso de referência é o planejado depois da série anterior, e vem da ficha mesmo com valores do histórico.
 
 ### US-013c: Iniciar a sessão do treino do dia
 - Status: a fazer
