@@ -569,9 +569,25 @@ A história original não cabia num commit: ela mistura as regras puras da séri
 - Falha inaceitável envolvida: FI-4 (a sessão guarda a versão, e nada é reescrito).
 - Notas de domínio: decisões do usuário nesta refinação: (1) método novo na porta, `iniciarSessaoComExercicios(sessao, exercicios)`, em vez de criar a UnidadeDeTrabalho; (2) com sessão em andamento, recusar com `ja_em_andamento` e o id da existente, o que exige `buscarSessaoEmAndamento()` na porta (a de início mais recente, se houver mais de uma); (3) sem botão nesta história. Porta nova: falso em memória e suíte de contrato nos dois. Sem migração.
 
-### US-013d: Tela de registro da série
+### US-013d: Tela da sessão e registro da série (quebrada em US-013d1 e US-013d2)
+A história original não cabia num commit: ela junta o botão que inicia o treino, uma rota e uma tela de sessão que ainda não existem e o formulário da série, que é o que toca a FI-1. A US-013d1 entrega a ponte e a tela da sessão (só leitura); a US-013d2, o registro da série.
+
+### US-013d1: Botão Iniciar treino e tela da sessão
+- Status: em andamento
+- Contexto: ver US-013d. Liga a tela inicial (US-012b) ao `IniciarSessao` (US-013c) e abre a tela da sessão, que só mostra a rotina e os exercícios (RF01, RB04, CE03).
+- Critérios de aceite (cada um vira um teste):
+  - Dada a rotina mostrada na tela inicial (a sugerida ou a escolhida), quando o usuário toca em Iniciar treino, então a sessão é iniciada com essa rotina e a tela da sessão abre mostrando ficha, rotina e os exercícios na ordem, com séries e meta planejadas.
+  - Dado o dia sem rotina (CE01) ou sem ficha ativa (CE02), então não há botão Iniciar treino; escolhida uma rotina, ele aparece.
+  - Dada uma sessão já em andamento, quando o usuário toca em Iniciar treino, então a tela avisa e oferece abrir o treino em andamento, sem criar outra (CE03).
+  - Dada a tela da sessão, então mostra o planejado da versão usada na época mesmo se a ficha foi editada depois (CE05), o início da sessão e, sem sessão em andamento, o aviso e a volta ao início; treino livre mostra "Treino livre".
+  - Dada uma falha ao iniciar ou ao ler, então ela vai ao limite de erro, que registra e avisa.
+- Fora do escopo: registrar séries (US-013d2); retomar ou finalizar a sessão em andamento (US-016); treino livre (US-040).
+- Falha inaceitável envolvida: FI-4 (a tela só lê; iniciar grava só pelo caso de uso da US-013c).
+- Notas de domínio: caso de uso novo `LerSessaoEmAndamento(sessoes, fichas, catalogo)`, só leitura: devolve a sessão com ficha, rotina e versão da época (pelo `versaoId` da sessão, não pela atual) e os exercícios com o nome do catálogo e o planejado do item de origem; `casosDaSessao()` na composição e rota `/sessao`. `TelaInicial` ganha `iniciarSessao` opcional: sem ele não há botão e os testes aprovados da tela não mudam; a rota `/` passa a entregá-lo.
+
+### US-013d2: Registrar a série na tela da sessão
 - Status: a fazer
-- Contexto: ver US-013. A tela que junta as anteriores e grava pelo `RegistrarSerie`.
+- Contexto: ver US-013d. O formulário da série na tela da US-013d1, que junta `PrepararSerie`, `concluirSerie` e `RegistrarSerie`.
 - Critérios de aceite (cada um vira um teste):
   - Dado o celular em modo avião, quando o usuário registra uma série de trabalho, então leva até 10 segundos e a série é salva em até 1 segundo (TE01, RNF01).
   - Dada uma série de trabalho sem RIR, quando o usuário tenta concluir, então a conclusão é bloqueada e o campo é destacado (RB09).

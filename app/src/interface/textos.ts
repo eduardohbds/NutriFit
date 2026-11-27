@@ -157,6 +157,18 @@ export const textos = {
     pedirParaIa: 'Pedir à IA',
     treinoLivre: 'Iniciar treino livre',
     emBreve: 'Em breve',
+    iniciarTreino: 'Iniciar treino',
+    jaEmAndamento: 'Já existe um treino em andamento.',
+    abrirEmAndamento: 'Abrir treino em andamento',
+  },
+  sessao: {
+    titulo: 'Treino em andamento',
+    ficha: (nome: string) => `Ficha: ${nome}`,
+    rotina: (nome: string) => `Rotina: ${nome}`,
+    treinoLivre: 'Treino livre',
+    iniciadoEm: (quando: string) => `Iniciado em ${quando}`,
+    nenhuma: 'Nenhum treino em andamento.',
+    voltarAoInicio: 'Voltar ao início',
   },
   validacao: {
     recusado: (recebido: string, esperado: string) =>

@@ -6,6 +6,7 @@ import type {
   EscolherTreinoDoDia,
   TreinoDoDia,
 } from '../../aplicacao/casos-de-uso/escolher-treino-do-dia';
+import type { IniciarSessao } from '../../aplicacao/casos-de-uso/iniciar-sessao';
 import type {
   FichaParaEdicao,
   LerFichaParaEdicao,
@@ -17,6 +18,8 @@ import { textos } from '../textos';
 export interface PropsDaTelaInicial {
   escolherTreinoDoDia: EscolherTreinoDoDia;
   lerFichaParaEdicao: LerFichaParaEdicao;
+  // Sem ele a tela fica só de leitura, sem o botão Iniciar treino (US-013d1).
+  iniciarSessao?: IniciarSessao;
 }
 
 type TreinoComFicha = Exclude<TreinoDoDia, { situacao: 'sem_ficha_ativa' }>;
