@@ -25,19 +25,7 @@ export class RepositorioDeSessoesSqlite implements RepositorioDeSessoes {
   constructor(private readonly banco: BancoDrizzle) {}
 
   async iniciarSessao(nova: NovaSessao): Promise<void> {
-    this.banco
-      .insert(sessao)
-      .values({
-        id: nova.id.valor,
-        inicio: nova.inicio.iso,
-        fim: nova.fim?.iso ?? null,
-        fichaId: nova.fichaId?.valor ?? null,
-        versaoId: nova.versaoId?.valor ?? null,
-        rotinaId: nova.rotinaId?.valor ?? null,
-        situacao: nova.situacao,
-        observacao: nova.observacao,
-      })
-      .run();
+    inserirSessao(this.banco, nova);
   }
 
   async adicionarExercicio(
@@ -52,17 +40,34 @@ export class RepositorioDeSessoesSqlite implements RepositorioDeSessoes {
         .from(exercicioSessao)
         .where(eq(exercicioSessao.sessaoId, sessaoId.valor))
         .all();
-      tx.insert(exercicioSessao)
-        .values({
-          id: exercicio.id.valor,
-          sessaoId: sessaoId.valor,
-          exercicioId: exercicio.exercicioId.valor,
-          itemOrigemId: exercicio.itemOrigemId?.valor ?? null,
-          posicao: (ultimo?.posicao ?? 0) + 1,
-          observacoes: exercicio.observacoes,
-        })
-        .run();
+      inserirExercicio(tx, sessaoId, exercicio, (ultimo?.posicao ?? 0) + 1);
     });
+  }
+
+  // Tudo ou nada: se um exercício falha (identificador repetido, por exemplo), a transação desfaz
+  // a sessão também, e nenhuma sessão pela metade fica no aparelho (RNF08, FI-4).
+  async iniciarSessaoComExercicios(
+    nova: NovaSessao,
+    exercicios: NovoExercicioDaSessao[],
+  ): Promise<void> {
+    this.banco.transaction((tx) => {
+      inserirSessao(tx, nova);
+      exercicios.forEach((exercicio, indice) => {
+        inserirExercicio(tx, nova.id, exercicio, indice + 1);
+      });
+    });
+  }
+
+  // A de início mais recente; em empate, a gravada depois (rowid).
+  async buscarSessaoEmAndamento(): Promise<Sessao | null> {
+    const [linha] = this.banco
+      .select({ id: sessao.id })
+      .from(sessao)
+      .where(eq(sessao.situacao, 'em_andamento'))
+      .orderBy(desc(sessao.inicio), sql`${sessao}.rowid DESC`)
+      .limit(1)
+      .all();
+    return linha ? this.buscarSessao(Identificador.de(linha.id)) : null;
   }
 
   async registrarSerie(exercicioDaSessaoId: Identificador, serie: SerieExecutada): Promise<void> {
@@ -262,4 +267,39 @@ function lerSerie(linha: typeof serieExecutada.$inferSelect): SerieExecutada {
     concluidaEm: InstanteUtc.de(linha.concluidaEm),
     removidaEm: linha.removidaEm === null ? null : InstanteUtc.de(linha.removidaEm),
   };
+}
+
+function inserirSessao(gravador: Gravador, nova: NovaSessao): void {
+  gravador
+    .insert(sessao)
+    .values({
+      id: nova.id.valor,
+      inicio: nova.inicio.iso,
+      fim: nova.fim?.iso ?? null,
+      fichaId: nova.fichaId?.valor ?? null,
+      versaoId: nova.versaoId?.valor ?? null,
+      rotinaId: nova.rotinaId?.valor ?? null,
+      situacao: nova.situacao,
+      observacao: nova.observacao,
+    })
+    .run();
+}
+
+function inserirExercicio(
+  gravador: Gravador,
+  sessaoId: Identificador,
+  exercicio: NovoExercicioDaSessao,
+  posicao: number,
+): void {
+  gravador
+    .insert(exercicioSessao)
+    .values({
+      id: exercicio.id.valor,
+      sessaoId: sessaoId.valor,
+      exercicioId: exercicio.exercicioId.valor,
+      itemOrigemId: exercicio.itemOrigemId?.valor ?? null,
+      posicao,
+      observacoes: exercicio.observacoes,
+    })
+    .run();
 }

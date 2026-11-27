@@ -42,6 +42,29 @@ export class RepositorioDeSessoesEmMemoria implements RepositorioDeSessoes {
     this.sessoes.set(sessao.id.valor, copiar({ ...sessao, exercicios: [] }));
   }
 
+  // Tudo ou nada, como a transação do SQLite: confere os identificadores antes de gravar.
+  async iniciarSessaoComExercicios(
+    sessao: NovaSessao,
+    exercicios: NovoExercicioDaSessao[],
+  ): Promise<void> {
+    const ids = exercicios.map((e) => e.id.valor);
+    const repetido = ids.find((id, indice) => ids.indexOf(id) !== indice);
+    if (repetido !== undefined) {
+      throw new ErroDeValidacao('exercício da sessão', 'identificador único', repetido);
+    }
+    // Grava direto, sem passar por iniciarSessao e adicionarExercicio: é uma operação só.
+    const nova = copiar({ ...sessao, exercicios: [] });
+    nova.exercicios = exercicios.map((e) => ({ ...e, series: [] }));
+    this.sessoes.set(sessao.id.valor, nova);
+  }
+
+  // A de início mais recente; em empate, a gravada depois (o sort é estável).
+  async buscarSessaoEmAndamento(): Promise<Sessao | null> {
+    const abertas = [...this.sessoes.values()].filter((s) => s.situacao === 'em_andamento');
+    const ultima = abertas.sort(porInicio).pop();
+    return ultima ? copiar(ultima) : null;
+  }
+
   async adicionarExercicio(
     sessaoId: Identificador,
     exercicio: NovoExercicioDaSessao,

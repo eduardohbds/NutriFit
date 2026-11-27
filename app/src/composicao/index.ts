@@ -19,6 +19,7 @@ import { BuscarExercicios } from '../aplicacao/casos-de-uso/buscar-exercicios';
 import { CompararVersoes } from '../aplicacao/casos-de-uso/comparar-versoes';
 import { DuplicarFicha } from '../aplicacao/casos-de-uso/duplicar-ficha';
 import { EscolherTreinoDoDia } from '../aplicacao/casos-de-uso/escolher-treino-do-dia';
+import { IniciarSessao } from '../aplicacao/casos-de-uso/iniciar-sessao';
 import { HistoricoDaFicha } from '../aplicacao/casos-de-uso/historico-da-ficha';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
 import { LerFichaParaEdicao } from '../aplicacao/casos-de-uso/ler-ficha-para-edicao';
@@ -111,13 +112,21 @@ export function casosDeFichas(): {
   };
 }
 
-// A tela inicial: o treino de hoje pelo relógio do aparelho (RB16) e a ficha lida para mostrá-lo.
+// A tela inicial: o treino de hoje pelo relógio do aparelho (RB16), a ficha lida para mostrá-lo e o
+// início da sessão, que ainda não tem botão (US-013d).
 export function casosDoInicio(): {
   escolherTreinoDoDia: EscolherTreinoDoDia;
   lerFichaParaEdicao: LerFichaParaEdicao;
+  iniciarSessao: IniciarSessao;
 } {
   return {
     escolherTreinoDoDia: new EscolherTreinoDoDia(fichas(), sessoes(), new RelogioDoSistema()),
     lerFichaParaEdicao: new LerFichaParaEdicao(fichas(), catalogo()),
+    iniciarSessao: new IniciarSessao(
+      fichas(),
+      sessoes(),
+      new RelogioDoSistema(),
+      new GeradorUuidV7(),
+    ),
   };
 }

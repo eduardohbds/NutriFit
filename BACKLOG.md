@@ -555,9 +555,19 @@ A história original não cabia num commit: ela mistura as regras puras da séri
 - Notas de domínio: o caso de uso `PrepararSerie` recebe o exercício, a sessão em andamento, a posição da série (a partir de 1) e as séries planejadas do item, e devolve a série sugerida: valores da série de mesma posição da última sessão com série de trabalho do exercício (a sessão em andamento não conta; aquecimento não conta; exercícios mesclados contam juntos; além das séries dela, repete a última), ou da ficha, ou vazia. RIR nunca vem do histórico: só vem 0 quando a meta é "falha". O descanso de referência é o planejado depois da série anterior, e vem da ficha mesmo com valores do histórico.
 
 ### US-013c: Iniciar a sessão do treino do dia
-- Status: a fazer
-- Contexto: ver US-013. A ponte entre a tela inicial (US-012b) e o registro: cria a sessão presa à versão usada na época (RB04). Os critérios saem do refinamento antes do Red.
+- Status: aceita
+- Contexto: ver US-013. A ponte entre a tela inicial (US-012b) e o registro: cria a sessão presa à versão usada na época (RB04, RF01, CE03, CE05, CE06). Só o caso de uso, as portas e a composição; o botão e a tela da sessão ficam na US-013d.
+- Critérios de aceite (cada um vira um teste):
+  - Dada a rotina escolhida da versão atual da ficha ativa, quando a sessão é iniciada, então nasce em andamento presa à ficha, à versão e à rotina, com um exercício da sessão por item, na ordem, cada um com o item de origem e sem séries.
+  - Dada outra rotina que não a de hoje, quando é iniciada, então a sessão é dela.
+  - Dada a sessão iniciada, quando a ficha é editada depois, então a sessão continua com a versão com que começou (CE05).
+  - Dada a sessão iniciada, então nenhuma versão nasce e a ficha não muda (RB02, FI-4); o início é o instante real do relógio (CE06).
+  - Dada uma sessão já em andamento, quando outra é iniciada, então nada é criado e o resultado devolve o identificador da existente (CE03); sessão concluída não impede.
+  - Dada a ausência de ficha ativa, ou uma rotina que não é da versão atual da ficha ativa (inexistente, de outra ficha ou de versão antiga), então é recusado com o campo, o valor recebido e o formato esperado, sem gravar nada.
+  - Dada uma falha ao gravar, então o erro sobe e nenhuma sessão fica em andamento: a sessão e os exercícios entram por um método atômico da porta, tudo ou nada.
+- Fora do escopo: o botão Iniciar treino e a tela da sessão (US-013d); retomar ou finalizar a sessão em andamento (US-016); treino livre (US-040).
 - Falha inaceitável envolvida: FI-4 (a sessão guarda a versão, e nada é reescrito).
+- Notas de domínio: decisões do usuário nesta refinação: (1) método novo na porta, `iniciarSessaoComExercicios(sessao, exercicios)`, em vez de criar a UnidadeDeTrabalho; (2) com sessão em andamento, recusar com `ja_em_andamento` e o id da existente, o que exige `buscarSessaoEmAndamento()` na porta (a de início mais recente, se houver mais de uma); (3) sem botão nesta história. Porta nova: falso em memória e suíte de contrato nos dois. Sem migração.
 
 ### US-013d: Tela de registro da série
 - Status: a fazer

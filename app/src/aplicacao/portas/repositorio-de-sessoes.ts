@@ -12,6 +12,15 @@ import type {
 // grava a corrigida no lugar dela. Valores derivados nunca passam por aqui (seção 18.6).
 export interface RepositorioDeSessoes {
   iniciarSessao(sessao: NovaSessao): Promise<void>;
+  // Atômico (RNF08, RB04): a sessão e todos os exercícios, na ordem dada, entram numa transação ou
+  // nada entra. Identificadores repetidos entre os exercícios fazem tudo falhar, sem gravar nada.
+  iniciarSessaoComExercicios(
+    sessao: NovaSessao,
+    exercicios: NovoExercicioDaSessao[],
+  ): Promise<void>;
+  // Só leitura (FI-4). A sessão em andamento, com exercícios e séries; a de início mais recente se
+  // houver mais de uma. Nulo se nenhuma. Concluída, parcial e descartada não contam.
+  buscarSessaoEmAndamento(): Promise<Sessao | null>;
   // Falha, sem gravar nada, se a sessão não existe.
   adicionarExercicio(sessaoId: Identificador, exercicio: NovoExercicioDaSessao): Promise<void>;
   // A série entra depois das já registradas. Falha, sem gravar nada, se o exercício da sessão não existe.
