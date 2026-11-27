@@ -80,8 +80,8 @@ describe('tela da sessão em andamento (US-013d1, RF01)', () => {
     await abrirSessao(inicio);
 
     await screen.findByText(s.titulo);
-    expect(screen.getAllByText(/Meta: 10$/).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/Meta: 15$/)).toBeNull();
+    expect(screen.getAllByText('4 séries · Meta: 10')).toHaveLength(1);
+    expect(screen.queryByText('4 séries · Meta: 15')).toBeNull();
   });
 
   it('sem sessão em andamento avisa e volta ao início', async () => {
