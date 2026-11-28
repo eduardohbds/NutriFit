@@ -573,7 +573,7 @@ A história original não cabia num commit: ela mistura as regras puras da séri
 A história original não cabia num commit: ela junta o botão que inicia o treino, uma rota e uma tela de sessão que ainda não existem e o formulário da série, que é o que toca a FI-1. A US-013d1 entrega a ponte e a tela da sessão (só leitura); a US-013d2, o registro da série.
 
 ### US-013d1: Botão Iniciar treino e tela da sessão
-- Status: em andamento
+- Status: aceita
 - Contexto: ver US-013d. Liga a tela inicial (US-012b) ao `IniciarSessao` (US-013c) e abre a tela da sessão, que só mostra a rotina e os exercícios (RF01, RB04, CE03).
 - Critérios de aceite (cada um vira um teste):
   - Dada a rotina mostrada na tela inicial (a sugerida ou a escolhida), quando o usuário toca em Iniciar treino, então a sessão é iniciada com essa rotina e a tela da sessão abre mostrando ficha, rotina e os exercícios na ordem, com séries e meta planejadas.
@@ -586,7 +586,7 @@ A história original não cabia num commit: ela junta o botão que inicia o trei
 - Notas de domínio: caso de uso novo `LerSessaoEmAndamento(sessoes, fichas, catalogo)`, só leitura: devolve a sessão com ficha, rotina e versão da época (pelo `versaoId` da sessão, não pela atual) e os exercícios com o nome do catálogo e o planejado do item de origem; `casosDaSessao()` na composição e rota `/sessao`. `TelaInicial` ganha `iniciarSessao` opcional: sem ele não há botão e os testes aprovados da tela não mudam; a rota `/` passa a entregá-lo.
 
 ### US-013d2: Registrar a série na tela da sessão
-- Status: a fazer
+- Status: aceita
 - Contexto: ver US-013d. O formulário da série na tela da US-013d1, que junta `PrepararSerie`, `concluirSerie` e `RegistrarSerie`.
 - Critérios de aceite (cada um vira um teste):
   - Dado o celular em modo avião, quando o usuário registra uma série de trabalho, então leva até 10 segundos e a série é salva em até 1 segundo (TE01, RNF01).

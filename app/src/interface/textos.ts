@@ -169,6 +169,23 @@ export const textos = {
     iniciadoEm: (quando: string) => `Iniciado em ${quando}`,
     nenhuma: 'Nenhum treino em andamento.',
     voltarAoInicio: 'Voltar ao início',
+    campoCarga: (nome: string) => `Carga (kg), ${nome}`,
+    campoRepeticoes: (nome: string) => `Repetições, ${nome}`,
+    campoRepeticoesOutroLado: (nome: string) => `Repetições do outro lado, ${nome}`,
+    campoRir: (nome: string) => `RIR, ${nome}`,
+    concluirSerie: (nome: string) => `Concluir série, ${nome}`,
+    concluir: 'Concluir',
+    serieRegistrada: (
+      numero: number,
+      carga: string | null,
+      esforco: number | null,
+      rir: number | null,
+    ) =>
+      `Série ${numero}: ${carga === null ? '' : `${carga} kg × `}${esforco}${rir === null ? '' : `, RIR ${rir}`}`,
+    semEspaco:
+      'Sem espaço no aparelho: a série não foi gravada. Libere espaço e toque em concluir de novo.',
+    erroDoCampo: (campo: string, recebido: string, esperado: string) =>
+      `${campo}: Valor recebido: ${recebido}. Formato esperado: ${esperado}.`,
   },
   validacao: {
     recusado: (recebido: string, esperado: string) =>
