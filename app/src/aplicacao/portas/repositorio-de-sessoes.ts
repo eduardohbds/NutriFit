@@ -6,6 +6,7 @@ import type {
   SerieDoHistorico,
   SerieExecutada,
   Sessao,
+  SituacaoEncerrada,
 } from '../../dominio/sessao';
 
 // Nada é apagado nem sobrescrito (FI-4): corrigir uma série marca a antiga como removida e
@@ -28,6 +29,13 @@ export interface RepositorioDeSessoes {
   // Marca a série antiga com `em` e grava a corrigida na mesma posição, numa única transação.
   corrigirSerie(serieId: Identificador, corrigida: SerieExecutada, em: InstanteUtc): Promise<void>;
   buscarSessao(id: Identificador): Promise<Sessao | null>;
+  // Só a sessão em andamento se encerra: grava a situação final e o fim, sem tocar em exercícios nem
+  // séries (FI-1, FI-4). Falha, sem gravar nada, se a sessão não existe ou já foi encerrada.
+  encerrarSessao(
+    sessaoId: Identificador,
+    situacao: SituacaoEncerrada,
+    fim: InstanteUtc,
+  ): Promise<void>;
   // Só leitura (FI-4). A rotina da última sessão concluída da ficha, a de maior `fim` (em empate, a
   // gravada depois). Sessão em andamento, parcial, descartada, de outra ficha ou sem rotina não conta.
   // Nulo se nenhuma sessão serve. É o identificador da rotina na versão usada na época: o nome vem

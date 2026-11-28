@@ -9,6 +9,7 @@ import type {
   SerieDoHistorico,
   SerieExecutada,
   Sessao,
+  SituacaoEncerrada,
 } from '../../src/dominio/sessao';
 
 // Cópia na entrada e na saída: quem recebe um objeto não consegue alterar o que está guardado.
@@ -27,6 +28,7 @@ function porInicio(a: Sessao, b: Sessao): number {
 
 // Só as séries ativas dos exercícios pedidos, cada uma com a sessão e o exercício de origem.
 function seriesDaSessao(sessao: Sessao, pedidos: Set<string>): SerieDoHistorico[] {
+  if (sessao.situacao === 'descartada') return [];
   const doPedido = sessao.exercicios.filter((e) => pedidos.has(e.exercicioId.valor));
   return doPedido.flatMap((e) =>
     e.series
@@ -72,6 +74,19 @@ export class RepositorioDeSessoesEmMemoria implements RepositorioDeSessoes {
     const sessao = this.sessoes.get(sessaoId.valor);
     if (!sessao) throw new ErroDeValidacao('sessão', 'sessão existente', sessaoId.valor);
     sessao.exercicios.push({ ...exercicio, series: [] });
+  }
+
+  async encerrarSessao(
+    sessaoId: Identificador,
+    situacao: SituacaoEncerrada,
+    fim: InstanteUtc,
+  ): Promise<void> {
+    const sessao = this.sessoes.get(sessaoId.valor);
+    if (sessao?.situacao !== 'em_andamento') {
+      throw new ErroDeValidacao('sessão', 'sessão em andamento', sessaoId.valor);
+    }
+    sessao.situacao = situacao;
+    sessao.fim = fim;
   }
 
   async registrarSerie(exercicioDaSessaoId: Identificador, serie: SerieExecutada): Promise<void> {
