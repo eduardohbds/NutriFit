@@ -6,6 +6,8 @@ import type { InstanteUtc } from './instante-utc';
 // regras na US-013; aqui os campos são dados sem validação. Nenhum campo é valor derivado
 // (classificação, contagens, recordes, 1RM): esses são sempre recalculados (seção 18.6).
 export type SituacaoDaSessao = 'em_andamento' | 'concluida' | 'parcial' | 'descartada';
+// Os estados finais da sessão (seção 18.5): só se chega a eles saindo de em andamento.
+export type SituacaoEncerrada = Exclude<SituacaoDaSessao, 'em_andamento'>;
 export type TipoDeSerie = 'trabalho' | 'aquecimento' | 'tempo' | 'cardio';
 
 export interface SerieExecutada {

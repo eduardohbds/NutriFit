@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, max, ne, sql } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 
 import type { RepositorioDeSessoes } from '../../aplicacao/portas/repositorio-de-sessoes';
@@ -14,6 +14,7 @@ import type {
   SerieDoHistorico,
   SerieExecutada,
   Sessao,
+  SituacaoEncerrada,
 } from '../../dominio/sessao';
 import { exercicioSessao, serieExecutada, sessao } from './esquema';
 
@@ -23,6 +24,21 @@ type Gravador = Pick<BancoDrizzle, 'insert' | 'select' | 'update'>;
 
 export class RepositorioDeSessoesSqlite implements RepositorioDeSessoes {
   constructor(private readonly banco: BancoDrizzle) {}
+
+  // Confere e grava na mesma transação: só a sessão em andamento se encerra.
+  async encerrarSessao(
+    sessaoId: Identificador,
+    situacao: SituacaoEncerrada,
+    fim: InstanteUtc,
+  ): Promise<void> {
+    this.banco.transaction((tx) => {
+      const [atual] = tx.select().from(sessao).where(eq(sessao.id, sessaoId.valor)).all();
+      if (atual?.situacao !== 'em_andamento') {
+        throw new ErroDeValidacao('sessão', 'sessão em andamento', sessaoId.valor);
+      }
+      tx.update(sessao).set({ situacao, fim: fim.iso }).where(eq(sessao.id, sessaoId.valor)).run();
+    });
+  }
 
   async iniciarSessao(nova: NovaSessao): Promise<void> {
     inserirSessao(this.banco, nova);
@@ -135,7 +151,14 @@ export class RepositorioDeSessoesSqlite implements RepositorioDeSessoes {
       .from(serieExecutada)
       .innerJoin(exercicioSessao, eq(serieExecutada.exercicioSessaoId, exercicioSessao.id))
       .innerJoin(sessao, eq(exercicioSessao.sessaoId, sessao.id))
-      .where(and(inArray(exercicioSessao.exercicioId, ids), isNull(serieExecutada.removidaEm)))
+      .where(
+        and(
+          inArray(exercicioSessao.exercicioId, ids),
+          isNull(serieExecutada.removidaEm),
+          // Sessão descartada não é histórico (CE08).
+          ne(sessao.situacao, 'descartada'),
+        ),
+      )
       .orderBy(
         asc(sessao.inicio),
         asc(exercicioSessao.posicao),

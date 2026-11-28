@@ -608,18 +608,35 @@ A história original não cabia num commit: ela junta o botão que inicia o trei
 - Falha inaceitável envolvida: FI-4 (apagar ou alterar versão, sessão ou histórico); a sessão nunca altera a ficha.
 - Notas de domínio: se a ficha for editada durante a sessão, a sessão continua com a versão em que começou (CE05).
 
-### US-015: Finalizar a sessão e ver o resumo
-- Status: a fazer
-- Contexto: o resumo fecha o ciclo do treino e dispara o backup (RF04, RB40).
+### US-015: Finalizar a sessão e ver o resumo (quebrada em US-015a, US-015b e US-015c)
+A história original não cabia num commit e depende de regras que ainda não existem: o resumo pede séries válidas por grupo muscular e recordes, que nascem nas US-019, US-020 e US-025. A US-015a entrega o caso de uso (finalizar, parcial, descartar, resumo básico); a US-015b, o botão e a tela; a US-015c enriquece o resumo quando as contagens e os recordes existirem. O backup ao concluir fica para a US-022 (depende de E-07).
+
+### US-015a: Finalizar a sessão (caso de uso)
+- Status: aceita
+- Contexto: a sessão só termina quando o usuário finaliza (CE03). Sem isto o app nunca deixa iniciar outro treino e a rotação de fichas não avança (RF04, CE07, CE08).
 - Critérios de aceite (cada um vira um teste):
-  - Dada uma sessão com séries de trabalho sem RIR, quando o usuário finaliza, então o app pede o preenchimento antes de concluir.
-  - Dada uma sessão completa, quando é finalizada, então o resumo lista as séries válidas por grupo muscular e os recordes batidos, com data e duração.
-  - Dada uma sessão com exercícios previstos sem série feita, quando é finalizada, então fica marcada como parcial (CE07).
-  - Dada uma sessão sem nenhuma série, quando o usuário finaliza, então o app pergunta se deve descartá-la, e a descartada não aparece no histórico (CE08).
-  - Dada conexão disponível, quando a sessão é concluída, então o backup inicia (depende de E-07).
-- Fora do escopo: o processo de backup em si (US-022).
-- Falha inaceitável envolvida: FI-1 (perder série concluída); FI-2 (número errado).
-- Notas de domínio: estados finais da sessão são concluída, parcial e descartada (seção 18.5). Uma sessão que passa da meia-noite pertence ao dia em que começou, mas cada série conta na semana em que foi concluída (CE06).
+  - Dada uma sessão em andamento com série feita em todos os exercícios previstos, quando é finalizada, então fica concluída, com o fim no instante do relógio, e o resumo traz início, fim, duração e as séries feitas por exercício.
+  - Dada uma sessão com exercício previsto sem série feita, quando é finalizada, então fica parcial, com as séries feitas guardadas (CE07).
+  - Dada uma sessão com série de trabalho sem RIR, quando é finalizada, então nada muda e o resultado diz quais séries pedem o RIR.
+  - Dada uma sessão sem nenhuma série, quando é finalizada, então nada muda e o resultado pergunta se deve descartá-la; confirmado o descarte, ela fica descartada, sem ser apagada, e some do histórico, da sessão em andamento e da sugestão de treino (CE08, FI-4).
+  - Dada uma sessão com séries, quando o descarte é pedido, então é recusado; sessão que não está em andamento também é recusada, sem gravar nada.
+- Fora do escopo: botão e tela (US-015b); séries válidas por grupo e recordes (US-015c); backup (US-022); corrigir o RIR de uma série (US-014).
+- Falha inaceitável envolvida: FI-1 (as séries feitas nunca se perdem ao finalizar) e FI-4 (descartar marca, não apaga).
+- Notas de domínio: decisão do usuário: descartar é marcar a sessão como descartada, sem apagar (a EA06 diz "remove", mas a FI-4 vale). Porta nova no repositório de sessões, `encerrarSessao(id, situacao, fim)`, só a partir de em andamento, com falso e contrato nos dois; `seriesDosExercicios` passa a ignorar sessão descartada (pendência da US-013b). "Previsto" é o exercício com item de origem na ficha; exercício incluído só na sessão sem série não torna a sessão parcial.
+
+### US-015b: Botão Finalizar e tela do resumo
+- Status: a fazer
+- Contexto: liga a tela da sessão ao `FinalizarSessao` da US-015a.
+- Critérios de aceite (cada um vira um teste):
+  - Dada a sessão aberta, quando o usuário toca em Finalizar, então a sessão é encerrada e a tela mostra o resumo (data, duração, séries por exercício) e que ficou parcial, se for o caso.
+  - Dada uma sessão com série sem RIR, então a tela pede o preenchimento antes de concluir.
+  - Dada uma sessão sem série, então a tela pergunta se deve descartar; confirmar descarta e volta ao início, cancelar mantém a sessão.
+- Falha inaceitável envolvida: FI-1.
+
+### US-015c: Resumo com séries válidas por grupo e recordes
+- Status: a fazer (depois das US-020 e US-025)
+- Contexto: critério original da US-015: o resumo lista as séries válidas por grupo muscular e os recordes batidos (RF04).
+- Falha inaceitável envolvida: FI-2 (número errado).
 
 ### US-016: Sessão interrompida e retomada
 - Status: a fazer
