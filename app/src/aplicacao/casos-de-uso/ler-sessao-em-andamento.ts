@@ -1,8 +1,8 @@
 import { ErroDeValidacao } from '../../dominio/erro-de-validacao';
-import type { Rotina } from '../../dominio/ficha';
+import type { Rotina, SeriePlanejada } from '../../dominio/ficha';
 import type { Identificador } from '../../dominio/identificador';
 import type { InstanteUtc } from '../../dominio/instante-utc';
-import type { Sessao } from '../../dominio/sessao';
+import type { Sessao, SerieExecutada } from '../../dominio/sessao';
 import { textosDasSeries, type TextosDasSeries } from '../../dominio/textos-das-series';
 import type { RepositorioDeFichas } from '../portas/repositorio-de-fichas';
 import type { RepositorioDeSessoes } from '../portas/repositorio-de-sessoes';
@@ -15,6 +15,11 @@ export interface ExercicioDaSessaoParaTela {
   ordem: number;
   // O planejado, no texto da planilha, da versão usada na época; nulo se o exercício não veio da ficha.
   listas: TextosDasSeries | null;
+  // As séries do item da ficha e se ele é unilateral, para preparar cada série (vazio sem ficha).
+  planejadas: SeriePlanejada[];
+  unilateral: boolean;
+  // As séries ativas já registradas, na ordem de registro; as removidas ficam de fora.
+  series: SerieExecutada[];
 }
 
 export interface SessaoParaTela {
@@ -63,7 +68,14 @@ export class LerSessaoEmAndamento {
         }
         const item = origem.rotina?.itens.find((i) => i.id.valor === e.itemOrigemId?.valor);
         const listas = item ? textosDasSeries(item.series) : null;
-        return { id: e.id, exercicioId: e.exercicioId, nome, ordem: posicao + 1, listas };
+        const base = { id: e.id, exercicioId: e.exercicioId, nome, ordem: posicao + 1, listas };
+        const series = e.series.filter((serie) => serie.removidaEm === null);
+        return {
+          ...base,
+          planejadas: item?.series ?? [],
+          unilateral: item?.unilateral ?? false,
+          series,
+        };
       }),
     };
   }

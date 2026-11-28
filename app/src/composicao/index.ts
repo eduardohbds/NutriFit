@@ -19,6 +19,10 @@ import { BuscarExercicios } from '../aplicacao/casos-de-uso/buscar-exercicios';
 import { CompararVersoes } from '../aplicacao/casos-de-uso/comparar-versoes';
 import { DuplicarFicha } from '../aplicacao/casos-de-uso/duplicar-ficha';
 import { EscolherTreinoDoDia } from '../aplicacao/casos-de-uso/escolher-treino-do-dia';
+import { ConcluirSerieDaSessao } from '../aplicacao/casos-de-uso/concluir-serie-da-sessao';
+import { HistoricoDoExercicio } from '../aplicacao/casos-de-uso/historico-do-exercicio';
+import { PrepararSerie } from '../aplicacao/casos-de-uso/preparar-serie';
+import { RegistrarSerie } from '../aplicacao/casos-de-uso/registrar-serie';
 import { IniciarSessao } from '../aplicacao/casos-de-uso/iniciar-sessao';
 import { LerSessaoEmAndamento } from '../aplicacao/casos-de-uso/ler-sessao-em-andamento';
 import { HistoricoDaFicha } from '../aplicacao/casos-de-uso/historico-da-ficha';
@@ -132,7 +136,20 @@ export function casosDoInicio(): {
   };
 }
 
-// A tela da sessão em andamento: lê a sessão, a versão da época da ficha e o catálogo (US-013d1).
-export function casosDaSessao(): { lerSessaoEmAndamento: LerSessaoEmAndamento } {
-  return { lerSessaoEmAndamento: new LerSessaoEmAndamento(sessoes(), fichas(), catalogo()) };
+// A tela da sessão em andamento: lê a sessão, a versão da época da ficha e o catálogo (US-013d1),
+// prepara a série pelo histórico e a grava no aparelho ao concluir (US-013d2, FI-1).
+export function casosDaSessao(): {
+  lerSessaoEmAndamento: LerSessaoEmAndamento;
+  prepararSerie: PrepararSerie;
+  concluirSerie: ConcluirSerieDaSessao;
+} {
+  return {
+    lerSessaoEmAndamento: new LerSessaoEmAndamento(sessoes(), fichas(), catalogo()),
+    prepararSerie: new PrepararSerie(new HistoricoDoExercicio(catalogo(), sessoes())),
+    concluirSerie: new ConcluirSerieDaSessao(
+      new RegistrarSerie(sessoes(), registrarFalha),
+      new RelogioDoSistema(),
+      new GeradorUuidV7(),
+    ),
+  };
 }
