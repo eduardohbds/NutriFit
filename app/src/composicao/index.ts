@@ -20,6 +20,7 @@ import { CompararVersoes } from '../aplicacao/casos-de-uso/comparar-versoes';
 import { DuplicarFicha } from '../aplicacao/casos-de-uso/duplicar-ficha';
 import { EscolherTreinoDoDia } from '../aplicacao/casos-de-uso/escolher-treino-do-dia';
 import { IniciarSessao } from '../aplicacao/casos-de-uso/iniciar-sessao';
+import { LerSessaoEmAndamento } from '../aplicacao/casos-de-uso/ler-sessao-em-andamento';
 import { HistoricoDaFicha } from '../aplicacao/casos-de-uso/historico-da-ficha';
 import { EditarGruposDoExercicio } from '../aplicacao/casos-de-uso/editar-grupos-do-exercicio';
 import { LerFichaParaEdicao } from '../aplicacao/casos-de-uso/ler-ficha-para-edicao';
@@ -129,4 +130,9 @@ export function casosDoInicio(): {
       new GeradorUuidV7(),
     ),
   };
+}
+
+// A tela da sessão em andamento: lê a sessão, a versão da época da ficha e o catálogo (US-013d1).
+export function casosDaSessao(): { lerSessaoEmAndamento: LerSessaoEmAndamento } {
+  return { lerSessaoEmAndamento: new LerSessaoEmAndamento(sessoes(), fichas(), catalogo()) };
 }

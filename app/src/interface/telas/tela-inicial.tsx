@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -6,17 +6,21 @@ import type {
   EscolherTreinoDoDia,
   TreinoDoDia,
 } from '../../aplicacao/casos-de-uso/escolher-treino-do-dia';
+import type { IniciarSessao } from '../../aplicacao/casos-de-uso/iniciar-sessao';
 import type {
   FichaParaEdicao,
   LerFichaParaEdicao,
   RotinaParaEdicao,
 } from '../../aplicacao/casos-de-uso/ler-ficha-para-edicao';
+import type { Identificador } from '../../dominio/identificador';
 import { BotaoDeAcao } from '../componentes/botao-de-acao';
 import { textos } from '../textos';
 
 export interface PropsDaTelaInicial {
   escolherTreinoDoDia: EscolherTreinoDoDia;
   lerFichaParaEdicao: LerFichaParaEdicao;
+  // Sem ele a tela fica só de leitura, sem o botão Iniciar treino (US-013d1).
+  iniciarSessao?: IniciarSessao;
 }
 
 type TreinoComFicha = Exclude<TreinoDoDia, { situacao: 'sem_ficha_ativa' }>;
@@ -24,11 +28,17 @@ type TreinoComFicha = Exclude<TreinoDoDia, { situacao: 'sem_ficha_ativa' }>;
 // Abre direto no treino de hoje (RF01): a rotina sugerida, ou o aviso do dia sem rotina (CE01), ou
 // as opções de quem não tem ficha ativa (CE02, SL18). Só lê: escolher outra rotina muda o que a tela
 // mostra e não grava nada (RB02, FI-4).
-export function TelaInicial({ escolherTreinoDoDia, lerFichaParaEdicao }: PropsDaTelaInicial) {
+export function TelaInicial({
+  escolherTreinoDoDia,
+  lerFichaParaEdicao,
+  iniciarSessao,
+}: PropsDaTelaInicial) {
+  const roteador = useRouter();
   const [treino, setTreino] = useState<TreinoDoDia | null>(null);
   const [ficha, setFicha] = useState<FichaParaEdicao | null>(null);
   const [escolhida, setEscolhida] = useState<number | null>(null);
   const [erro, setErro] = useState<unknown>(null);
+  const [jaEmAndamento, setJaEmAndamento] = useState(false);
 
   useEffect(() => {
     const carregar = async () => {
@@ -41,7 +51,19 @@ export function TelaInicial({ escolherTreinoDoDia, lerFichaParaEdicao }: PropsDa
     carregar().catch((falha: unknown) => setErro(falha));
   }, [escolherTreinoDoDia, lerFichaParaEdicao]);
 
-  // A falha ao ler chega ao limite de erro, que registra e avisa (nunca engolir).
+  // Já havendo sessão em andamento nada é criado e a tela oferece abri-la (CE03); a falha chega ao
+  // limite de erro, que registra e avisa (nunca engolir).
+  const iniciar =
+    iniciarSessao &&
+    ((rotinaId: Identificador) => {
+      iniciarSessao
+        .executar(rotinaId)
+        .then((resultado) =>
+          resultado.iniciada ? roteador.push('/sessao') : setJaEmAndamento(true),
+        )
+        .catch((falha: unknown) => setErro(falha));
+    });
+
   if (erro) throw erro;
   if (!treino) return null;
   return (
@@ -55,6 +77,8 @@ export function TelaInicial({ escolherTreinoDoDia, lerFichaParaEdicao }: PropsDa
           ficha={ficha}
           escolhida={escolhida}
           aoEscolher={setEscolhida}
+          aoIniciar={iniciar}
+          jaEmAndamento={jaEmAndamento}
         />
       )}
       <Link href="/catalogo">{textos.catalogo.abrir}</Link>
@@ -68,9 +92,13 @@ interface PropsDoTreinoDeHoje {
   ficha: FichaParaEdicao | null;
   escolhida: number | null;
   aoEscolher: (indice: number) => void;
+  // Sem ele não há botão Iniciar treino (US-013d1).
+  aoIniciar?: (rotinaId: Identificador) => void;
+  jaEmAndamento: boolean;
 }
 
-function TreinoDeHoje({ treino, ficha, escolhida, aoEscolher }: PropsDoTreinoDeHoje) {
+function TreinoDeHoje(props: PropsDoTreinoDeHoje) {
+  const { treino, ficha, escolhida, aoEscolher, aoIniciar, jaEmAndamento } = props;
   const sugerida = treino.situacao === 'sugerido' ? treino.rotinas.indexOf(treino.sugerida) : -1;
   const mostrada = escolhida ?? (sugerida >= 0 ? sugerida : null);
   const rotina = mostrada === null ? undefined : ficha?.rotinas[mostrada];
@@ -83,6 +111,14 @@ function TreinoDeHoje({ treino, ficha, escolhida, aoEscolher }: PropsDoTreinoDeH
         </Text>
       )}
       {rotina && <RotinaDoDia rotina={rotina} sugerida={mostrada === sugerida} />}
+      {rotina && aoIniciar && mostrada !== null && (
+        <BotaoDeAcao
+          rotulo={textos.inicio.iniciarTreino}
+          nome={textos.inicio.iniciarTreino}
+          aoTocar={() => aoIniciar(treino.rotinas[mostrada].id)}
+        />
+      )}
+      {jaEmAndamento && <TreinoEmAndamento />}
       <Text style={estilos.subtitulo}>{textos.inicio.escolherOutra}</Text>
       {treino.rotinas.map((outra, indice) => (
         <BotaoDeAcao
@@ -92,6 +128,15 @@ function TreinoDeHoje({ treino, ficha, escolhida, aoEscolher }: PropsDoTreinoDeH
           aoTocar={() => aoEscolher(indice)}
         />
       ))}
+    </View>
+  );
+}
+
+function TreinoEmAndamento() {
+  return (
+    <View>
+      <Text>{textos.inicio.jaEmAndamento}</Text>
+      <Link href="/sessao">{textos.inicio.abrirEmAndamento}</Link>
     </View>
   );
 }
